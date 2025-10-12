@@ -8,32 +8,30 @@ import { configStore } from "../stores/config";
 import { determineAccessState } from "./comparasion";
 import { requestGate } from "./requests-gate";
 
+type TestRequest =
+  | { type: "mutated"; raw: string }
+  | { type: "no-auth"; raw: string };
+
 export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   const sdk = requireSDK();
-
   const config = configStore.getConfig();
-  const mutations = config.mutations;
 
-  const baselineResult = await sdk.requests.get(job.baselineRequestId);
-  if (!baselineResult) {
+  const originalRequest = await sdk.requests.get(job.baselineRequestId);
+  if (!originalRequest) {
     yield { kind: "Error", error: "Baseline request not found" };
     return;
   }
 
-  const rawBaseline = baselineResult.request.getRaw().toText();
+  const baselineRaw = originalRequest.request.getRaw().toText();
+  const baselineSpec = buildRequestSpec(baselineRaw, originalRequest.request);
 
-  const freshBaselineRequest = buildRequestSpecRaw(
-    rawBaseline,
-    baselineResult.request,
-  );
-  const freshBaselineResult = await requestGate.wrapSend(freshBaselineRequest);
-
-  if (freshBaselineResult.kind === "Error") {
-    yield { kind: "Error", error: freshBaselineResult.error };
+  const baselineResult = await requestGate.wrapSend(baselineSpec);
+  if (baselineResult.kind === "Error") {
+    yield { kind: "Error", error: baselineResult.error };
     return;
   }
 
-  if (freshBaselineResult.value.response === undefined) {
+  if (baselineResult.value.response === undefined) {
     yield { kind: "Error", error: "Baseline response not found" };
     return;
   }
@@ -42,86 +40,67 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     kind: "Ok",
     type: "baseline",
     request: {
-      id: freshBaselineResult.value.request.getId(),
-      method: freshBaselineResult.value.request.getMethod(),
-      url: freshBaselineResult.value.request.getUrl(),
+      id: baselineResult.value.request.getId(),
+      method: baselineResult.value.request.getMethod(),
+      url: baselineResult.value.request.getUrl(),
     },
     response: {
-      id: freshBaselineResult.value.response.getId(),
-      code: freshBaselineResult.value.response.getCode(),
-      length: freshBaselineResult.value.response.getRaw().toText().length,
+      id: baselineResult.value.response.getId(),
+      code: baselineResult.value.response.getCode(),
+      length: baselineResult.value.response.getRaw().toText().length,
     },
   };
 
-  const mutatedRawRequest = applyMutations(rawBaseline, mutations);
-  const mutatedRequest = buildRequestSpecRaw(
-    mutatedRawRequest,
-    baselineResult.request,
-  );
-
-  const mutatedResult = await requestGate.wrapSend(mutatedRequest);
-  if (mutatedResult.kind === "Error") {
-    yield { kind: "Error", error: mutatedResult.error };
-    return;
-  }
-
-  if (mutatedResult.value.response === undefined) {
-    yield { kind: "Error", error: "Mutated response not found" };
-    return;
-  }
-
-  const accessState = determineAccessState(
-    freshBaselineResult.value.response,
-    mutatedResult.value.response,
-  );
-
-  yield {
-    kind: "Ok",
-    type: "mutated",
-    request: {
-      id: mutatedResult.value.request.getId(),
-      method: mutatedResult.value.request.getMethod(),
-      url: mutatedResult.value.request.getUrl(),
+  const testRequests: TestRequest[] = [
+    {
+      type: "mutated",
+      raw: applyMutations(baselineRaw, config.mutations),
     },
-    response: {
-      id: mutatedResult.value.response.getId(),
-      code: mutatedResult.value.response.getCode(),
-      length: mutatedResult.value.response.getRaw().toText().length,
-    },
-    accessState,
-  };
+  ];
 
   if (config.testNoAuth) {
-    const noAuthRequest = buildRequestSpecRaw(
-      removeAuthHeaders(rawBaseline),
-      baselineResult.request,
-    );
-    const noAuthResult = await requestGate.wrapSend(noAuthRequest);
+    testRequests.push({
+      type: "no-auth",
+      raw: removeAuthHeaders(baselineRaw),
+    });
+  }
 
-    if (noAuthResult.kind === "Error") {
-      yield { kind: "Error", error: noAuthResult.error };
-      return;
+  const testPromises = testRequests.map(async ({ type, raw }) => {
+    const spec = buildRequestSpec(raw, originalRequest.request);
+    const result = await requestGate.wrapSend(spec);
+    return { type, result };
+  });
+
+  for (const promise of testPromises) {
+    const { type, result } = await promise;
+
+    if (result.kind === "Error") {
+      yield { kind: "Error", error: result.error };
+      continue;
     }
 
-    const noAuthAccessState = determineAccessState(
-      freshBaselineResult.value.response,
-      noAuthResult.value.response,
-    );
+    if (result.value.response === undefined) {
+      yield { kind: "Error", error: `${type} response not found` };
+      continue;
+    }
 
     yield {
       kind: "Ok",
-      type: "no-auth",
+      type,
       request: {
-        id: noAuthResult.value.request.getId(),
-        method: noAuthResult.value.request.getMethod(),
-        url: noAuthResult.value.request.getUrl(),
+        id: result.value.request.getId(),
+        method: result.value.request.getMethod(),
+        url: result.value.request.getUrl(),
       },
       response: {
-        id: noAuthResult.value.response.getId(),
-        code: noAuthResult.value.response.getCode(),
-        length: noAuthResult.value.response.getRaw().toText().length,
+        id: result.value.response.getId(),
+        code: result.value.response.getCode(),
+        length: result.value.response.getRaw().toText().length,
       },
-      accessState: noAuthAccessState,
+      accessState: determineAccessState(
+        baselineResult.value.response,
+        result.value.response,
+      ),
     };
   }
 }
@@ -141,15 +120,12 @@ function applyMutation(
   mutation: Mutation,
 ) {
   switch (mutation.kind) {
-    case "HeaderAdd": {
+    case "HeaderAdd":
       return forge.addHeader(mutation.header, mutation.value);
-    }
-    case "HeaderRemove": {
+    case "HeaderRemove":
       return forge.removeHeader(mutation.header);
-    }
-    case "HeaderReplace": {
+    case "HeaderReplace":
       return forge.setHeader(mutation.header, mutation.value);
-    }
     case "RawMatchAndReplace": {
       const newRaw = forge.build().replaceAll(mutation.match, mutation.value);
       return HttpForge.create(newRaw).removeHeader("Content-Length");
@@ -176,11 +152,10 @@ function removeAuthHeaders(raw: string): string {
   return forge.build();
 }
 
-function buildRequestSpecRaw(raw: string, baseline: Request): RequestSpecRaw {
-  const url = `${
-    baseline.getTls() ? "https" : "http"
-  }://${baseline.getHost()}:${baseline.getPort()}${baseline.getPath()}${baseline.getQuery()}`;
-  const request = new RequestSpecRaw(url);
-  request.setRaw(raw);
-  return request;
+function buildRequestSpec(raw: string, request: Request): RequestSpecRaw {
+  const protocol = request.getTls() ? "https" : "http";
+  const url = `${protocol}://${request.getHost()}:${request.getPort()}${request.getPath()}${request.getQuery()}`;
+  const spec = new RequestSpecRaw(url);
+  spec.setRaw(raw);
+  return spec;
 }
