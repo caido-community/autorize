@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import InputNumber from "primevue/inputnumber";
-import InputSwitch from "primevue/inputswitch";
 import InputText from "primevue/inputtext";
+import ToggleSwitch from "primevue/toggleswitch";
 import { computed } from "vue";
 
 import { MutationsManager } from "@/components/MutationsManager";
@@ -49,7 +49,7 @@ const maxConcurrentRequests = computed({
 });
 
 const requestsPerSecond = computed({
-  get: () => configStore.data?.queue.requestsPerSecond ?? 1,
+  get: () => configStore.data?.queue.requestsPerSecond ?? 6,
   set: (value) => {
     if (configStore.data !== undefined) {
       configStore.update({
@@ -127,7 +127,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
                 Process only requests that are in scope
               </p>
             </div>
-            <InputSwitch v-model="onlyInScope" :disabled="isPluginEnabled" />
+            <ToggleSwitch v-model="onlyInScope" :disabled="isPluginEnabled" />
           </div>
 
           <div class="flex flex-col gap-2">
@@ -165,7 +165,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
                 Test requests without any authorization headers
               </p>
             </div>
-            <InputSwitch v-model="testNoAuth" :disabled="isPluginEnabled" />
+            <ToggleSwitch v-model="testNoAuth" :disabled="isPluginEnabled" />
           </div>
         </div>
       </template>
@@ -238,7 +238,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
               Display only response lengths in results table
             </p>
           </div>
-          <InputSwitch v-model="showOnlyLengths" />
+          <ToggleSwitch v-model="showOnlyLengths" />
         </div>
       </template>
     </Card>

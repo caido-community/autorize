@@ -10,10 +10,9 @@
     "@caido/sdk-backend": "^0.52.0"
   },
   "dependencies": {
-    "fastq": "^1.19.1",
     "mutative": "^1.3.0",
     "p-limit": "^7.1.1",
-    "p-queue": "^8.1.1",
+    "p-queue": "^9.0.0",
     "shared": "workspace:*",
     "ts-http-forge": "^0.1.2"
   }

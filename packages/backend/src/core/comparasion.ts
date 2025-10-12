@@ -1,8 +1,9 @@
 import { type Response } from "caido:utils";
 import { type AccessState } from "shared";
 
-import { stringSimilarity } from "./utils";
+import { stringSimilarity } from "../utils";
 
+// Compare mutated request to the original one
 export function determineAccessState(
   baseline: Response,
   mutated: Response,
@@ -30,10 +31,6 @@ export function determineAccessState(
     if (isSignificantSimilarity) {
       return { kind: "authorized", confidence: similarity };
     }
-
-    console.log("Similarity=" + similarity);
-    console.log("Raw Length=" + rawResult.length);
-    console.log("Baseline Length=" + rawBaseline.length);
   }
 
   if (mutated.getCode() === 404 && baseline.getCode() !== 404) {

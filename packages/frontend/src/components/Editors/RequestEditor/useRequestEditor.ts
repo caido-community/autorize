@@ -41,7 +41,6 @@ export const useRequestEditor = (
         isTLS: editorState.value.connectionInfo.isTLS,
       },
     });
-    sdk.window.showToast("Request sent to Replay", { variant: "success" });
   };
 
   const initializeEditor = (initialContent: string) => {

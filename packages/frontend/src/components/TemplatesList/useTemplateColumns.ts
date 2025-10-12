@@ -18,12 +18,22 @@ export const useTemplateColumns = () => {
 
   const getResultByType = (
     template: Template,
-    type: "no-auth" | "mutated",
+    type: "baseline" | "no-auth" | "mutated",
   ): (JobResult & { kind: "Ok" }) | undefined => {
     return template.results.find(
       (r): r is JobResult & { kind: "Ok" } =>
         r.kind === "Ok" && r.type === type,
     );
+  };
+
+  const getBaselineCode = (template: Template) => {
+    const result = getResultByType(template, "baseline");
+    return result?.response.code;
+  };
+
+  const getBaselineRespLen = (template: Template) => {
+    const result = getResultByType(template, "baseline");
+    return result?.response.length;
   };
 
   const getNoAuthCode = (template: Template) => {
@@ -48,7 +58,8 @@ export const useTemplateColumns = () => {
 
   const getNoAuthAccessState = (template: Template) => {
     const result = getResultByType(template, "no-auth");
-    const state = result?.accessState.kind;
+    if (result === undefined || result.type !== "no-auth") return undefined;
+    const state = result.accessState.kind;
     if (state === "unauthorized") return "DENY";
     if (state === "authorized") return "ALLOW";
     if (state === "uncertain") return "UNCERTAIN";
@@ -57,7 +68,8 @@ export const useTemplateColumns = () => {
 
   const getMutatedAccessState = (template: Template) => {
     const result = getResultByType(template, "mutated");
-    const state = result?.accessState.kind;
+    if (result === undefined || result.type !== "mutated") return undefined;
+    const state = result.accessState.kind;
     if (state === "unauthorized") return "DENY";
     if (state === "authorized") return "ALLOW";
     if (state === "uncertain") return "UNCERTAIN";
@@ -157,6 +169,8 @@ export const useTemplateColumns = () => {
 
   return {
     parseURL,
+    getBaselineCode,
+    getBaselineRespLen,
     codeAndLengthColumns,
     accessColumns,
   };

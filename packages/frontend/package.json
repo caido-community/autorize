@@ -6,7 +6,7 @@
     "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
-    "@caido/primevue": "0.3.0",
+    "@caido/primevue": "0.3.1",
     "@tanstack/vue-table": "^8.21.3",
     "@tanstack/vue-virtual": "^3.13.12",
     "@vueuse/core": "^13.9.0",
@@ -21,8 +21,8 @@
   "devDependencies": {
     "@caido/sdk-backend": "^0.52.0",
     "@caido/sdk-frontend": "^0.52.0",
-    "@codemirror/view": "6.38.3",
+    "@codemirror/view": "6.38.5",
     "backend": "workspace:*",
-    "vue-tsc": "3.0.8"
+    "vue-tsc": "3.1.1"
   }
 }

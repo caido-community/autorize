@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "typecheck": "pnpm -r typecheck",
-    "lint": "eslint ./packages/**/src --fix",
+    "lint": "eslint --fix packages/*/src",
     "build": "caido-dev build",
     "watch": "caido-dev watch"
   },

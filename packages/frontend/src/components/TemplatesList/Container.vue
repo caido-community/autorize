@@ -13,7 +13,13 @@ import { useTemplatesStore } from "@/stores/templates";
 
 const store = useTemplatesStore();
 const configStore = useConfigStore();
-const { parseURL, codeAndLengthColumns, accessColumns } = useTemplateColumns();
+const {
+  parseURL,
+  getBaselineCode,
+  getBaselineRespLen,
+  codeAndLengthColumns,
+  accessColumns,
+} = useTemplateColumns();
 
 const selectedTemplate = computed({
   get: () => store.selectedTemplate,
@@ -160,15 +166,18 @@ const handleView = (event: Event, templateId: number) => {
         </Column>
         <Column
           v-if="!configStore.data?.ui?.showOnlyLengths"
-          field="response.code"
           header="Orig. Resp. Code"
           style="width: 8%"
-        />
-        <Column
-          field="response.length"
-          header="Orig. Resp. Len"
-          style="width: 9%"
-        />
+        >
+          <template #body="{ data }">
+            {{ getBaselineCode(data) ?? "-" }}
+          </template>
+        </Column>
+        <Column header="Orig. Resp. Len" style="width: 9%">
+          <template #body="{ data }">
+            {{ getBaselineRespLen(data) ?? "-" }}
+          </template>
+        </Column>
         <Column
           v-for="column in codeAndLengthColumns"
           :key="column.field"

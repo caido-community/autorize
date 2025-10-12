@@ -3,30 +3,37 @@ import PQueue from "p-queue";
 import { type APIResult } from "shared";
 import { HttpForge } from "ts-http-forge";
 
-import { requireSDK } from "./sdk";
-import { store } from "./store";
-import { Uint8ArrayToString } from "./utils";
+import { requireSDK } from "../sdk";
+import { configStore } from "../stores/config";
+import { Uint8ArrayToString } from "../utils";
 
 class RequestGate {
   private queue = new PQueue({
-    concurrency: store.getState().config.queue.maxConcurrentRequests,
-    intervalCap: store.getState().config.queue.requestsPerSecond,
+    concurrency: 2,
+    intervalCap: 1,
     interval: 1000,
     carryoverConcurrencyCount: true,
   });
 
+  constructor() {
+    this.updateFromConfig();
+    configStore.subscribe(() => this.updateFromConfig());
+  }
+
   updateFromConfig() {
-    const q = store.getState().config.queue;
+    const config = configStore.getConfig();
+    const { queue } = config;
+
     this.queue = new PQueue({
-      concurrency: q.maxConcurrentRequests,
-      intervalCap: q.requestsPerSecond,
+      concurrency: queue.maxConcurrentRequests,
+      intervalCap: queue.requestsPerSecond,
       interval: 1000,
       carryoverConcurrencyCount: true,
     });
   }
 
   add<T>(task: () => Promise<T>): Promise<T> {
-    return this.queue.add(task) as Promise<T>;
+    return this.queue.add(task);
   }
 
   wrapSend(request: RequestSpecRaw): Promise<APIResult<RequestResponse>> {
@@ -43,14 +50,6 @@ class RequestGate {
     request.setRaw(modifiedRaw);
 
     return this.add(() => sendRequest(request));
-  }
-
-  pause() {
-    this.queue.pause();
-  }
-
-  resume() {
-    this.queue.start();
   }
 
   clear() {

@@ -1,11 +1,11 @@
 import { defineConfig } from "@caido-community/dev";
+import tailwindCaido from "@caido/tailwindcss";
 import vue from "@vitejs/plugin-vue";
+import path from "path";
+import prefixwrap from "postcss-prefixwrap";
 import tailwindcss from "tailwindcss";
 // @ts-expect-error no declared types at this time
 import tailwindPrimeui from "tailwindcss-primeui";
-import tailwindCaido from "@caido/tailwindcss";
-import path from "path";
-import prefixwrap from "postcss-prefixwrap";
 
 const id = "autorize";
 export default defineConfig({

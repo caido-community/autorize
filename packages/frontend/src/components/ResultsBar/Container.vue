@@ -12,11 +12,10 @@ const selectedTemplate = computed(() => store.selectedTemplate);
 
 const options = computed(() => {
   if (selectedTemplate.value === undefined) return [];
-  const opts = ["baseline"];
   const resultTypes = selectedTemplate.value.results
     .filter((result) => result.kind === "Ok")
     .map((result) => result.type);
-  return opts.concat(resultTypes);
+  return resultTypes;
 });
 
 const selection = computed({
@@ -26,10 +25,6 @@ const selection = computed({
       selectedTemplate.value === undefined
     )
       return options.value[0] ?? "";
-
-    if (store.selectedRequestID === selectedTemplate.value.request.id) {
-      return "baseline";
-    }
 
     const selectedIndex = selectedTemplate.value.results.findIndex((result) => {
       return (
@@ -46,11 +41,6 @@ const selection = computed({
   },
   set: (option) => {
     if (selectedTemplate.value === undefined) return;
-
-    if (option === "baseline") {
-      store.selectedRequestID = selectedTemplate.value.request.id;
-      return;
-    }
 
     const result = selectedTemplate.value.results.find(
       (r) => r.kind === "Ok" && r.type === option,

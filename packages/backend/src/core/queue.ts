@@ -1,11 +1,12 @@
 import { type Request, type Response } from "caido:utils";
-import fastq from "fastq";
+import PQueue from "p-queue";
 import { type Job, type Template } from "shared";
 
+import { configStore } from "../stores/config";
+import { templatesStore } from "../stores/templates";
+import { generateId } from "../utils";
+
 import { executeJob } from "./executor";
-import { requestGate } from "./requestGate";
-import { store } from "./store";
-import { generateId } from "./utils";
 
 export type AddRequestResult =
   | {
@@ -18,19 +19,16 @@ export type AddRequestResult =
     };
 
 class JobsQueue {
-  private queue = fastq.promise(this, this.worker, 3);
+  private queue = new PQueue({ concurrency: 3 });
 
   constructor() {
     const adjust = () => {
-      const state = store.getState();
-      const config = state.config.queue;
-
-      this.queue.concurrency = Math.max(1, config.maxConcurrentRequests);
-      requestGate.updateFromConfig();
+      const config = configStore.getConfig();
+      this.queue.concurrency = Math.max(1, config.queue.maxConcurrentRequests);
     };
 
     adjust();
-    store.subscribe(adjust);
+    configStore.subscribe(adjust);
   }
 
   addRequest(
@@ -38,9 +36,10 @@ class JobsQueue {
     response: Response,
     options: { force: boolean } = { force: false },
   ): AddRequestResult {
-    const { config } = store.getState();
+    const config = configStore.getConfig();
+    const templates = templatesStore.getTemplates();
 
-    if (!options.force && (!config.enabled || config.queue.paused))
+    if (!options.force && !config.enabled)
       return { kind: "Error", reason: "Queue is paused" };
 
     if (config.mutations.length === 0)
@@ -50,9 +49,7 @@ class JobsQueue {
       };
 
     const templateKey = `${request.getMethod()}:${request.getHost()}:${request.getPort()}${request.getPath()}${request.getQuery()}`;
-    const existingTemplate = store
-      .getState()
-      .templates.find((t) => t.key === templateKey);
+    const existingTemplate = templates.find((tmpl) => tmpl.key === templateKey);
 
     if (existingTemplate)
       return { kind: "Error", reason: "Template already exists" };
@@ -65,12 +62,22 @@ class JobsQueue {
         method: request.getMethod(),
         url: request.getUrl(),
       },
-      response: {
-        id: response.getId(),
-        code: response.getCode(),
-        length: response.getRaw().toText().length,
-      },
-      results: [],
+      results: [
+        {
+          kind: "Ok" as const,
+          type: "baseline" as const,
+          request: {
+            id: request.getId(),
+            method: request.getMethod(),
+            url: request.getUrl(),
+          },
+          response: {
+            id: response.getId(),
+            code: response.getCode(),
+            length: response.getRaw().toText().length,
+          },
+        },
+      ],
     };
 
     const job: Job = {
@@ -80,14 +87,14 @@ class JobsQueue {
       status: "pending",
     };
 
-    store.addTemplate(template);
-    this.queue.push(job);
+    templatesStore.addTemplate(template);
+    this.queue.add(() => this.worker(job));
     return { kind: "Ok", template };
   }
 
   rerunTemplate(templateId: number) {
-    const state = store.getState();
-    const template = state.templates.find((t) => t.id === templateId);
+    const templates = templatesStore.getTemplates();
+    const template = templates.find((t) => t.id === templateId);
     if (!template) return;
 
     const job: Job = {
@@ -97,41 +104,22 @@ class JobsQueue {
       status: "pending",
     };
 
-    store.clearTemplateResults(templateId);
-    this.queue.push(job);
+    templatesStore.clearTemplateResults(templateId);
+    this.queue.add(() => this.worker(job));
   }
 
   clear() {
-    this.queue.kill();
-    this.queue = fastq.promise(this, this.worker, this.queue.concurrency);
-  }
-
-  pause() {
-    const queueConfig = store.getState().config.queue;
-    store.updateConfig({
-      queue: { ...queueConfig, paused: true },
-    });
-    this.queue.pause();
-    requestGate.pause();
-  }
-
-  resume() {
-    const queueConfig = store.getState().config.queue;
-    store.updateConfig({
-      queue: { ...queueConfig, paused: false },
-    });
-    this.queue.resume();
-    requestGate.resume();
+    this.queue.clear();
   }
 
   private async worker(job: Job) {
     for await (const result of executeJob(job)) {
-      store.addTemplateResult(job.templateId, result);
+      templatesStore.addTemplateResult(job.templateId, result);
     }
   }
 
   private getNextId() {
-    const currentTemplates = store.getState().templates;
+    const currentTemplates = templatesStore.getTemplates();
     return currentTemplates.length > 0
       ? Math.max(...currentTemplates.map((t) => t.id)) + 1
       : 1;

@@ -2,15 +2,17 @@ import { type Request, RequestSpecRaw } from "caido:utils";
 import { type Job, type JobResult, type Mutation } from "shared";
 import { HttpForge } from "ts-http-forge";
 
+import { requireSDK } from "../sdk";
+import { configStore } from "../stores/config";
+
 import { determineAccessState } from "./comparasion";
-import { requestGate } from "./requestGate";
-import { requireSDK } from "./sdk";
-import { store } from "./store";
+import { requestGate } from "./requests-gate";
 
 export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   const sdk = requireSDK();
-  const state = store.getState();
-  const mutations = state.config.mutations;
+
+  const config = configStore.getConfig();
+  const mutations = config.mutations;
 
   const baselineResult = await sdk.requests.get(job.baselineRequestId);
   if (!baselineResult) {
@@ -18,12 +20,39 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     return;
   }
 
-  if (!baselineResult.response) {
+  const rawBaseline = baselineResult.request.getRaw().toText();
+
+  const freshBaselineRequest = buildRequestSpecRaw(
+    rawBaseline,
+    baselineResult.request,
+  );
+  const freshBaselineResult = await requestGate.wrapSend(freshBaselineRequest);
+
+  if (freshBaselineResult.kind === "Error") {
+    yield { kind: "Error", error: freshBaselineResult.error };
+    return;
+  }
+
+  if (freshBaselineResult.value.response === undefined) {
     yield { kind: "Error", error: "Baseline response not found" };
     return;
   }
 
-  const rawBaseline = baselineResult.request.getRaw().toText();
+  yield {
+    kind: "Ok",
+    type: "baseline",
+    request: {
+      id: freshBaselineResult.value.request.getId(),
+      method: freshBaselineResult.value.request.getMethod(),
+      url: freshBaselineResult.value.request.getUrl(),
+    },
+    response: {
+      id: freshBaselineResult.value.response.getId(),
+      code: freshBaselineResult.value.response.getCode(),
+      length: freshBaselineResult.value.response.getRaw().toText().length,
+    },
+  };
+
   const mutatedRawRequest = applyMutations(rawBaseline, mutations);
   const mutatedRequest = buildRequestSpecRaw(
     mutatedRawRequest,
@@ -42,7 +71,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   }
 
   const accessState = determineAccessState(
-    baselineResult.response,
+    freshBaselineResult.value.response,
     mutatedResult.value.response,
   );
 
@@ -62,7 +91,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     accessState,
   };
 
-  if (state.config.testNoAuth) {
+  if (config.testNoAuth) {
     const noAuthRequest = buildRequestSpecRaw(
       removeAuthHeaders(rawBaseline),
       baselineResult.request,
@@ -75,7 +104,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     }
 
     const noAuthAccessState = determineAccessState(
-      baselineResult.response,
+      freshBaselineResult.value.response,
       noAuthResult.value.response,
     );
 
@@ -112,15 +141,19 @@ function applyMutation(
   mutation: Mutation,
 ) {
   switch (mutation.kind) {
-    case "HeaderAdd":
+    case "HeaderAdd": {
       return forge.addHeader(mutation.header, mutation.value);
-    case "HeaderRemove":
+    }
+    case "HeaderRemove": {
       return forge.removeHeader(mutation.header);
-    case "HeaderReplace":
+    }
+    case "HeaderReplace": {
       return forge.setHeader(mutation.header, mutation.value);
-    case "RawMatchAndReplace":
+    }
+    case "RawMatchAndReplace": {
       const newRaw = forge.build().replaceAll(mutation.match, mutation.value);
       return HttpForge.create(newRaw).removeHeader("Content-Length");
+    }
   }
 }
 
