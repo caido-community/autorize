@@ -2,13 +2,10 @@ import { create } from "mutative";
 import { defineStore } from "pinia";
 import type { Config } from "shared";
 import { ref } from "vue";
-
 import { useSDK } from "../plugins/sdk";
-import { useConfigRepository } from "../repositories/config";
 
 export const useConfigStore = defineStore("config", () => {
   const sdk = useSDK();
-  const repository = useConfigRepository();
   const data = ref<Config | undefined>();
 
   const initialize = async () => {
@@ -16,12 +13,12 @@ export const useConfigStore = defineStore("config", () => {
   };
 
   const fetch = async () => {
-    const result = await repository.getConfig();
-    switch (result.type) {
+    const result = await sdk.backend.getConfig();
+    switch (result.kind) {
       case "Ok":
-        data.value = result.config;
+        data.value = result.value;
         break;
-      case "Err":
+      case "Error":
         console.error(result.error);
         sdk.window.showToast(
           "[Autorize] Failed to fetch config: " + result.error,
@@ -34,8 +31,8 @@ export const useConfigStore = defineStore("config", () => {
   };
 
   const update = async (updates: Partial<Config>) => {
-    const result = await repository.updateConfig(updates);
-    switch (result.type) {
+    const result = await sdk.backend.updateConfig(updates);
+    switch (result.kind) {
       case "Ok":
         if (data.value !== undefined) {
           data.value = create(data.value, (draft) => {
@@ -43,7 +40,7 @@ export const useConfigStore = defineStore("config", () => {
           });
         }
         return true;
-      case "Err":
+      case "Error":
         console.error(result.error);
         sdk.window.showToast(
           "[Autorize] Failed to update config: " + result.error,

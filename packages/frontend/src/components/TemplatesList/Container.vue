@@ -55,7 +55,6 @@ const handleRescanAll = async () => {
 
 const handleView = (event: Event, templateId: number) => {
   event.stopPropagation();
-  // just console log raw template
   console.log(store.data.find((t) => t.id === templateId));
 };
 </script>

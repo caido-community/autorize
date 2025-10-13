@@ -4,11 +4,9 @@ import type { JobResult, Template } from "shared";
 import { computed, reactive, ref, watch } from "vue";
 
 import { useSDK } from "../plugins/sdk";
-import { useTemplatesRepository } from "../repositories/templates";
 
 export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
-  const repository = useTemplatesRepository();
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const selectedRequestID = ref<string | undefined>(undefined);
@@ -34,12 +32,12 @@ export const useTemplatesStore = defineStore("templates", () => {
   };
 
   const fetch = async () => {
-    const result = await repository.getTemplates();
-    switch (result.type) {
+    const result = await sdk.backend.getTemplates();
+    switch (result.kind) {
       case "Ok":
-        data.splice(0, data.length, ...result.templates);
+        data.splice(0, data.length, ...result.value);
         break;
-      case "Err":
+      case "Error":
         console.error(result.error);
         break;
     }
@@ -79,12 +77,12 @@ export const useTemplatesStore = defineStore("templates", () => {
   };
 
   const deleteTemplate = async (id: number) => {
-    const result = await repository.deleteTemplate(id);
-    switch (result.type) {
+    const result = await sdk.backend.deleteTemplate(id);
+    switch (result.kind) {
       case "Ok":
         sdk.window.showToast("Template deleted", { variant: "success" });
         break;
-      case "Err":
+      case "Error":
         sdk.window.showToast(result.error, { variant: "error" });
         break;
     }
@@ -100,38 +98,38 @@ export const useTemplatesStore = defineStore("templates", () => {
   };
 
   const rerun = async (id: number) => {
-    const result = await repository.rerunTemplate(id);
-    switch (result.type) {
+    const result = await sdk.backend.rerunTemplate(id);
+    switch (result.kind) {
       case "Ok":
         sdk.window.showToast("Template rerun started", { variant: "success" });
         break;
-      case "Err":
+      case "Error":
         sdk.window.showToast(result.error, { variant: "error" });
         break;
     }
   };
 
   const clearAll = async () => {
-    const result = await repository.clearAllTemplates();
-    switch (result.type) {
+    const result = await sdk.backend.clearAllTemplates();
+    switch (result.kind) {
       case "Ok":
         sdk.window.showToast("All templates cleared", { variant: "success" });
         break;
-      case "Err":
+      case "Error":
         sdk.window.showToast(result.error, { variant: "error" });
         break;
     }
   };
 
   const rescanAll = async () => {
-    const result = await repository.rescanAllTemplates();
-    switch (result.type) {
+    const result = await sdk.backend.rescanAllTemplates();
+    switch (result.kind) {
       case "Ok":
         sdk.window.showToast("Rescanning all templates", {
           variant: "success",
         });
         break;
-      case "Err":
+      case "Error":
         sdk.window.showToast(result.error, { variant: "error" });
         break;
     }

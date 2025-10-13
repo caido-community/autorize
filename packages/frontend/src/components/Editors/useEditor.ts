@@ -2,7 +2,6 @@ import { useAsyncState } from "@vueuse/core";
 import { computed, ref } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
-import { useRequestsRepository } from "@/repositories/requests";
 
 export type EditorData = {
   requestID: string;
@@ -29,7 +28,6 @@ export type EditorState =
 
 export const useEditor = () => {
   const sdk = useSDK();
-  const repository = useRequestsRepository();
 
   const currentRequestId = ref<string | undefined>(undefined);
 
@@ -40,8 +38,8 @@ export const useEditor = () => {
         return undefined;
       }
 
-      const result = await repository.getRequestResponse(requestID);
-      if (result.type !== "Ok") {
+      const result = await sdk.backend.getRequestResponse(requestID);
+      if (result.kind !== "Ok") {
         sdk.window.showToast("Failed to load request", {
           variant: "error",
         });
@@ -51,14 +49,14 @@ export const useEditor = () => {
       return {
         requestID,
         request: {
-          id: result.data.request.id,
-          raw: result.data.request.raw,
+          id: result.value.request.id,
+          raw: result.value.request.raw,
         },
         response: {
-          id: result.data.response.id,
-          raw: result.data.response.raw,
+          id: result.value.response.id,
+          raw: result.value.response.raw,
         },
-        connectionInfo: result.data.connectionInfo,
+        connectionInfo: result.value.connectionInfo,
       };
     },
     undefined,
