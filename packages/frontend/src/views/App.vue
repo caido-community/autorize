@@ -1,5 +1,7 @@
 <script setup lang="ts">
 import MenuBar from "primevue/menubar";
+import ToggleSwitch from "primevue/toggleswitch";
+import Button from "primevue/button";
 import { computed, onMounted, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
@@ -41,25 +43,68 @@ onMounted(() => {
   configStore.initialize();
   templatesStore.initialize();
 });
+
+const isEnabled = computed({
+  get: () => configStore.data?.enabled ?? false,
+  set: (value) => configStore.update({ enabled: value }),
+});
+
+const anyMutations = computed(
+  () => configStore.data?.mutations.length ?? 0 > 0
+);
+
+// for some reason we can't just do :label="item.label"
+const handleLabel = (
+  label: string | ((...args: unknown[]) => string) | undefined
+) => {
+  if (typeof label === "function") {
+    return label();
+  }
+
+  return label;
+};
 </script>
 
 <template>
   <div class="h-full flex flex-col gap-1">
-    <MenuBar breakpoint="320px">
+    <MenuBar :model="items" class="h-12 gap-2">
       <template #start>
-        <div class="flex">
+        <div class="px-2 font-bold">Autorize</div>
+      </template>
+
+      <template #item="{ item }">
+        <Button
+          :severity="item.isActive?.() ? 'secondary' : 'contrast'"
+          :outlined="item.isActive?.()"
+          size="small"
+          :text="!item.isActive?.()"
+          :label="handleLabel(item.label)"
+        />
+      </template>
+
+      <template #end>
+        <div class="flex items-center gap-2 flex-shrink-0">
+          <label for="autorize-toggle" class="text-sm text-gray-400">
+            Enable Passive Scanning
+          </label>
           <div
-            v-for="(item, index) in items"
-            :key="index"
-            class="px-3 py-2 cursor-pointer text-gray-300 rounded transition-all duration-200 ease-in-out"
-            :class="{
-              'bg-zinc-800/40': page === item.label,
-              'hover:bg-gray-800/10': page !== item.label,
-            }"
-            @click="item.command"
+            v-if="!anyMutations"
+            v-tooltip.left="
+              'Enable only when you have at least one authorization mutation configured.'
+            "
           >
-            {{ item.label }}
+            <ToggleSwitch
+              v-model="isEnabled"
+              input-id="autorize-toggle"
+              :disabled="!anyMutations"
+            />
           </div>
+          <ToggleSwitch
+            v-else
+            v-model="isEnabled"
+            input-id="autorize-toggle"
+            :disabled="!anyMutations"
+          />
         </div>
       </template>
     </MenuBar>

@@ -3,7 +3,6 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import ToggleSwitch from "primevue/toggleswitch";
 import { computed } from "vue";
 
 import { useTemplateColumns } from "./useTemplateColumns";
@@ -25,15 +24,6 @@ const selectedTemplate = computed({
   get: () => store.selectedTemplate,
   set: (template) => store.select(template),
 });
-
-const isEnabled = computed({
-  get: () => configStore.data?.enabled ?? false,
-  set: (value) => configStore.update({ enabled: value }),
-});
-
-const anyMutations = computed(
-  () => configStore.data?.mutations.length ?? 0 > 0,
-);
 
 const handleDelete = async (event: Event, templateId: number) => {
   event.stopPropagation();
@@ -72,57 +62,30 @@ const handleView = (event: Event, templateId: number) => {
       <div class="p-4 flex justify-between items-center">
         <div class="flex justify-between items-start gap-8">
           <div class="flex flex-col">
-            <h2 class="text-lg font-semibold">Autorize</h2>
+            <h2 class="text-lg font-semibold">Dashboard</h2>
             <p class="text-sm text-gray-400">
-              Each queued request is sent twice: first without authorization,
-              then with mutated authorization for the second user specified in
-              configuration.
+              Review and analyze requests processed by Autorize along with their
+              test results.
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-6">
-          <div class="flex items-center gap-2 flex-shrink-0">
-            <label for="autorize-toggle" class="text-sm text-gray-400">
-              Enable Passive Scanning
-            </label>
-            <div
-              v-if="!anyMutations"
-              v-tooltip.left="
-                'Enable only when you have at least one authorization mutation configured.'
-              "
-            >
-              <ToggleSwitch
-                v-model="isEnabled"
-                input-id="autorize-toggle"
-                :disabled="!anyMutations"
-              />
-            </div>
-            <ToggleSwitch
-              v-else
-              v-model="isEnabled"
-              input-id="autorize-toggle"
-              :disabled="!anyMutations"
-            />
-          </div>
-
-          <div class="flex items-center gap-2">
-            <Button
-              label="Rescan All"
-              severity="info"
-              size="small"
-              icon="fas fa-redo"
-              outlined
-              @click="handleRescanAll"
-            />
-            <Button
-              label="Clear All"
-              severity="danger"
-              size="small"
-              icon="fas fa-trash-alt"
-              outlined
-              @click="handleClearAll"
-            />
-          </div>
+        <div class="flex items-center gap-2">
+          <Button
+            label="Rescan All"
+            severity="info"
+            size="small"
+            icon="fas fa-redo"
+            outlined
+            @click="handleRescanAll"
+          />
+          <Button
+            label="Clear All"
+            severity="danger"
+            size="small"
+            icon="fas fa-trash-alt"
+            outlined
+            @click="handleClearAll"
+          />
         </div>
       </div>
     </template>
