@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import Button from "primevue/button";
 import MenuBar from "primevue/menubar";
 import ToggleSwitch from "primevue/toggleswitch";
-import Button from "primevue/button";
 import { computed, onMounted, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
@@ -50,12 +50,12 @@ const isEnabled = computed({
 });
 
 const anyMutations = computed(
-  () => configStore.data?.mutations.length ?? 0 > 0
+  () => configStore.data?.mutations.length ?? 0 > 0,
 );
 
 // for some reason we can't just do :label="item.label"
 const handleLabel = (
-  label: string | ((...args: unknown[]) => string) | undefined
+  label: string | ((...args: unknown[]) => string) | undefined,
 ) => {
   if (typeof label === "function") {
     return label();

@@ -2,6 +2,7 @@ import { create } from "mutative";
 import { defineStore } from "pinia";
 import type { Config } from "shared";
 import { ref } from "vue";
+
 import { useSDK } from "../plugins/sdk";
 
 export const useConfigStore = defineStore("config", () => {

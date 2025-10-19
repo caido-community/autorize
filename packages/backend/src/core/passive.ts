@@ -32,6 +32,7 @@ const shouldProcessRequest = (request: Request, sdk: BackendSDK) => {
     ".woff2",
     ".ttf",
     ".eot",
+    ".webp",
   ];
 
   // Skip OPTIONS method requests

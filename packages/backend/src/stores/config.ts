@@ -22,7 +22,7 @@ class ConfigStore {
     },
     passiveFiltering: {
       httpql: "",
-      onlyInScope: false,
+      onlyInScope: true,
     },
   };
 

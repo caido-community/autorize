@@ -22,7 +22,6 @@ export type EditorData = {
 
 export type EditorState =
   | { type: "None" }
-  | { type: "Loading" }
   | { type: "Error" }
   | ({ type: "Success" } & EditorData);
 
@@ -30,6 +29,7 @@ export const useEditor = () => {
   const sdk = useSDK();
 
   const currentRequestId = ref<string | undefined>(undefined);
+  const lastSuccessfulState = ref<EditorData | undefined>(undefined);
 
   const { state, isLoading, error, execute } = useAsyncState(
     async () => {
@@ -46,7 +46,7 @@ export const useEditor = () => {
         throw new Error(result.error);
       }
 
-      return {
+      const data = {
         requestID,
         request: {
           id: result.value.request.id,
@@ -58,6 +58,9 @@ export const useEditor = () => {
         },
         connectionInfo: result.value.connectionInfo,
       };
+
+      lastSuccessfulState.value = data;
+      return data;
     },
     undefined,
     { immediate: false },
@@ -68,11 +71,7 @@ export const useEditor = () => {
       return { type: "None" };
     }
 
-    if (isLoading.value) {
-      return { type: "Loading" };
-    }
-
-    if (error.value !== undefined) {
+    if (error.value !== undefined && !isLoading.value) {
       return { type: "Error" };
     }
 
@@ -80,6 +79,13 @@ export const useEditor = () => {
       return {
         type: "Success",
         ...state.value,
+      };
+    }
+
+    if (lastSuccessfulState.value !== undefined) {
+      return {
+        type: "Success",
+        ...lastSuccessfulState.value,
       };
     }
 
@@ -95,6 +101,7 @@ export const useEditor = () => {
 
   const reset = () => {
     currentRequestId.value = undefined;
+    lastSuccessfulState.value = undefined;
   };
 
   return {

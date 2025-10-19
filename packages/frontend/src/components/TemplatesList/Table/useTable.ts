@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
-export const useTemplateColumns = () => {
+export const useTable = () => {
   const configStore = useConfigStore();
 
   const parseURL = (url: string) => {
@@ -95,14 +95,14 @@ export const useTemplateColumns = () => {
       if (testNoAuth) {
         columns.push({
           field: "noAuthRespLen",
-          header: "No-Auth Resp Len",
+          header: "Unauth. Len",
           getter: getNoAuthRespLen,
         });
       }
 
       columns.push({
         field: "mutatedRespLen",
-        header: "Mutated Resp Len",
+        header: "Mutated Len",
         getter: getMutatedRespLen,
       });
 
@@ -115,12 +115,12 @@ export const useTemplateColumns = () => {
       columns.push(
         {
           field: "noAuthCode",
-          header: "No-Auth Code",
+          header: "Unauth. Code",
           getter: getNoAuthCode,
         },
         {
           field: "noAuthRespLen",
-          header: "No-Auth Resp. Len",
+          header: "Unauth. Len",
           getter: getNoAuthRespLen,
         },
       );
@@ -134,7 +134,7 @@ export const useTemplateColumns = () => {
       },
       {
         field: "mutatedRespLen",
-        header: "Mutated Resp. Len",
+        header: "Mutated Len",
         getter: getMutatedRespLen,
       },
     );
@@ -149,7 +149,7 @@ export const useTemplateColumns = () => {
     if (testNoAuth) {
       columns.push({
         field: "noAuthAccessState",
-        header: "No-Auth Access",
+        header: "Unauth. Access",
         getter: getNoAuthAccessState,
         colorGetter: (template: Template) =>
           getAccessStateColor(getNoAuthAccessState(template)),
