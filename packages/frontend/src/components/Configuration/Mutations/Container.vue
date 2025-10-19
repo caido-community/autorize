@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from "primevue/button";
+import Tooltip from "primevue/tooltip";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
@@ -23,6 +24,8 @@ const {
   getMutationTypeLabel,
   getMutationField,
   getMutationValue,
+  updateMutationField,
+  updateMutationValue,
 } = useMutations();
 
 const handleAddMutation = () => {
@@ -35,13 +38,45 @@ const handleRemoveMutation = (index: number) => {
   configStore.update({ mutations: mutations.value });
 };
 
+const editingRows = ref<Set<number>>(new Set());
+
+const toggleEdit = (index: number) => {
+  const newEditingRows = new Set(editingRows.value);
+  if (newEditingRows.has(index)) {
+    newEditingRows.delete(index);
+  } else {
+    newEditingRows.add(index);
+  }
+  editingRows.value = newEditingRows;
+};
+
+const isEditing = (index: number) => {
+  return editingRows.value.has(index);
+};
+
+const handleFieldUpdate = (index: number, value: string) => {
+  const mutation = mutations.value[index];
+  if (mutation !== undefined) {
+    updateMutationField(mutation, value);
+    configStore.update({ mutations: mutations.value });
+  }
+};
+
+const handleValueUpdate = (index: number, value: string) => {
+  const mutation = mutations.value[index];
+  if (mutation !== undefined) {
+    updateMutationValue(mutation, value);
+    configStore.update({ mutations: mutations.value });
+  }
+};
+
 watch(
   () => configStore.data?.mutations,
   (newMutations) => {
     if (newMutations) {
       mutations.value = [...newMutations];
     }
-  },
+  }
 );
 
 const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
@@ -56,9 +91,9 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
     }"
   >
     <template #content>
-      <h3 class="text-md font-semibold mb-2">Request Mutation</h3>
+      <h3 class="text-md font-semibold mb-2">Request Mutations</h3>
       <p class="text-sm text-surface-400 mb-4">
-        Configure how to modify requests to simulate a low-privilege user
+        Configure how to modify requests to simulate a low-privilege user. This affects only the "Mutated" request, no-auth and baseline requests are not affected.
       </p>
 
       <DataTable
@@ -67,25 +102,60 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
         class="h-full"
         :pt="{
           root: { class: 'border border-surface-700 rounded' },
+          table: { class: 'w-full table-fixed' },
         }"
       >
-        <Column field="kind" header="Type">
+        <Column field="kind" header="Type" style="width: 15%">
           <template #body="{ data }">
             {{ getMutationTypeLabel(data.kind) }}
           </template>
         </Column>
-        <Column header="Field">
-          <template #body="{ data }">
-            {{ getMutationField(data) }}
+        <Column header="Field" style="width: 30%">
+          <template #body="{ data, index }">
+            <InputText
+              v-if="isEditing(index)"
+              :model-value="getMutationField(data)"
+              autofocus
+              fluid
+              @blur="handleFieldUpdate(index, $event.target.value)"
+              @keyup.enter="handleFieldUpdate(index, $event.target.value)"
+            />
+            <span
+              v-else
+              class="px-3 py-2 block text-ellipsis whitespace-nowrap overflow-hidden"
+            >
+              {{ getMutationField(data) }}
+            </span>
           </template>
         </Column>
-        <Column header="Value">
-          <template #body="{ data }">
-            {{ getMutationValue(data) }}
+        <Column header="Value" style="width: 45%">
+          <template #body="{ data, index }">
+            <InputText
+              v-if="isEditing(index) && data.kind !== 'HeaderRemove'"
+              :model-value="getMutationValue(data)"
+              autofocus
+              fluid
+              @blur="handleValueUpdate(index, $event.target.value)"
+              @keyup.enter="handleValueUpdate(index, $event.target.value)"
+            />
+            <span
+              v-else
+              class="px-3 py-2 block text-ellipsis whitespace-nowrap overflow-hidden"
+            >
+              {{ getMutationValue(data) }}
+            </span>
           </template>
         </Column>
-        <Column header="Actions" style="width: 100px">
+        <Column header="Actions" style="width: 10%">
           <template #body="{ index }">
+            <Button
+              :icon="isEditing(index) ? 'fas fa-check' : 'fas fa-pencil'"
+              text
+              :severity="isEditing(index) ? 'success' : 'info'"
+              size="small"
+              :disabled="isPluginEnabled"
+              @click="toggleEdit(index)"
+            />
             <Button
               icon="fas fa-trash"
               text
@@ -115,7 +185,11 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
               class="w-full"
               placeholder="Type"
               :disabled="isPluginEnabled"
-            />
+            >
+              <template #option="{ option }">
+                <span v-tooltip.top="option.tooltip">{{ option.label }}</span>
+              </template>
+            </Select>
           </div>
           <div class="col-span-4">
             <InputText

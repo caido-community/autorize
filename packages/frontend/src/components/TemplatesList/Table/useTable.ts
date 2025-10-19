@@ -1,8 +1,9 @@
 import type { JobResult, Template } from "shared";
-import { computed, onMounted, onUnmounted, ref, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
+// This is a temporary solution to track location changes until we have sdk support for navigation events
 type LocationChange = {
   oldHash: string;
   newHash: string;
@@ -53,9 +54,6 @@ export const useTable = () => {
   const configStore = useConfigStore();
 
   const isOnAutorizePage = ref(window.location.hash === "#/autorize");
-  watch(isOnAutorizePage, (newIsOnAutorizePage) => {
-    console.log("isOnAutorizePage", newIsOnAutorizePage);
-  });
 
   onMounted(() => {
     ensurePatched();

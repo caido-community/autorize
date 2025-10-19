@@ -10,10 +10,10 @@ type MutationInput = {
 
 export const useMutations = () => {
   const mutationTypes = [
-    { label: "Add Header", value: "HeaderAdd" },
-    { label: "Remove Header", value: "HeaderRemove" },
-    { label: "Replace Header", value: "HeaderReplace" },
-    { label: "Raw Match and Replace", value: "RawMatchAndReplace" },
+    { label: "Add Header", value: "HeaderAdd", tooltip: "Add a header to the request" },
+    { label: "Remove Header", value: "HeaderRemove", tooltip: "Remove a header from the request" },
+    { label: "Replace Header", value: "HeaderReplace", tooltip: "Replace a header in the request" },
+    { label: "Match and Replace", value: "RawMatchAndReplace", tooltip: "Match a pattern in the request and replace it with a value" },
   ] as const;
 
   const newMutation = ref<MutationInput>({
@@ -92,6 +92,20 @@ export const useMutations = () => {
     return mutation.value;
   };
 
+  const updateMutationField = (mutation: Mutation, value: string) => {
+    if (mutation.kind === "RawMatchAndReplace") {
+      mutation.match = value;
+    } else {
+      mutation.header = value;
+    }
+  };
+
+  const updateMutationValue = (mutation: Mutation, value: string) => {
+    if (mutation.kind !== "HeaderRemove") {
+      mutation.value = value;
+    }
+  };
+
   return {
     mutationTypes,
     newMutation,
@@ -101,5 +115,7 @@ export const useMutations = () => {
     getMutationTypeLabel,
     getMutationField,
     getMutationValue,
+    updateMutationField,
+    updateMutationValue,
   };
 };

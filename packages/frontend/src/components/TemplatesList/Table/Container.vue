@@ -38,6 +38,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
 </script>
 
 <template>
+  <!-- isOnAutorizePage makes sure that performance is not affected when not on the Autorize page -->
   <DataTable
     v-if="isOnAutorizePage"
     v-model:selection="selectedTemplate"
