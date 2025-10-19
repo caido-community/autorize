@@ -28,6 +28,7 @@ export const ConfigSchema = z.object({
   enabled: z.boolean(),
   mutations: z.array(MutationSchema),
   testNoAuth: z.boolean(),
+  debug: z.boolean(),
   queue: z.object({
     maxConcurrentRequests: z.number().int().min(1).max(10),
     requestsPerSecond: z.number().int().min(1).max(100),
@@ -38,6 +39,7 @@ export const ConfigSchema = z.object({
   passiveFiltering: z.object({
     httpql: z.string(),
     onlyInScope: z.boolean(),
+    filters: z.array(z.string()),
   }),
 });
 

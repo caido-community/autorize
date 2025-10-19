@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Card from "primevue/card";
+import { computed } from "vue";
 
 import { TemplatesTable } from "./Table";
 
 import { useTemplatesStore } from "@/stores/templates";
 
 const store = useTemplatesStore();
+const hasTemplates = computed(() => store.data.length > 0);
 
 const handleClearAll = async () => {
   await store.clearAll();
@@ -44,6 +46,7 @@ const handleRescanAll = async () => {
             size="small"
             icon="fas fa-redo"
             outlined
+            :disabled="!hasTemplates"
             @click="handleRescanAll"
           />
           <Button
@@ -52,6 +55,7 @@ const handleRescanAll = async () => {
             size="small"
             icon="fas fa-trash-alt"
             outlined
+            :disabled="!hasTemplates"
             @click="handleClearAll"
           />
         </div>

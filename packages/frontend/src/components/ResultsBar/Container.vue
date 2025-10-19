@@ -57,6 +57,11 @@ const selection = computed({
     }
   },
 });
+
+const onSelectButtonMouseDown = (event: MouseEvent) => {
+  const target = event.target as HTMLButtonElement;
+  target.click();
+};
 </script>
 
 <template>
@@ -71,6 +76,7 @@ const selection = computed({
             v-model="selection"
             :options="options"
             :allow-empty="false"
+            @mousedown="onSelectButtonMouseDown"
           >
             <template #option="{ option }">
               <span>{{ option }}</span>

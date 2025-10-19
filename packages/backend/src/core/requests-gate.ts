@@ -5,7 +5,7 @@ import { HttpForge } from "ts-http-forge";
 
 import { requireSDK } from "../sdk";
 import { configStore } from "../stores/config";
-import { Uint8ArrayToString } from "../utils";
+import { debugLog, Uint8ArrayToString } from "../utils";
 
 class RequestGate {
   private queue = new PQueue({
@@ -24,6 +24,10 @@ class RequestGate {
     const config = configStore.getConfig();
     const { queue } = config;
 
+    debugLog(
+      `Updating request gate config: concurrency=${queue.maxConcurrentRequests}, rps=${queue.requestsPerSecond}`,
+    );
+
     this.queue = new PQueue({
       concurrency: queue.maxConcurrentRequests,
       intervalCap: queue.requestsPerSecond,
@@ -33,6 +37,9 @@ class RequestGate {
   }
 
   add<T>(task: () => Promise<T>): Promise<T> {
+    debugLog(
+      `Adding task to request gate, queue size: ${this.queue.size}, pending: ${this.queue.pending}`,
+    );
     return this.queue.add(task);
   }
 
@@ -49,11 +56,16 @@ class RequestGate {
     const modifiedRaw = forge.build();
     request.setRaw(modifiedRaw);
 
+    debugLog(`Queueing request to send via request gate`);
     return this.add(() => sendRequest(request));
   }
 
   clear() {
+    debugLog(
+      `Clearing request gate, current size: ${this.queue.size}, pending: ${this.queue.pending}`,
+    );
     this.queue.clear();
+    debugLog(`Request gate cleared, new size: ${this.queue.size}`);
   }
 }
 
@@ -62,15 +74,21 @@ async function sendRequest(
 ): Promise<APIResult<RequestResponse>> {
   try {
     const sdk = requireSDK();
+    debugLog("Sending HTTP request");
     const result = await sdk.requests.send(_requestSpecRaw);
+    debugLog(
+      `Request completed with status: ${result.response?.getCode() ?? "no response"}`,
+    );
     return {
       kind: "Ok",
       value: result,
     };
   } catch (error) {
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    debugLog(`Request failed with error: ${errorMsg}`);
     return {
       kind: "Error",
-      error: error instanceof Error ? error.message : "Unknown error",
+      error: errorMsg,
     };
   }
 }

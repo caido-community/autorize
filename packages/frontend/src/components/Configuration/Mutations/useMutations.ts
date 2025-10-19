@@ -8,7 +8,7 @@ type MutationInput = {
   value: string;
 };
 
-export const useMutationsManager = () => {
+export const useMutations = () => {
   const mutationTypes = [
     { label: "Add Header", value: "HeaderAdd" },
     { label: "Remove Header", value: "HeaderRemove" },

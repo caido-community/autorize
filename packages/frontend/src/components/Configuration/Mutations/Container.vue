@@ -5,18 +5,13 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
-import { useMutationsManager } from "./useMutationsManager";
+import { useMutations } from "./useMutations";
 
 import { useConfigStore } from "@/stores/config";
 
-defineProps<{
-  disabled?: boolean;
-}>();
-
 const configStore = useConfigStore();
-
 const mutations = ref(configStore.data?.mutations ?? []);
 
 const {
@@ -28,7 +23,7 @@ const {
   getMutationTypeLabel,
   getMutationField,
   getMutationValue,
-} = useMutationsManager();
+} = useMutations();
 
 const handleAddMutation = () => {
   addMutation(mutations.value);
@@ -48,11 +43,13 @@ watch(
     }
   },
 );
+
+const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
 </script>
 
 <template>
   <Card
-    class="h-fit"
+    class="h-full"
     :pt="{
       body: { class: 'p-4' },
       content: { class: 'flex flex-col' },
@@ -67,6 +64,7 @@ watch(
       <DataTable
         :value="mutations"
         striped-rows
+        class="h-full"
         :pt="{
           root: { class: 'border border-surface-700 rounded' },
         }"
@@ -93,7 +91,7 @@ watch(
               text
               severity="danger"
               size="small"
-              :disabled="disabled"
+              :disabled="isPluginEnabled"
               @click="handleRemoveMutation(index)"
             />
           </template>
@@ -116,7 +114,7 @@ watch(
               option-value="value"
               class="w-full"
               placeholder="Type"
-              :disabled="disabled"
+              :disabled="isPluginEnabled"
             />
           </div>
           <div class="col-span-4">
@@ -125,28 +123,28 @@ watch(
               v-model="newMutation.match"
               placeholder="Match pattern"
               class="w-full"
-              :disabled="disabled"
+              :disabled="isPluginEnabled"
             />
             <InputText
               v-else
               v-model="newMutation.header"
               placeholder="Header name"
               class="w-full"
-              :disabled="disabled"
+              :disabled="isPluginEnabled"
             />
           </div>
           <div class="col-span-4">
             <InputText
               v-model="newMutation.value"
               placeholder="Value"
-              :disabled="disabled || newMutation.kind === 'HeaderRemove'"
+              :disabled="isPluginEnabled || newMutation.kind === 'HeaderRemove'"
               class="w-full"
             />
           </div>
           <div class="col-span-1">
             <Button
               icon="fas fa-plus"
-              :disabled="disabled || !canAddMutation"
+              :disabled="isPluginEnabled || !canAddMutation"
               class="w-full"
               @click="handleAddMutation"
             />

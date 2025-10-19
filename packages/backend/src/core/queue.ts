@@ -4,7 +4,7 @@ import { type Job, type Template } from "shared";
 
 import { configStore } from "../stores/config";
 import { templatesStore } from "../stores/templates";
-import { generateId } from "../utils";
+import { debugLog, generateId } from "../utils";
 
 import { executeJob } from "./executor";
 
@@ -39,20 +39,30 @@ class JobsQueue {
     const config = configStore.getConfig();
     const templates = templatesStore.getTemplates();
 
-    if (!options.force && !config.enabled)
-      return { kind: "Error", reason: "Queue is paused" };
+    debugLog(
+      `addRequest called for ${request.getMethod()} ${request.getUrl()}, force=${options.force}`,
+    );
 
-    if (config.mutations.length === 0)
+    if (!options.force && !config.enabled) {
+      debugLog("addRequest rejected: queue is paused");
+      return { kind: "Error", reason: "Queue is paused" };
+    }
+
+    if (config.mutations.length === 0) {
+      debugLog("addRequest rejected: no mutations configured");
       return {
         kind: "Error",
         reason: "Please configure authorization for the second user first",
       };
+    }
 
     const templateKey = `${request.getMethod()}:${request.getHost()}:${request.getPort()}${request.getPath()}${request.getQuery()}`;
     const existingTemplate = templates.find((tmpl) => tmpl.key === templateKey);
 
-    if (existingTemplate)
+    if (existingTemplate) {
+      debugLog("addRequest rejected: template already exists");
       return { kind: "Error", reason: "Template already exists" };
+    }
 
     const template = {
       id: this.getNextId(),
@@ -87,6 +97,10 @@ class JobsQueue {
       status: "pending",
     };
 
+    debugLog(
+      `Added job ${job.id} to queue for template ${template.id}, queue size: ${this.queue.size}, pending: ${this.queue.pending}`,
+    );
+
     templatesStore.addTemplate(template);
     this.queue.add(() => this.worker(job));
     return { kind: "Ok", template };
@@ -95,7 +109,10 @@ class JobsQueue {
   rerunTemplate(templateId: number) {
     const templates = templatesStore.getTemplates();
     const template = templates.find((t) => t.id === templateId);
-    if (!template) return;
+    if (!template) {
+      debugLog(`rerunTemplate failed: template ${templateId} not found`);
+      return;
+    }
 
     const job: Job = {
       id: generateId(),
@@ -104,18 +121,44 @@ class JobsQueue {
       status: "pending",
     };
 
+    debugLog(
+      `Rerunning template ${templateId}, new job ${job.id}, queue size: ${this.queue.size}, pending: ${this.queue.pending}`,
+    );
+
     templatesStore.clearTemplateResults(templateId);
     this.queue.add(() => this.worker(job));
   }
 
   clear() {
+    debugLog(
+      `Clearing job queue, current size: ${this.queue.size}, pending: ${this.queue.pending}`,
+    );
     this.queue.clear();
+    debugLog(`Job queue cleared, new size: ${this.queue.size}`);
   }
 
   private async worker(job: Job) {
+    debugLog(`Worker started for job ${job.id}, template ${job.templateId}`);
+
+    const templates = templatesStore.getTemplates();
+    const template = templates.find((t) => t.id === job.templateId);
+    if (!template) {
+      debugLog(
+        `Worker skipping job ${job.id}: template ${job.templateId} no longer exists`,
+      );
+      return;
+    }
+
     for await (const result of executeJob(job)) {
+      debugLog(
+        `Job ${job.id} result:`,
+        result.kind === "Ok"
+          ? `${result.type} request`
+          : `Error: ${result.error}`,
+      );
       templatesStore.addTemplateResult(job.templateId, result);
     }
+    debugLog(`Worker finished for job ${job.id}`);
   }
 
   private getNextId() {

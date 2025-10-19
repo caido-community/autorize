@@ -1,9 +1,11 @@
 import { type APIResult, type Template } from "shared";
 
 import { jobsQueue } from "../core/queue";
+import { requestGate } from "../core/requests-gate";
 import { configStore } from "../stores/config";
 import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
+import { debugLog } from "../utils";
 
 export function getTemplates(_sdk: BackendSDK): APIResult<Template[]> {
   return { kind: "Ok", value: templatesStore.getTemplates() };
@@ -45,13 +47,17 @@ export function deleteTemplate(
   _sdk: BackendSDK,
   templateId: number,
 ): APIResult<void> {
+  debugLog(`deleteTemplate API called for template ${templateId}`);
+
   const templates = templatesStore.getTemplates();
   const template = templates.find((tmpl: Template) => tmpl.id === templateId);
   if (!template) {
+    debugLog(`deleteTemplate failed: template ${templateId} not found`);
     return { kind: "Error", error: "Template not found" };
   }
 
   templatesStore.deleteTemplate(templateId);
+  debugLog(`Template ${templateId} deleted successfully`);
   return { kind: "Ok", value: undefined };
 }
 
@@ -74,33 +80,50 @@ export function rerunTemplate(
 export function clearQueue(_sdk: BackendSDK): APIResult<void> {
   const config = configStore.getConfig();
 
+  debugLog("clearQueue API called");
+
   if (!config.enabled) {
+    debugLog("clearQueue rejected: plugin not enabled");
     return { kind: "Error", error: "Plugin must be enabled to control queue" };
   }
 
   jobsQueue.clear();
+  requestGate.clear();
+  debugLog("Queue and request gate cleared successfully");
   return { kind: "Ok", value: undefined };
 }
 
 export function clearAllTemplates(_sdk: BackendSDK): APIResult<void> {
   const templates = templatesStore.getTemplates();
+  debugLog(`clearAllTemplates API called, ${templates.length} templates exist`);
+
   if (templates.length === 0) {
+    debugLog("No templates to clear");
     return { kind: "Ok", value: undefined };
   }
+
+  debugLog("Clearing job queue and request gate before deleting templates");
+  jobsQueue.clear();
+  requestGate.clear();
 
   const templateIds = templates.map((tmpl) => tmpl.id);
   _sdk.api.send("templates:cleared");
 
+  debugLog(`Deleting ${templateIds.length} templates`);
   for (const id of templateIds) {
     templatesStore.deleteTemplate(id);
   }
 
+  debugLog("All templates cleared successfully");
   return { kind: "Ok", value: undefined };
 }
 
 export function rescanAllTemplates(_sdk: BackendSDK): APIResult<void> {
   const config = configStore.getConfig();
+  debugLog("rescanAllTemplates API called");
+
   if (config.mutations.length === 0) {
+    debugLog("rescanAllTemplates rejected: no mutations configured");
     return {
       kind: "Error",
       error: "Please configure authorization for the second user first",
@@ -110,9 +133,11 @@ export function rescanAllTemplates(_sdk: BackendSDK): APIResult<void> {
   const templates = templatesStore.getTemplates();
   const templateIds = templates.map((tmpl) => tmpl.id);
 
+  debugLog(`Rescanning ${templateIds.length} templates`);
   for (const id of templateIds) {
     jobsQueue.rerunTemplate(id);
   }
 
+  debugLog("All templates queued for rescanning");
   return { kind: "Ok", value: undefined };
 }

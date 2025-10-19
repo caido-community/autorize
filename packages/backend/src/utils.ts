@@ -1,5 +1,14 @@
+import { configStore } from "./stores/config";
+
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+export function debugLog(message: string, ...args: unknown[]): void {
+  const config = configStore.getConfig();
+  if (config.debug) {
+    console.log(`[Autorize Debug] ${message}`, ...args);
+  }
 }
 
 export function Uint8ArrayToString(data: Uint8Array): string {

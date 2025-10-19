@@ -1,27 +1,88 @@
 import type { JobResult, Template } from "shared";
-import { computed } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
+type LocationChange = {
+  oldHash: string;
+  newHash: string;
+};
+
+type Callback = (change: LocationChange) => void;
+
+const subscribers = new Set<Callback>();
+let lastHash = window.location.hash;
+
+function notify(): void {
+  const newHash = window.location.hash;
+  if (newHash === lastHash) return;
+  for (const cb of subscribers) {
+    cb({ oldHash: lastHash, newHash });
+  }
+  lastHash = newHash;
+}
+
+const patchHistoryMethod = (method: "pushState" | "replaceState"): void => {
+  const original = history[method];
+  history[method] = function (...args: Parameters<typeof original>) {
+    const result = original.apply(this, args);
+    window.dispatchEvent(new Event("locationchange"));
+    return result;
+  };
+};
+
+function onLocationChange(cb: Callback): () => void {
+  subscribers.add(cb);
+  return () => {
+    subscribers.delete(cb);
+  };
+}
+
+let isPatched = false;
+
+function ensurePatched(): void {
+  if (isPatched) return;
+  patchHistoryMethod("pushState");
+  patchHistoryMethod("replaceState");
+  window.addEventListener("locationchange", notify);
+  window.addEventListener("hashchange", notify);
+  isPatched = true;
+}
+
 export const useTable = () => {
   const configStore = useConfigStore();
+
+  const isOnAutorizePage = ref(window.location.hash === "#/autorize");
+  watch(isOnAutorizePage, (newIsOnAutorizePage) => {
+    console.log("isOnAutorizePage", newIsOnAutorizePage);
+  });
+
+  onMounted(() => {
+    ensurePatched();
+
+    const unsubscribe = onLocationChange(({ newHash }) => {
+      isOnAutorizePage.value = newHash === "#/autorize";
+    });
+
+    onUnmounted(() => {
+      unsubscribe();
+    });
+  });
 
   const parseURL = (url: string) => {
     const parsed = new URL(url);
     return {
       host: parsed.host,
-      path: parsed.pathname,
-      query: parsed.search,
       pathWithQuery: parsed.pathname + parsed.search,
     };
   };
 
-  const getResultByType = (
+  const getResultByType = <T extends "baseline" | "no-auth" | "mutated">(
     template: Template,
-    type: "baseline" | "no-auth" | "mutated",
-  ): (JobResult & { kind: "Ok" }) | undefined => {
+    type: T,
+  ): (JobResult & { kind: "Ok"; type: T }) | undefined => {
     return template.results.find(
-      (r): r is JobResult & { kind: "Ok" } =>
+      (r): r is JobResult & { kind: "Ok"; type: T } =>
         r.kind === "Ok" && r.type === type,
     );
   };
@@ -58,7 +119,8 @@ export const useTable = () => {
 
   const getNoAuthAccessState = (template: Template) => {
     const result = getResultByType(template, "no-auth");
-    if (result === undefined || result.type !== "no-auth") return undefined;
+    if (result === undefined) return undefined;
+
     const state = result.accessState.kind;
     if (state === "unauthorized") return "DENY";
     if (state === "authorized") return "ALLOW";
@@ -68,7 +130,8 @@ export const useTable = () => {
 
   const getMutatedAccessState = (template: Template) => {
     const result = getResultByType(template, "mutated");
-    if (result === undefined || result.type !== "mutated") return undefined;
+    if (result === undefined) return undefined;
+
     const state = result.accessState.kind;
     if (state === "unauthorized") return "DENY";
     if (state === "authorized") return "ALLOW";
@@ -168,6 +231,7 @@ export const useTable = () => {
   });
 
   return {
+    isOnAutorizePage,
     parseURL,
     getBaselineCode,
     getBaselineRespLen,

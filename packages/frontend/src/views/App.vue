@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import Button from "primevue/button";
 import MenuBar from "primevue/menubar";
 import ToggleSwitch from "primevue/toggleswitch";
 import { computed, onMounted, ref } from "vue";
@@ -52,34 +51,27 @@ const isEnabled = computed({
 const anyMutations = computed(
   () => configStore.data?.mutations.length ?? 0 > 0,
 );
-
-// for some reason we can't just do :label="item.label"
-const handleLabel = (
-  label: string | ((...args: unknown[]) => string) | undefined,
-) => {
-  if (typeof label === "function") {
-    return label();
-  }
-
-  return label;
-};
 </script>
 
 <template>
   <div class="h-full flex flex-col gap-1">
-    <MenuBar :model="items" class="h-12 gap-2">
+    <MenuBar breakpoint="320px">
       <template #start>
-        <div class="px-2 font-bold">Autorize</div>
-      </template>
-
-      <template #item="{ item }">
-        <Button
-          :severity="item.isActive?.() ? 'secondary' : 'contrast'"
-          :outlined="item.isActive?.()"
-          size="small"
-          :text="!item.isActive?.()"
-          :label="handleLabel(item.label)"
-        />
+        <div class="flex">
+          <div class="px-3 py-2 font-bold text-gray-300">Autorize</div>
+          <div
+            v-for="(item, index) in items"
+            :key="index"
+            class="px-3 py-2 cursor-pointer text-gray-300 rounded transition-all duration-200 ease-in-out"
+            :class="{
+              'bg-zinc-800/40': page === item.label,
+              'hover:bg-gray-800/10': page !== item.label,
+            }"
+            @mousedown="item.command"
+          >
+            {{ item.label }}
+          </div>
+        </div>
       </template>
 
       <template #end>

@@ -10,6 +10,9 @@ export const useTemplatesStore = defineStore("templates", () => {
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const selectedRequestID = ref<string | undefined>(undefined);
+  const lastSelectedResultType = ref<"baseline" | "no-auth" | "mutated">(
+    "baseline",
+  );
 
   const initialize = async () => {
     await fetch();
@@ -90,11 +93,11 @@ export const useTemplatesStore = defineStore("templates", () => {
 
   const select = (template: Template | undefined) => {
     selectedID.value = template?.id;
-    selectedRequestID.value = template?.request.id;
   };
 
   const selectResult = (result: JobResult & { kind: "Ok" }) => {
     selectedRequestID.value = result.request.id;
+    lastSelectedResultType.value = result.type;
   };
 
   const rerun = async (id: number) => {
@@ -141,18 +144,37 @@ export const useTemplatesStore = defineStore("templates", () => {
     },
     set(value: Template | undefined) {
       selectedID.value = value?.id;
-      selectedRequestID.value = value?.request.id;
     },
   });
 
   watch(selectedID, (newID) => {
-    selectedRequestID.value = data.find((t) => t.id === newID)?.request.id;
+    const template = data.find((t) => t.id === newID);
+    if (template === undefined) {
+      selectedRequestID.value = undefined;
+      return;
+    }
+
+    const preferredResult = template.results.find(
+      (r) => r.kind === "Ok" && r.type === lastSelectedResultType.value,
+    );
+
+    if (preferredResult !== undefined && preferredResult.kind === "Ok") {
+      selectedRequestID.value = preferredResult.request.id;
+      return;
+    }
+
+    const fallbackResult = template.results.find((r) => r.kind === "Ok");
+    selectedRequestID.value =
+      fallbackResult !== undefined && fallbackResult.kind === "Ok"
+        ? fallbackResult.request.id
+        : template.request.id;
   });
 
   return {
     data,
     selectedID,
     selectedRequestID,
+    lastSelectedResultType,
     fetch,
     add,
     update,

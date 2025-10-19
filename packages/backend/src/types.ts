@@ -9,4 +9,5 @@ export type BackendEvents = DefineEvents<{
   "template:updated": (templateId: number, template: Template) => void;
   "template:deleted": (templateId: number) => void;
   "templates:cleared": () => void;
+  "project:changed": (projectID: string | undefined) => void;
 }>;

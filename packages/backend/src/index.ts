@@ -49,4 +49,9 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("rescanAllTemplates", rescanAllTemplates);
 
   initPassiveListener(sdk);
+
+  sdk.events.onProjectChange((sdk, project) => {
+    const projectID = project?.getId();
+    sdk.api.send("project:changed", projectID);
+  });
 }

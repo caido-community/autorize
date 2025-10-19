@@ -10,6 +10,8 @@ const templatesStore = useTemplatesStore();
 
 const selectedTemplateID = computed(() => templatesStore.selectedID);
 const selectedRequestID = computed(() => templatesStore.selectedRequestID);
+
+const selectedTemplate = computed(() => templatesStore.selectedTemplate);
 </script>
 
 <template>
@@ -18,7 +20,7 @@ const selectedRequestID = computed(() => templatesStore.selectedRequestID);
       <TemplatesList />
     </div>
     <div v-if="selectedTemplateID" class="h-1/2 flex flex-col gap-1.5 min-h-0">
-      <ResultsBar />
+      <ResultsBar v-if="selectedTemplate?.results.length ?? 0 > 0" />
       <div class="flex-1 min-h-0">
         <Editors :request-id="selectedRequestID" />
       </div>

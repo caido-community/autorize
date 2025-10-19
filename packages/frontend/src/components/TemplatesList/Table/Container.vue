@@ -16,6 +16,7 @@ const store = useTemplatesStore();
 const configStore = useConfigStore();
 
 const {
+  isOnAutorizePage,
   parseURL,
   getBaselineCode,
   getBaselineRespLen,
@@ -38,6 +39,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
 
 <template>
   <DataTable
+    v-if="isOnAutorizePage"
     v-model:selection="selectedTemplate"
     :value="store.data"
     striped-rows
@@ -80,7 +82,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
     </Column>
     <Column
       header="Host"
-      style="width: 12%"
+      style="width: 14%"
       :pt="{
         headerCell: {
           class: 'overflow-hidden text-ellipsis whitespace-nowrap',
@@ -95,7 +97,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
     </Column>
     <Column
       header="Path"
-      style="width: 25%"
+      style="width: 23%"
       :pt="{
         headerCell: {
           class: 'overflow-hidden text-ellipsis whitespace-nowrap',
@@ -169,6 +171,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
     >
       <template #body="{ data }">
         <div
+          class="text-ellipsis whitespace-nowrap"
           :style="{
             backgroundColor: column.colorGetter?.(data),
             padding: '0.25rem 0',

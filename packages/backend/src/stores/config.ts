@@ -6,6 +6,7 @@ class ConfigStore {
   private config: Config = {
     enabled: false,
     testNoAuth: true,
+    debug: false,
     mutations: [
       {
         kind: "HeaderAdd",
@@ -14,7 +15,7 @@ class ConfigStore {
       },
     ],
     queue: {
-      maxConcurrentRequests: 4,
+      maxConcurrentRequests: 2,
       requestsPerSecond: 10,
     },
     ui: {
@@ -23,6 +24,7 @@ class ConfigStore {
     passiveFiltering: {
       httpql: "",
       onlyInScope: true,
+      filters: [],
     },
   };
 
