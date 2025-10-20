@@ -28,15 +28,22 @@ const showOnlyLengths = computed({
     }"
   >
     <template #content>
-      <h3 class="text-md font-semibold mb-4">UI Settings</h3>
-      <div class="flex items-center justify-between">
-        <div>
-          <label class="text-sm font-medium">Show Only Lengths</label>
-          <p class="text-sm text-surface-400 mt-1">
-            Display only response lengths in results table
+      <div class="space-y-4">
+        <div class="flex-1">
+          <h3 class="text-md font-semibold">UI Settings</h3>
+          <p class="text-sm text-surface-400">
+            Configure UI settings for the plugin
           </p>
         </div>
-        <ToggleSwitch v-model="showOnlyLengths" />
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="text-sm font-medium">Show Only Lengths</label>
+            <p class="text-sm text-surface-400 mt-1">
+              Display only response lengths in results table
+            </p>
+          </div>
+          <ToggleSwitch v-model="showOnlyLengths" />
+        </div>
       </div>
     </template>
   </Card>

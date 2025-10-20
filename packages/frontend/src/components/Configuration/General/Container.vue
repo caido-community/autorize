@@ -37,8 +37,14 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
     }"
   >
     <template #content>
-      <h3 class="text-md font-semibold mb-4">General Settings</h3>
       <div class="space-y-4">
+        <div class="flex-1">
+          <h3 class="text-md font-semibold">General Settings</h3>
+          <p class="text-sm text-surface-400">
+            Configure general settings for the plugin
+          </p>
+        </div>
+
         <div class="flex items-center justify-between">
           <div>
             <label class="text-sm font-medium">Test No Auth</label>

@@ -22,7 +22,15 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     return;
   }
 
-  const baselineRaw = originalRequest.request.getRaw().toText();
+  let baselineRaw = originalRequest.request.getRaw().toText();
+
+  const baselineMutations = config.mutations.filter(
+    (m) => m.type === "baseline",
+  );
+  if (baselineMutations.length > 0) {
+    baselineRaw = applyMutations(baselineRaw, baselineMutations);
+  }
+
   const baselineSpec = buildRequestSpec(baselineRaw, originalRequest.request);
 
   const baselineResult = await requestGate.wrapSend(baselineSpec);
@@ -51,18 +59,31 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     },
   };
 
-  const testRequests: TestRequest[] = [
-    {
-      type: "mutated",
-      raw: applyMutations(baselineRaw, config.mutations),
-    },
-  ];
+  const testRequests: TestRequest[] = [];
 
-  if (config.testNoAuth) {
+  // Apply mutations for "mutated" type
+  const mutatedMutations = config.mutations.filter((m) => m.type === "mutated");
+  if (mutatedMutations.length > 0) {
     testRequests.push({
-      type: "no-auth",
-      raw: removeAuthHeaders(baselineRaw),
+      type: "mutated",
+      raw: applyMutations(baselineRaw, mutatedMutations),
     });
+  }
+
+  // Apply mutations for "no-auth" type or use default auth removal
+  const noauthMutations = config.mutations.filter((m) => m.type === "no-auth");
+  if (config.testNoAuth) {
+    if (noauthMutations.length > 0) {
+      testRequests.push({
+        type: "no-auth",
+        raw: removeAuthHeaders(applyMutations(baselineRaw, noauthMutations)),
+      });
+    } else {
+      testRequests.push({
+        type: "no-auth",
+        raw: removeAuthHeaders(baselineRaw),
+      });
+    }
   }
 
   const testPromises = testRequests.map(async ({ type, raw }) => {

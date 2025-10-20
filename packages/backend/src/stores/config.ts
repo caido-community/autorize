@@ -9,6 +9,7 @@ class ConfigStore {
     debug: false,
     mutations: [
       {
+        type: "mutated",
         kind: "HeaderAdd",
         header: "test",
         value: "te",

@@ -50,8 +50,8 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
     scrollable
     context-menu
     :pt="{
-      root: { class: 'flex-1 min-h-0 min-w-[800px] overflow-auto' },
-      table: { class: 'w-full table-fixed' },
+      root: { class: 'relative flex flex-col grow min-h-0 min-w-[800px] overflow-auto' },
+      table: { class: 'w-full border-spacing-0 border-separate table-fixed' },
     }"
     @row-contextmenu="onRowContextMenu"
   >

@@ -1,21 +1,27 @@
 import { z } from "zod";
 
+const MutationTypeSchema = z.enum(["mutated", "no-auth", "baseline"]);
+export type MutationType = z.infer<typeof MutationTypeSchema>;
 export const MutationSchema = z.discriminatedUnion("kind", [
   z.object({
+    type: MutationTypeSchema,
     kind: z.literal("HeaderAdd"),
     header: z.string().min(1),
     value: z.string(),
   }),
   z.object({
+    type: MutationTypeSchema,
     kind: z.literal("HeaderRemove"),
     header: z.string().min(1),
   }),
   z.object({
+    type: MutationTypeSchema,
     kind: z.literal("HeaderReplace"),
     header: z.string().min(1),
     value: z.string(),
   }),
   z.object({
+    type: MutationTypeSchema,
     kind: z.literal("RawMatchAndReplace"),
     match: z.string().min(1),
     value: z.string(),

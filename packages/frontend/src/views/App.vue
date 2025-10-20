@@ -7,8 +7,9 @@ import { useConfigStore } from "@/stores/config";
 import { useTemplatesStore } from "@/stores/templates";
 import Configuration from "@/views/Configuration.vue";
 import Dashboard from "@/views/Dashboard.vue";
+import Usage from "@/views/Usage.vue";
 
-const page = ref<"Dashboard" | "Configuration">("Dashboard");
+const page = ref<"Dashboard" | "Configuration" | "Usage">("Dashboard");
 const items = [
   {
     label: "Dashboard",
@@ -22,6 +23,12 @@ const items = [
       page.value = "Configuration";
     },
   },
+  {
+    label: "Usage",
+    command: () => {
+      page.value = "Usage";
+    },
+  },
 ];
 
 const component = computed(() => {
@@ -30,6 +37,8 @@ const component = computed(() => {
       return Dashboard;
     case "Configuration":
       return Configuration;
+    case "Usage":
+      return Usage;
     default:
       return undefined;
   }
@@ -49,7 +58,7 @@ const isEnabled = computed({
 });
 
 const anyMutations = computed(
-  () => configStore.data?.mutations.length ?? 0 > 0,
+  () => configStore.data?.mutations.some((m) => m.type === "mutated") ?? false,
 );
 </script>
 

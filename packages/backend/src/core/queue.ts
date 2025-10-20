@@ -48,8 +48,11 @@ class JobsQueue {
       return { kind: "Error", reason: "Queue is paused" };
     }
 
-    if (config.mutations.length === 0) {
-      debugLog("addRequest rejected: no mutations configured");
+    const anyMutatedMutations = config.mutations.some(
+      (m) => m.type === "mutated",
+    );
+    if (!anyMutatedMutations) {
+      debugLog("addRequest rejected: no mutated mutations configured");
       return {
         kind: "Error",
         reason: "Please configure authorization for the second user first",

@@ -1,4 +1,4 @@
-import type { JobResult, Template } from "shared";
+import type { JobResult, MutationType, Template } from "shared";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
@@ -75,7 +75,7 @@ export const useTable = () => {
     };
   };
 
-  const getResultByType = <T extends "baseline" | "no-auth" | "mutated">(
+  const getResultByType = <T extends MutationType>(
     template: Template,
     type: T,
   ): (JobResult & { kind: "Ok"; type: T }) | undefined => {

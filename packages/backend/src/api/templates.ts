@@ -66,10 +66,15 @@ export function rerunTemplate(
   templateId: number,
 ): APIResult<void> {
   const config = configStore.getConfig();
-  if (config.mutations.length === 0) {
+  const anyMutatedMutations = config.mutations.some(
+    (m) => m.type === "mutated",
+  );
+  if (!anyMutatedMutations) {
+    debugLog("rerunTemplate rejected: no mutated mutations configured");
     return {
       kind: "Error",
-      error: "Please configure authorization for the second user first",
+      error:
+        "Please configure authorization for the second user first to rerun templates",
     };
   }
 

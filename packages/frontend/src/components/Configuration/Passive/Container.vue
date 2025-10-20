@@ -75,8 +75,14 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
     }"
   >
     <template #content>
-      <h3 class="text-md font-semibold mb-4">Passive Scanning</h3>
       <div class="space-y-4">
+        <div class="flex-1">
+          <h3 class="text-md font-semibold">Passive Scanning</h3>
+          <p class="text-sm text-surface-400">
+            Configure passive scanning settings for the plugin
+          </p>
+        </div>
+
         <div class="flex items-center justify-between">
           <div>
             <label class="text-sm font-medium">Only In Scope</label>

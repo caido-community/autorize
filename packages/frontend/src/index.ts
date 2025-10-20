@@ -49,7 +49,7 @@ export const init = (sdk: FrontendSDK) => {
   });
 
   sdk.commands.register("send-to-autorize", {
-    name: "Send to Autorize",
+    name: "Send Request to Autorize",
     run: async (context) => {
       switch (context.type) {
         case "RequestRowContext": {

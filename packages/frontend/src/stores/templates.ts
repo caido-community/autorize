@@ -1,6 +1,6 @@
 import { create } from "mutative";
 import { defineStore } from "pinia";
-import type { JobResult, Template } from "shared";
+import type { JobResult, MutationType, Template } from "shared";
 import { computed, reactive, ref, watch } from "vue";
 
 import { useSDK } from "../plugins/sdk";
@@ -10,7 +10,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const selectedRequestID = ref<string | undefined>(undefined);
-  const lastSelectedResultType = ref<"baseline" | "no-auth" | "mutated">(
+  const lastSelectedResultType = ref<MutationType>(
     "baseline",
   );
 

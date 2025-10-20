@@ -35,8 +35,11 @@ export function updateConfig(
     };
   }
 
-  if (_config.enabled === true && config.mutations.length === 0) {
-    debugLog("updateConfig rejected: no mutations configured");
+  const anyMutatedMutations = config.mutations.some(
+    (m) => m.type === "mutated",
+  );
+  if (_config.enabled === true && !anyMutatedMutations) {
+    debugLog("updateConfig rejected: no mutated mutations configured");
     return {
       kind: "Error",
       error:

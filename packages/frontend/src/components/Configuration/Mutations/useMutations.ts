@@ -1,7 +1,8 @@
-import type { Mutation } from "shared";
+import type { Mutation, MutationType } from "shared";
 import { computed, ref } from "vue";
 
 type MutationInput = {
+  type: MutationType
   kind: Mutation["kind"];
   header: string;
   match: string;
@@ -9,14 +10,51 @@ type MutationInput = {
 };
 
 export const useMutations = () => {
+  const selectedType = ref<MutationType>("mutated");
+
+  const requestTypes = [
+    {
+      label: "Mutated",
+      value: "mutated",
+      tooltip: "Mutations for the low-privilege user request",
+    },
+    {
+      label: "No Auth",
+      value: "no-auth",
+      tooltip: "Mutations for the unauthenticated request",
+    },
+    {
+      label: "Baseline",
+      value: "baseline",
+      tooltip: "Mutations for the baseline (original) request",
+    },
+  ] as const;
+
   const mutationTypes = [
-    { label: "Add Header", value: "HeaderAdd", tooltip: "Add a header to the request" },
-    { label: "Remove Header", value: "HeaderRemove", tooltip: "Remove a header from the request" },
-    { label: "Replace Header", value: "HeaderReplace", tooltip: "Replace a header in the request" },
-    { label: "Match and Replace", value: "RawMatchAndReplace", tooltip: "Match a pattern in the request and replace it with a value" },
+    {
+      label: "Add Header",
+      value: "HeaderAdd",
+      tooltip: "Add a header to the request",
+    },
+    {
+      label: "Remove Header",
+      value: "HeaderRemove",
+      tooltip: "Remove a header from the request",
+    },
+    {
+      label: "Replace Header",
+      value: "HeaderReplace",
+      tooltip: "Replace a header in the request",
+    },
+    {
+      label: "Match and Replace",
+      value: "RawMatchAndReplace",
+      tooltip: "Match a pattern in the request and replace it with a value",
+    },
   ] as const;
 
   const newMutation = ref<MutationInput>({
+    type: "mutated",
     kind: "HeaderAdd",
     header: "",
     match: "",
@@ -44,17 +82,20 @@ export const useMutations = () => {
 
     if (mutation.kind === "HeaderRemove") {
       mutations.push({
+        type: mutation.type,
         kind: "HeaderRemove",
         header: mutation.header,
       });
     } else if (mutation.kind === "RawMatchAndReplace") {
       mutations.push({
+        type: mutation.type,
         kind: "RawMatchAndReplace",
         match: mutation.match,
         value: mutation.value,
       });
     } else {
       mutations.push({
+        type: mutation.type,
         kind: mutation.kind,
         header: mutation.header,
         value: mutation.value,
@@ -62,6 +103,7 @@ export const useMutations = () => {
     }
 
     newMutation.value = {
+      type: selectedType.value,
       kind: "HeaderAdd",
       header: "",
       match: "",
@@ -107,6 +149,8 @@ export const useMutations = () => {
   };
 
   return {
+    selectedType,
+    requestTypes,
     mutationTypes,
     newMutation,
     canAddMutation,

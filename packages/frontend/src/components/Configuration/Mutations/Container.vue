@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Button from "primevue/button";
-import Tooltip from "primevue/tooltip";
 import Card from "primevue/card";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
@@ -11,11 +10,14 @@ import { computed, ref, watch } from "vue";
 import { useMutations } from "./useMutations";
 
 import { useConfigStore } from "@/stores/config";
+import { MutationType } from "shared";
 
 const configStore = useConfigStore();
 const mutations = ref(configStore.data?.mutations ?? []);
 
 const {
+  selectedType,
+  requestTypes,
   mutationTypes,
   newMutation,
   canAddMutation,
@@ -79,7 +81,27 @@ watch(
   }
 );
 
+watch(selectedType, (newType) => {
+  newMutation.value.type = newType;
+});
+
+const filteredMutations = computed(() => {
+  return mutations.value.filter((m) => m.type === selectedType.value);
+});
+
 const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
+
+const getTypeDescription = (type: MutationType) => {
+  const descriptions = {
+    mutated:
+      "Configure how to modify requests to simulate a low-privilege user.",
+    "no-auth":
+      "Configure how to modify requests to simulate an unauthenticated user (no authorization). Autorize already removes some headers by default.",
+    baseline:
+      "Configure how to modify the baseline (original) request. This will affect every request sent.",
+  };
+  return descriptions[type] ?? "";
+};
 </script>
 
 <template>
@@ -91,13 +113,30 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
     }"
   >
     <template #content>
-      <h3 class="text-md font-semibold mb-2">Request Mutations</h3>
-      <p class="text-sm text-surface-400 mb-4">
-        Configure how to modify requests to simulate a low-privilege user. This affects only the "Mutated" request, no-auth and baseline requests are not affected.
-      </p>
+      <div class="flex justify-between items-start mb-4">
+        <div class="flex-1">
+          <h3 class="text-md font-semibold">Request Mutations</h3>
+          <p class="text-sm text-surface-400">
+            {{ getTypeDescription(selectedType) }}
+          </p>
+        </div>
+        <div class="w-48">
+          <Select
+            v-model="selectedType"
+            :options="requestTypes"
+            option-label="label"
+            option-value="value"
+            class="w-full"
+          >
+            <template #option="{ option }">
+              <span v-tooltip.left="option.tooltip">{{ option.label }}</span>
+            </template>
+          </Select>
+        </div>
+      </div>
 
       <DataTable
-        :value="mutations"
+        :value="filteredMutations"
         striped-rows
         class="h-full"
         :pt="{
@@ -168,7 +207,12 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
         </Column>
         <template #empty>
           <div class="text-center py-4 text-surface-400">
-            No authorization modifications configured
+            No mutations configured for
+            {{
+              requestTypes.find((t) => t.value === selectedType)?.label ??
+              selectedType
+            }}
+            requests
           </div>
         </template>
       </DataTable>
