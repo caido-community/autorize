@@ -156,7 +156,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     const fallbackResult = template.results.find((r) => r.kind === "Ok");
     return fallbackResult !== undefined && fallbackResult.kind === "Ok"
       ? fallbackResult.request.id
-      : template.request.id;
+      : undefined;
   });
 
   return {
