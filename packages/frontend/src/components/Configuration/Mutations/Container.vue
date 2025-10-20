@@ -5,12 +5,12 @@ import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
+import { type MutationType } from "shared";
 import { computed, ref, watch } from "vue";
 
 import { useMutations } from "./useMutations";
 
 import { useConfigStore } from "@/stores/config";
-import { MutationType } from "shared";
 
 const configStore = useConfigStore();
 const mutations = ref(configStore.data?.mutations ?? []);
@@ -78,7 +78,7 @@ watch(
     if (newMutations) {
       mutations.value = [...newMutations];
     }
-  }
+  },
 );
 
 watch(selectedType, (newType) => {

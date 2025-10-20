@@ -2,7 +2,7 @@ import type { Mutation, MutationType } from "shared";
 import { computed, ref } from "vue";
 
 type MutationInput = {
-  type: MutationType
+  type: MutationType;
   kind: Mutation["kind"];
   header: string;
   match: string;

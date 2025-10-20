@@ -35,7 +35,7 @@ const menuItems = [
         console.log(currentTemplate.value);
       }
     },
-  }
+  },
 ];
 
 const currentTemplate = ref<Template | undefined>(undefined);

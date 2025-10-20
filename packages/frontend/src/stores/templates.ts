@@ -10,9 +10,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const selectedRequestID = ref<string | undefined>(undefined);
-  const lastSelectedResultType = ref<MutationType>(
-    "baseline",
-  );
+  const lastSelectedResultType = ref<MutationType>("baseline");
 
   const initialize = async () => {
     await fetch();
