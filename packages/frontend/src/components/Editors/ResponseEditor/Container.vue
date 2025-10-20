@@ -4,6 +4,7 @@ import { type EditorState } from "../useEditor";
 import Failed from "./Failed.vue";
 import None from "./None.vue";
 import Show from "./Show.vue";
+import TooLarge from "./TooLarge.vue";
 
 defineProps<{
   editorState: EditorState;
@@ -12,6 +13,7 @@ defineProps<{
 
 <template>
   <None v-if="editorState.type === 'None'" />
+  <TooLarge v-else-if="editorState.type === 'TooLarge'" />
   <Failed v-else-if="editorState.type === 'Error'" />
   <Show v-else :editor-state="editorState" />
 </template>

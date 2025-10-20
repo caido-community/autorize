@@ -23,13 +23,17 @@ export type EditorData = {
 export type EditorState =
   | { type: "None" }
   | { type: "Error" }
+  | { type: "TooLarge" }
   | ({ type: "Success" } & EditorData);
+
+const MAX_RESPONSE_SIZE = 10 * 1024 * 1024;
 
 export const useEditor = () => {
   const sdk = useSDK();
 
   const currentRequestId = ref<string | undefined>(undefined);
   const lastSuccessfulState = ref<EditorData | undefined>(undefined);
+  const isTooLarge = ref(false);
 
   const { state, isLoading, error, execute } = useAsyncState(
     async () => {
@@ -46,6 +50,13 @@ export const useEditor = () => {
         throw new Error(result.error);
       }
 
+      const responseSize = result.value.response.raw.length;
+      if (responseSize > MAX_RESPONSE_SIZE) {
+        isTooLarge.value = true;
+        return undefined;
+      }
+
+      isTooLarge.value = false;
       const data = {
         requestID,
         request: {
@@ -69,6 +80,10 @@ export const useEditor = () => {
   const editorState = computed<EditorState>(() => {
     if (currentRequestId.value === undefined) {
       return { type: "None" };
+    }
+
+    if (isTooLarge.value && !isLoading.value) {
+      return { type: "TooLarge" };
     }
 
     if (error.value !== undefined && !isLoading.value) {
@@ -102,6 +117,7 @@ export const useEditor = () => {
   const reset = () => {
     currentRequestId.value = undefined;
     lastSuccessfulState.value = undefined;
+    isTooLarge.value = false;
   };
 
   return {
