@@ -74,8 +74,20 @@ async function sendRequest(
 ): Promise<APIResult<RequestResponse>> {
   try {
     const sdk = requireSDK();
-    debugLog("Sending HTTP request");
-    const result = await sdk.requests.send(_requestSpecRaw);
+    const config = configStore.getConfig();
+    const timeoutMs = config.queue.requestTimeoutSeconds * 1000;
+
+    debugLog(
+      `Sending HTTP request with timeout of ${config.queue.requestTimeoutSeconds}s`,
+    );
+
+    const result = await Promise.race([
+      sdk.requests.send(_requestSpecRaw),
+      new Promise<RequestResponse>((_, reject) =>
+        setTimeout(() => reject(new Error("Request timeout")), timeoutMs),
+      ),
+    ]);
+
     debugLog(
       `Request completed with status: ${result.response?.getCode() ?? "no response"}`,
     );

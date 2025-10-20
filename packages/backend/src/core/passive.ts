@@ -51,11 +51,11 @@ export const initPassiveListener = (sdk: BackendSDK) => {
     jobsQueue.addRequest(request, response);
   });
 };
-
 // Here we control which passive requests are being sent to the Autorize plugin queue
 const shouldProcessRequest = async (request: Request, sdk: BackendSDK) => {
   const config = configStore.getConfig();
   const requestPath = request.getPath();
+  const requestHost = request.getHost();
   const staticFileExtensions = [
     ".js",
     ".css",
@@ -80,6 +80,31 @@ const shouldProcessRequest = async (request: Request, sdk: BackendSDK) => {
 
   // Skip some file extensions
   if (staticFileExtensions.some((ext) => requestPath.endsWith(ext))) {
+    return false;
+  }
+
+  // Skip known non-interesting endpoints
+  if (requestPath.startsWith("/cdn-cgi/challenge-platform/")) {
+    return false;
+  }
+
+  // Skip analytics and tracking hosts
+  const analyticsHosts = [
+    "geolocation.onetrust.com",
+    "cdn.cookielaw.org",
+    "use.typekit.net",
+    "www.google-analytics.com",
+    "googletagmanager.com",
+    "doubleclick.net",
+    "connect.facebook.net",
+    "hotjar.com",
+    "mixpanel.com",
+    "segment.com",
+    "amplitude.com",
+    "fullstory.com",
+    "intercom.io",
+  ];
+  if (analyticsHosts.includes(requestHost)) {
     return false;
   }
 

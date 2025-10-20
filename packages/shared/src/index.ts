@@ -38,6 +38,7 @@ export const ConfigSchema = z.object({
   queue: z.object({
     maxConcurrentRequests: z.number().int().min(1).max(10),
     requestsPerSecond: z.number().int().min(1).max(100),
+    requestTimeoutSeconds: z.number().int().min(5).max(300),
   }),
   ui: z.object({
     showOnlyLengths: z.boolean(),

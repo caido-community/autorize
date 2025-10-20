@@ -16,8 +16,9 @@ class ConfigStore {
       },
     ],
     queue: {
-      maxConcurrentRequests: 2,
+      maxConcurrentRequests: 3,
       requestsPerSecond: 10,
+      requestTimeoutSeconds: 30,
     },
     ui: {
       showOnlyLengths: true,
