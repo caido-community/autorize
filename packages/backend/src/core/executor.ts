@@ -126,6 +126,16 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   }
 }
 
+function resolveEnvVariables(value: string): string {
+  const sdk = requireSDK();
+  const envVarPattern = /{{\s*([A-Za-z0-9_]+)\s*}}/g;
+
+  return value.replace(envVarPattern, (match, varName) => {
+    const envValue = sdk.env.getVar(varName);
+    return envValue ?? match;
+  });
+}
+
 function applyMutations(raw: string, mutations: Mutation[]): string {
   let forge = HttpForge.create(raw);
 
@@ -142,13 +152,21 @@ function applyMutation(
 ) {
   switch (mutation.kind) {
     case "HeaderAdd":
-      return forge.addHeader(mutation.header, mutation.value);
+      return forge.addHeader(
+        mutation.header,
+        resolveEnvVariables(mutation.value),
+      );
     case "HeaderRemove":
       return forge.removeHeader(mutation.header);
     case "HeaderReplace":
-      return forge.setHeader(mutation.header, mutation.value);
+      return forge.setHeader(
+        mutation.header,
+        resolveEnvVariables(mutation.value),
+      );
     case "RawMatchAndReplace": {
-      const newRaw = forge.build().replaceAll(mutation.match, mutation.value);
+      const resolvedMatch = resolveEnvVariables(mutation.match);
+      const resolvedValue = resolveEnvVariables(mutation.value);
+      const newRaw = forge.build().replaceAll(resolvedMatch, resolvedValue);
       return HttpForge.create(newRaw).removeHeader("Content-Length");
     }
   }

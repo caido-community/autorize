@@ -48,7 +48,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
         <div class="flex items-center justify-between">
           <div>
             <label class="text-sm font-medium">Test No Auth</label>
-            <p class="text-sm text-surface-400 mt-1">
+            <p class="text-sm text-surface-400">
               Test requests without any authorization headers
             </p>
           </div>
@@ -58,7 +58,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
         <div class="flex items-center justify-between">
           <div>
             <label class="text-sm font-medium">Debug Mode</label>
-            <p class="text-sm text-surface-400 mt-1">Enable detailed logging</p>
+            <p class="text-sm text-surface-400">Enable detailed logging</p>
           </div>
           <ToggleSwitch v-model="debugMode" />
         </div>

@@ -1,7 +1,7 @@
 import { create } from "mutative";
 import { defineStore } from "pinia";
 import type { JobResult, MutationType, Template } from "shared";
-import { computed, reactive, ref, watch } from "vue";
+import { computed, reactive, ref } from "vue";
 
 import { useSDK } from "../plugins/sdk";
 
@@ -9,7 +9,6 @@ export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
-  const selectedRequestID = ref<string | undefined>(undefined);
   const lastSelectedResultType = ref<MutationType>("baseline");
 
   const initialize = async () => {
@@ -66,7 +65,6 @@ export const useTemplatesStore = defineStore("templates", () => {
       data.splice(index, 1);
       if (selectedID.value === id) {
         selectedID.value = undefined;
-        selectedRequestID.value = undefined;
       }
     }
   };
@@ -74,7 +72,6 @@ export const useTemplatesStore = defineStore("templates", () => {
   const clearAllClientSide = () => {
     data.splice(0, data.length);
     selectedID.value = undefined;
-    selectedRequestID.value = undefined;
   };
 
   const deleteTemplate = async (id: number) => {
@@ -94,7 +91,6 @@ export const useTemplatesStore = defineStore("templates", () => {
   };
 
   const selectResult = (result: JobResult & { kind: "Ok" }) => {
-    selectedRequestID.value = result.request.id;
     lastSelectedResultType.value = result.type;
   };
 
@@ -145,27 +141,22 @@ export const useTemplatesStore = defineStore("templates", () => {
     },
   });
 
-  watch(selectedID, (newID) => {
-    const template = data.find((t) => t.id === newID);
-    if (template === undefined) {
-      selectedRequestID.value = undefined;
-      return;
-    }
+  const selectedRequestID = computed(() => {
+    const template = selectedTemplate.value;
+    if (template === undefined) return undefined;
 
     const preferredResult = template.results.find(
       (r) => r.kind === "Ok" && r.type === lastSelectedResultType.value,
     );
 
     if (preferredResult !== undefined && preferredResult.kind === "Ok") {
-      selectedRequestID.value = preferredResult.request.id;
-      return;
+      return preferredResult.request.id;
     }
 
     const fallbackResult = template.results.find((r) => r.kind === "Ok");
-    selectedRequestID.value =
-      fallbackResult !== undefined && fallbackResult.kind === "Ok"
-        ? fallbackResult.request.id
-        : template.request.id;
+    return fallbackResult !== undefined && fallbackResult.kind === "Ok"
+      ? fallbackResult.request.id
+      : template.request.id;
   });
 
   return {

@@ -38,7 +38,7 @@ const showOnlyLengths = computed({
         <div class="flex items-center justify-between">
           <div>
             <label class="text-sm font-medium">Show Only Lengths</label>
-            <p class="text-sm text-surface-400 mt-1">
+            <p class="text-sm text-surface-400">
               Display only response lengths in results table
             </p>
           </div>
