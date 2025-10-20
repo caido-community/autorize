@@ -135,6 +135,10 @@ export function rescanAllTemplates(_sdk: BackendSDK): APIResult<void> {
     };
   }
 
+  debugLog("Clearing job queue and request gate before rescanning templates");
+  jobsQueue.clear();
+  requestGate.clear();
+
   const templates = templatesStore.getTemplates();
   const templateIds = templates.map((tmpl) => tmpl.id);
 
