@@ -164,7 +164,12 @@ export const init = (sdk: FrontendSDK) => {
           const colonIndex = header.indexOf(":");
           const key = header.substring(0, colonIndex).trim();
           const value = header.substring(colonIndex + 1).trim();
-          return { kind: "HeaderReplace" as const, header: key, value };
+          return {
+            type: "mutated" as const,
+            kind: "HeaderReplace" as const,
+            header: key,
+            value,
+          };
         });
 
       if (mutations.length === 0) {

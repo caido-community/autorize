@@ -3,6 +3,7 @@ import Button from "primevue/button";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import type { MutationType } from "shared";
+import { toRef } from "vue";
 
 import { useCreateForm } from "./useCreateForm";
 
@@ -11,6 +12,12 @@ const props = defineProps<{
 }>();
 
 const mutationTypes = [
+  {
+    label: "Replace Header",
+    value: "HeaderReplace",
+    tooltip:
+      "Replace a header in the request. If header does not exist, it will be added.",
+  },
   {
     label: "Add Header",
     value: "HeaderAdd",
@@ -22,33 +29,21 @@ const mutationTypes = [
     tooltip: "Remove a header from the request",
   },
   {
-    label: "Replace Header",
-    value: "HeaderReplace",
-    tooltip: "Replace a header in the request",
-  },
-  {
     label: "Match and Replace",
     value: "RawMatchAndReplace",
     tooltip: "Match a pattern in the request and replace it with a value",
   },
 ] as const;
 
+const selectedType = toRef(props, "selectedType");
 const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
-  useCreateForm(props.selectedType);
+  useCreateForm(selectedType);
 </script>
 
 <template>
   <div class="border border-surface-700 rounded p-4 space-y-3">
     <div class="flex justify-between items-start">
       <h4 class="text-sm font-semibold">Add Mutation</h4>
-      <span class="text-xs text-surface-400">
-        <i class="fas fa-info-circle mr-1"></i>
-        <span>Use </span>
-        <code class="px-1 py-0.5 bg-surface-900 rounded text-xs">
-          {{ "\{\{" }} ENV_VAR {{ "\}\}" }}
-        </code>
-        <span> for env variables</span>
-      </span>
     </div>
     <div class="grid grid-cols-12 gap-3">
       <div class="col-span-3">

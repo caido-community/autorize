@@ -17,6 +17,17 @@ const showOnlyLengths = computed({
     }
   },
 });
+
+const showFullURL = computed({
+  get: () => configStore.data?.ui.showFullURL ?? true,
+  set: (value) => {
+    if (configStore.data !== undefined) {
+      configStore.update({
+        ui: { ...configStore.data.ui, showFullURL: value },
+      });
+    }
+  },
+});
 </script>
 
 <template>
@@ -43,6 +54,15 @@ const showOnlyLengths = computed({
             </p>
           </div>
           <ToggleSwitch v-model="showOnlyLengths" />
+        </div>
+        <div class="flex items-center justify-between">
+          <div>
+            <label class="text-sm font-medium">Show Full URL</label>
+            <p class="text-sm text-surface-400">
+              Display full URLs instead of just paths in results table
+            </p>
+          </div>
+          <ToggleSwitch v-model="showFullURL" />
         </div>
       </div>
     </template>

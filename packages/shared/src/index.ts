@@ -42,6 +42,7 @@ export const ConfigSchema = z.object({
   }),
   ui: z.object({
     showOnlyLengths: z.boolean(),
+    showFullURL: z.boolean(),
   }),
   passiveFiltering: z.object({
     httpql: z.string(),

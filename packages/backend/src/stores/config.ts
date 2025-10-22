@@ -22,6 +22,7 @@ class ConfigStore {
     },
     ui: {
       showOnlyLengths: true,
+      showFullURL: true,
     },
     passiveFiltering: {
       httpql: "",

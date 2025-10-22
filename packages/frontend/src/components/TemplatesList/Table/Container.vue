@@ -20,6 +20,7 @@ const {
   parseURL,
   getBaselineCode,
   getBaselineRespLen,
+  getStatusCodeColor,
   codeAndLengthColumns,
   accessColumns,
 } = useTable();
@@ -85,8 +86,9 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
       </template>
     </Column>
     <Column
+      v-if="configStore.data?.ui?.showFullURL"
       header="Host"
-      style="width: 14%"
+      style="width: 12%"
       :pt="{
         headerCell: {
           class: 'overflow-hidden text-ellipsis whitespace-nowrap',
@@ -125,7 +127,10 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
       }"
     >
       <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
+        <div
+          class="overflow-hidden text-ellipsis whitespace-nowrap"
+          :style="{ color: getStatusCodeColor(getBaselineCode(data)) }"
+        >
           {{ getBaselineCode(data) ?? "-" }}
         </div>
       </template>
@@ -157,7 +162,10 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
       }"
     >
       <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
+        <div
+          class="overflow-hidden text-ellipsis whitespace-nowrap"
+          :style="{ color: column.colorGetter?.(data) }"
+        >
           {{ column.getter(data) ?? "-" }}
         </div>
       </template>
@@ -166,7 +174,7 @@ const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
       v-for="column in accessColumns"
       :key="column.field"
       :header="column.header"
-      style="width: 6%"
+      style="width: 7%"
       :pt="{
         headerCell: {
           class: 'overflow-hidden text-ellipsis whitespace-nowrap',

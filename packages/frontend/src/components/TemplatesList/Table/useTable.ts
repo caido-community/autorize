@@ -146,6 +146,16 @@ export const useTable = () => {
     return undefined;
   };
 
+  const getStatusCodeColor = (code: number | undefined) => {
+    if (code === undefined) return undefined;
+
+    if (code >= 200 && code < 300) return "#10b981";
+    if (code >= 300 && code < 400) return "#3b82f6";
+    if (code >= 400 && code < 500) return "#f59e0b";
+    if (code >= 500) return "#ef4444";
+    return undefined;
+  };
+
   const codeAndLengthColumns = computed(() => {
     const showOnlyLengths = configStore.data?.ui?.showOnlyLengths ?? false;
     const testNoAuth = configStore.data?.testNoAuth ?? true;
@@ -178,6 +188,8 @@ export const useTable = () => {
           field: "noAuthCode",
           header: "Unauth. Code",
           getter: getNoAuthCode,
+          colorGetter: (template: Template) =>
+            getStatusCodeColor(getNoAuthCode(template)),
         },
         {
           field: "noAuthRespLen",
@@ -192,6 +204,8 @@ export const useTable = () => {
         field: "mutatedCode",
         header: "Mutated Code",
         getter: getMutatedCode,
+        colorGetter: (template: Template) =>
+          getStatusCodeColor(getMutatedCode(template)),
       },
       {
         field: "mutatedRespLen",
@@ -233,6 +247,7 @@ export const useTable = () => {
     parseURL,
     getBaselineCode,
     getBaselineRespLen,
+    getStatusCodeColor,
     codeAndLengthColumns,
     accessColumns,
   };

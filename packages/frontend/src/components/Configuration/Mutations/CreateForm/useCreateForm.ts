@@ -1,5 +1,5 @@
 import type { Mutation, MutationType } from "shared";
-import { computed, ref, watch } from "vue";
+import { computed, type Ref, ref, watch } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
@@ -11,23 +11,20 @@ type MutationInput = {
   value: string;
 };
 
-export const useCreateForm = (selectedType: MutationType) => {
+export const useCreateForm = (selectedType: Ref<MutationType>) => {
   const configStore = useConfigStore();
 
   const newMutation = ref<MutationInput>({
-    type: selectedType,
-    kind: "HeaderAdd",
+    type: selectedType.value,
+    kind: "HeaderReplace",
     header: "",
     match: "",
     value: "",
   });
 
-  watch(
-    () => selectedType,
-    (newType) => {
-      newMutation.value.type = newType;
-    },
-  );
+  watch(selectedType, (newType) => {
+    newMutation.value.type = newType;
+  });
 
   const canAddMutation = computed(() => {
     const mutation = newMutation.value;
@@ -74,7 +71,7 @@ export const useCreateForm = (selectedType: MutationType) => {
     configStore.update({ mutations: [...mutations] });
 
     newMutation.value = {
-      type: selectedType,
+      type: selectedType.value,
       kind: "HeaderAdd",
       header: "",
       match: "",

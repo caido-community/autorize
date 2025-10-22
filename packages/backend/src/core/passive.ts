@@ -51,6 +51,7 @@ export const initPassiveListener = (sdk: BackendSDK) => {
     jobsQueue.addRequest(request, response);
   });
 };
+
 // Here we control which passive requests are being sent to the Autorize plugin queue
 const shouldProcessRequest = async (request: Request, sdk: BackendSDK) => {
   const config = configStore.getConfig();
