@@ -15,7 +15,18 @@ const options = computed(() => {
   const resultTypes = selectedTemplate.value.results
     .filter((result) => result.kind === "Ok")
     .map((result) => result.type);
-  return resultTypes;
+
+  const order = ["baseline", "mutated", "noauth"];
+  return resultTypes.sort((a, b) => {
+    const aIndex = order.indexOf(a);
+    const bIndex = order.indexOf(b);
+
+    if (aIndex === -1 && bIndex === -1) return 0;
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+
+    return aIndex - bIndex;
+  });
 });
 
 const selection = computed({
