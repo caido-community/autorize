@@ -43,6 +43,11 @@ export const ConfigSchema = z.object({
   ui: z.object({
     showOnlyLengths: z.boolean(),
     showFullURL: z.boolean(),
+    accessStateLabels: z.object({
+      authorized: z.string().min(1).max(14),
+      unauthorized: z.string().min(1).max(14),
+      uncertain: z.string().min(1).max(14),
+    }),
   }),
   passiveFiltering: z.object({
     httpql: z.string(),

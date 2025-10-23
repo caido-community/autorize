@@ -119,10 +119,11 @@ export const useTable = () => {
     const result = getResultByType(template, "no-auth");
     if (result === undefined) return undefined;
 
+    const labels = configStore.data?.ui.accessStateLabels;
     const state = result.accessState.kind;
-    if (state === "unauthorized") return "DENY";
-    if (state === "authorized") return "ALLOW";
-    if (state === "uncertain") return "UNCERTAIN";
+    if (state === "unauthorized") return labels?.unauthorized ?? "DENY";
+    if (state === "authorized") return labels?.authorized ?? "ALLOW";
+    if (state === "uncertain") return labels?.uncertain ?? "UNCERTAIN";
     return undefined;
   };
 
@@ -130,19 +131,21 @@ export const useTable = () => {
     const result = getResultByType(template, "mutated");
     if (result === undefined) return undefined;
 
+    const labels = configStore.data?.ui.accessStateLabels;
     const state = result.accessState.kind;
-    if (state === "unauthorized") return "DENY";
-    if (state === "authorized") return "ALLOW";
-    if (state === "uncertain") return "UNCERTAIN";
+    if (state === "unauthorized") return labels?.unauthorized ?? "DENY";
+    if (state === "authorized") return labels?.authorized ?? "ALLOW";
+    if (state === "uncertain") return labels?.uncertain ?? "UNCERTAIN";
     return undefined;
   };
 
   const getAccessStateColor = (state: string | undefined) => {
     if (state === undefined) return undefined;
 
-    if (state === "DENY") return "#dc2626";
-    if (state === "ALLOW") return "#059669";
-    if (state === "UNCERTAIN") return "#d97706";
+    const labels = configStore.data?.ui.accessStateLabels;
+    if (state === (labels?.unauthorized ?? "DENY")) return "#dc2626";
+    if (state === (labels?.authorized ?? "ALLOW")) return "#059669";
+    if (state === (labels?.uncertain ?? "UNCERTAIN")) return "#d97706";
     return undefined;
   };
 

@@ -12,7 +12,7 @@ class ConfigStore {
         type: "mutated",
         kind: "HeaderAdd",
         header: "test",
-        value: "te",
+        value: "test",
       },
     ],
     queue: {
@@ -23,6 +23,11 @@ class ConfigStore {
     ui: {
       showOnlyLengths: true,
       showFullURL: true,
+      accessStateLabels: {
+        authorized: "ALLOW",
+        unauthorized: "DENY",
+        uncertain: "UNCERTAIN",
+      },
     },
     passiveFiltering: {
       httpql: "",
