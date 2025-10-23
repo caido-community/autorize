@@ -1,3 +1,6 @@
+import { readFile, writeFile } from "fs/promises";
+import path from "path";
+
 import { create } from "mutative";
 import { type JobResult, type Template } from "shared";
 
@@ -6,6 +9,41 @@ import { requireSDK } from "../sdk";
 class TemplatesStore {
   private templates: Template[] = [];
   private subscribers = new Set<(templates: Template[]) => void>();
+  private saveTimeout: Timeout | undefined;
+
+  async initialize(): Promise<void> {
+    await this.loadFromFile();
+  }
+
+  private getFilePath(): string {
+    const sdk = requireSDK();
+    return path.join(sdk.meta.path(), "templates.json");
+  }
+
+  private async saveToFile(): Promise<void> {
+    const filePath = this.getFilePath();
+    await writeFile(filePath, JSON.stringify(this.templates, null, 2));
+  }
+
+  private debouncedSave(): void {
+    if (this.saveTimeout !== undefined) {
+      clearTimeout(this.saveTimeout);
+    }
+    this.saveTimeout = setTimeout(() => {
+      this.saveToFile();
+    }, 5000);
+  }
+
+  private async loadFromFile(): Promise<void> {
+    const filePath = this.getFilePath();
+    try {
+      const data = await readFile(filePath, "utf-8");
+      this.templates = JSON.parse(data);
+      this.notify();
+    } catch {
+      await this.saveToFile();
+    }
+  }
 
   getTemplates(): Template[] {
     return this.templates;
@@ -19,6 +57,7 @@ class TemplatesStore {
     });
 
     this.notify();
+    this.debouncedSave();
     sdk.api.send("template:created", template);
   }
 
@@ -30,6 +69,7 @@ class TemplatesStore {
     });
 
     this.notify();
+    this.debouncedSave();
     sdk.api.send("template:deleted", templateId);
   }
 
@@ -56,6 +96,7 @@ class TemplatesStore {
     });
 
     this.notify();
+    this.debouncedSave();
   }
 
   clearTemplateResults(templateId: number): void {
@@ -70,6 +111,7 @@ class TemplatesStore {
     });
 
     this.notify();
+    this.debouncedSave();
   }
 
   subscribe(subscriber: (templates: Template[]) => void): () => void {

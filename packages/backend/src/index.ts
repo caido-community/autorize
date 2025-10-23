@@ -15,6 +15,8 @@ import {
 } from "./api";
 import { initPassiveListener } from "./core/passive";
 import { setSDK } from "./sdk";
+import { configStore } from "./stores/config";
+import { templatesStore } from "./stores/templates";
 import { type BackendSDK } from "./types";
 
 export { type BackendEvents } from "./types";
@@ -35,6 +37,9 @@ export type API = DefineAPI<{
 
 export function init(sdk: BackendSDK) {
   setSDK(sdk);
+
+  configStore.initialize();
+  templatesStore.initialize();
 
   sdk.api.register("getTemplates", getTemplates);
   sdk.api.register("getTemplate", getTemplate);
