@@ -54,6 +54,10 @@ export const ConfigSchema = z.object({
     onlyInScope: z.boolean(),
     filters: z.array(z.string()),
   }),
+  statusDetection: z.object({
+    authorizedHttpql: z.string(),
+    unauthorizedHttpql: z.string(),
+  }),
 });
 
 export type Config = z.infer<typeof ConfigSchema>;

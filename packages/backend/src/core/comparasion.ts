@@ -3,7 +3,6 @@ import { type AccessState } from "shared";
 
 import { stringSimilarity } from "../utils";
 
-// Compare mutated request to the original one
 export function determineAccessState(
   baseline: Response,
   mutated: Response,

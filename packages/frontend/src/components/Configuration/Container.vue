@@ -3,18 +3,28 @@ import Card from "primevue/card";
 import SelectButton from "primevue/selectbutton";
 import { computed, ref } from "vue";
 
+import { Filtering } from "./Filtering";
 import { GeneralSettings } from "./General";
 import { Mutations } from "./Mutations";
 import { PassiveScanning } from "./Passive";
+import { StatusDetection } from "./StatusDetection";
 import { UISettings } from "./UI";
 
-type Tab = "Mutations" | "PassiveScanning" | "GeneralSettings" | "UISettings";
+type Tab =
+  | "Mutations"
+  | "Filtering"
+  | "PassiveScanning"
+  | "StatusDetection"
+  | "GeneralSettings"
+  | "UISettings";
 
 const activeTab = ref<Tab>("Mutations");
 
-const tabs: Array<{ label: string; value: Tab }> = [
+const tabs = [
   { label: "Mutations", value: "Mutations" },
-  { label: "Scanning", value: "PassiveScanning" },
+  { label: "Filtering", value: "Filtering" },
+  { label: "Detection", value: "StatusDetection" },
+  { label: "Queue", value: "PassiveScanning" },
   { label: "General", value: "GeneralSettings" },
   { label: "UI", value: "UISettings" },
 ];
@@ -23,8 +33,12 @@ const component = computed(() => {
   switch (activeTab.value) {
     case "Mutations":
       return Mutations;
+    case "Filtering":
+      return Filtering;
     case "PassiveScanning":
       return PassiveScanning;
+    case "StatusDetection":
+      return StatusDetection;
     case "GeneralSettings":
       return GeneralSettings;
     case "UISettings":

@@ -5,10 +5,8 @@ import { computed } from "vue";
 
 import { TemplatesTable } from "./Table";
 
-import { useSDK } from "@/plugins/sdk";
 import { useTemplatesStore } from "@/stores/templates";
 
-const sdk = useSDK();
 const store = useTemplatesStore();
 const hasTemplates = computed(() => store.data.length > 0);
 

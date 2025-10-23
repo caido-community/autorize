@@ -129,7 +129,7 @@ const uncertainLabel = computed({
           <ToggleSwitch v-model="showFullURL" />
         </div>
         <div class="border-t border-surface-700 pt-4">
-          <h4 class="text-sm font-semibold mb-1">Access State Labels</h4>
+          <h4 class="text-sm font-semibold">Access State Labels</h4>
           <p class="text-sm text-surface-400 mb-4">
             Customize labels for access states (1-14 characters). In other
             tools, this is often set to "Enforced" and "Bypassed".

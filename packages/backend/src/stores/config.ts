@@ -34,6 +34,10 @@ class ConfigStore {
       onlyInScope: true,
       filters: [],
     },
+    statusDetection: {
+      authorizedHttpql: "",
+      unauthorizedHttpql: "",
+    },
   };
 
   private subscribers = new Set<(config: Config) => void>();

@@ -105,6 +105,37 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       continue;
     }
 
+    const baselineResponse = baselineResult.value.response;
+    const mutatedResponse = result.value.response;
+
+    let accessState = determineAccessState(baselineResponse, mutatedResponse);
+
+    const authorizedHttpql = config.statusDetection.authorizedHttpql;
+    const unauthorizedHttpql = config.statusDetection.unauthorizedHttpql;
+
+    if (unauthorizedHttpql !== "") {
+      const matchesUnauthorized = sdk.requests.matches(
+        unauthorizedHttpql,
+        originalRequest.request,
+        mutatedResponse,
+      );
+      if (matchesUnauthorized) {
+        accessState = { kind: "unauthorized", confidence: 1 };
+      }
+    }
+
+    if (authorizedHttpql !== "") {
+      const matchesAuthorized = sdk.requests.matches(
+        authorizedHttpql,
+        originalRequest.request,
+        mutatedResponse,
+      );
+
+      if (matchesAuthorized) {
+        accessState = { kind: "authorized", confidence: 1 };
+      }
+    }
+
     yield {
       kind: "Ok",
       type,
@@ -118,10 +149,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
         code: result.value.response.getCode(),
         length: result.value.response.getRaw().toText().length,
       },
-      accessState: determineAccessState(
-        baselineResult.value.response,
-        result.value.response,
-      ),
+      accessState,
     };
   }
 }
