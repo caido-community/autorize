@@ -36,7 +36,7 @@ const getFilterPresets = async (sdk: BackendSDK): Promise<FilterPreset[]> => {
   `);
 
   const result = FilterPresetsResponseSchema.safeParse(response);
-  if (!result.success) {
+  if (result.success === false) {
     return [];
   }
 
