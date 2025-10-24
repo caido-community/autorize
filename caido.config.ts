@@ -12,7 +12,7 @@ export default defineConfig({
   id,
   name: "Autorize",
   description: "Autorize plugin for Caido",
-  version: "0.0.0",
+  version: "0.0.1",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",

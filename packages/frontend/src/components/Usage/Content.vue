@@ -538,21 +538,24 @@
         <div class="border border-surface-700 rounded p-4">
           <h4 class="font-semibold mb-2">Editor Layout</h4>
           <p class="text-surface-300 text-sm mb-3">
-            Choose how request and response editors are displayed when viewing results.
+            Choose how request and response editors are displayed when viewing
+            results.
           </p>
           <div class="space-y-3 text-sm">
             <div class="border-l-4 border-blue-500 pl-3">
               <div class="font-medium mb-1">Tabs Layout</div>
               <p class="text-surface-300">
-                Shows one result at a time with tabs to switch between different request types.
-                Best for detailed analysis of individual requests.
+                Shows one result at a time with tabs to switch between different
+                request types. Best for detailed analysis of individual
+                requests.
               </p>
             </div>
             <div class="border-l-4 border-blue-500 pl-3">
               <div class="font-medium mb-1">Vertical Layout</div>
               <p class="text-surface-300">
-                Displays all results simultaneously in vertical panels.
-                Perfect for comparing responses side-by-side to spot differences quickly.
+                Displays all results simultaneously in vertical panels. Perfect
+                for comparing responses side-by-side to spot differences
+                quickly.
               </p>
             </div>
           </div>

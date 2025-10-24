@@ -19,6 +19,5 @@
     "typescript": "5.5.4"
   },
   "dependencies": {
-    "@vueuse/core": "^13.9.0"
   }
 }
