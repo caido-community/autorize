@@ -16,6 +16,8 @@
 
 Automated authorization testing for web applications. Autorize helps you find authorization vulnerabilities by automatically testing if lower-privilege users can access resources they shouldn't.
 
+<img width="1902" height="1040" alt="dashboard" src="https://github.com/user-attachments/assets/d62d3ac5-56e8-45f6-b884-8992fd164e57" />
+
 ## Installation
 
 ### From Plugin Store
