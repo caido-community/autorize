@@ -11,14 +11,7 @@ class ConfigStore {
     enabled: false,
     testNoAuth: true,
     debug: false,
-    mutations: [
-      {
-        type: "mutated",
-        kind: "HeaderAdd",
-        header: "test",
-        value: "test",
-      },
-    ],
+    mutations: [],
     queue: {
       maxConcurrentRequests: 3,
       requestsPerSecond: 10,

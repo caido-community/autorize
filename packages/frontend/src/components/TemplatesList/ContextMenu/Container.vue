@@ -27,15 +27,6 @@ const menuItems = [
       }
     },
   },
-  {
-    label: "Debug print",
-    icon: "fas fa-code",
-    command: () => {
-      if (currentTemplate.value !== undefined) {
-        console.log(currentTemplate.value);
-      }
-    },
-  },
 ];
 
 const currentTemplate = ref<Template | undefined>(undefined);

@@ -32,6 +32,7 @@ export function determineAccessState(
     }
   }
 
+  // Clear denial indicators
   if (mutated.getCode() === 404 && baseline.getCode() !== 404) {
     return { kind: "unauthorized", confidence: 1 };
   }
