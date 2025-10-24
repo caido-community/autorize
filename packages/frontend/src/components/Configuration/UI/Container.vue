@@ -1,12 +1,29 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
+import SelectButton from "primevue/selectbutton";
 import ToggleSwitch from "primevue/toggleswitch";
 import { computed } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
 const configStore = useConfigStore();
+
+const editorsLayoutOptions = [
+  { label: "Tabs", value: "tabs" },
+  { label: "Vertical", value: "vertical" },
+];
+
+const editorsLayout = computed({
+  get: () => configStore.data?.ui.editorsLayout ?? "tabs",
+  set: (value) => {
+    if (configStore.data !== undefined) {
+      configStore.update({
+        ui: { ...configStore.data.ui, editorsLayout: value },
+      });
+    }
+  },
+});
 
 const showOnlyLengths = computed({
   get: () => configStore.data?.ui.showOnlyLengths ?? false,
@@ -127,6 +144,20 @@ const uncertainLabel = computed({
             </p>
           </div>
           <ToggleSwitch v-model="showFullURL" />
+        </div>
+        <div class="border-t border-surface-700 pt-4">
+          <h4 class="text-sm font-semibold mb-1">Editors Layout</h4>
+          <p class="text-sm text-surface-400 mb-3">
+            Choose how request and response editors are displayed. We recommend
+            using "Tabs" for better readability.
+          </p>
+          <SelectButton
+            v-model="editorsLayout"
+            :options="editorsLayoutOptions"
+            option-label="label"
+            option-value="value"
+            :allow-empty="false"
+          />
         </div>
         <div class="border-t border-surface-700 pt-4">
           <h4 class="text-sm font-semibold">Access State Labels</h4>

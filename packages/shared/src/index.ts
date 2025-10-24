@@ -43,6 +43,7 @@ export const ConfigSchema = z.object({
   ui: z.object({
     showOnlyLengths: z.boolean(),
     showFullURL: z.boolean(),
+    editorsLayout: z.enum(["tabs", "vertical"]),
     accessStateLabels: z.object({
       authorized: z.string().min(1).max(14),
       unauthorized: z.string().min(1).max(14),

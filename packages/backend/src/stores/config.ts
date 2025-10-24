@@ -20,6 +20,7 @@ class ConfigStore {
     ui: {
       showOnlyLengths: true,
       showFullURL: true,
+      editorsLayout: "tabs",
       accessStateLabels: {
         authorized: "ALLOW",
         unauthorized: "DENY",

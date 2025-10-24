@@ -5,7 +5,10 @@ import { toRefs, watch } from "vue";
 
 import { useEditor } from "./useEditor";
 
-import { RequestEditor, ResponseEditor } from "@/components/Editors";
+import {
+  RequestEditor,
+  ResponseEditor,
+} from "@/components/Dashboard/Preview/Editors";
 
 const props = defineProps<{
   requestId: string | undefined;

@@ -11,22 +11,12 @@ const store = useTemplatesStore();
 const selectedTemplate = computed(() => store.selectedTemplate);
 
 const options = computed(() => {
-  if (selectedTemplate.value === undefined) return [];
-  const resultTypes = selectedTemplate.value.results
-    .filter((result) => result.kind === "Ok")
-    .map((result) => result.type);
-
-  const order = ["baseline", "mutated", "noauth"];
-  return resultTypes.sort((a, b) => {
-    const aIndex = order.indexOf(a);
-    const bIndex = order.indexOf(b);
-
-    if (aIndex === -1 && bIndex === -1) return 0;
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-
-    return aIndex - bIndex;
-  });
+  return store.orderedResults
+    .map((result) => {
+      if (result.kind !== "Ok") return "";
+      return result.type;
+    })
+    .filter((type) => type !== "");
 });
 
 const selection = computed({

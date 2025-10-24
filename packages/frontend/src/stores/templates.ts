@@ -159,6 +159,27 @@ export const useTemplatesStore = defineStore("templates", () => {
       : undefined;
   });
 
+  const orderedResults = computed(() => {
+    const template = selectedTemplate.value;
+    if (template === undefined) return [];
+
+    const okResults = template.results.filter((r) => r.kind === "Ok");
+    const order: MutationType[] = ["baseline", "mutated", "no-auth"];
+
+    return okResults.sort((a, b) => {
+      if (a.kind !== "Ok" || b.kind !== "Ok") return 0;
+
+      const aIndex = order.indexOf(a.type);
+      const bIndex = order.indexOf(b.type);
+
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+
+      return aIndex - bIndex;
+    });
+  });
+
   return {
     data,
     selectedID,
@@ -176,5 +197,6 @@ export const useTemplatesStore = defineStore("templates", () => {
     rescanAll,
     initialize,
     selectedTemplate,
+    orderedResults,
   };
 });

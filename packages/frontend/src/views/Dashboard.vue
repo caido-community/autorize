@@ -1,29 +1,43 @@
 <script setup lang="ts">
 import { computed } from "vue";
 
-import { Editors } from "@/components/Editors";
-import { ResultsBar } from "@/components/ResultsBar";
-import { TemplatesList } from "@/components/TemplatesList";
+import { PreviewLayout } from "@/components/Dashboard/Preview";
+import { TemplatesList } from "@/components/Dashboard/TemplatesList";
+import { useConfigStore } from "@/stores/config";
 import { useTemplatesStore } from "@/stores/templates";
 
 const templatesStore = useTemplatesStore();
+const configStore = useConfigStore();
 
 const selectedTemplateID = computed(() => templatesStore.selectedID);
-const selectedRequestID = computed(() => templatesStore.selectedRequestID);
-
 const selectedTemplate = computed(() => templatesStore.selectedTemplate);
+const hasResults = computed(
+  () => (selectedTemplate.value?.results.length ?? 0) > 0,
+);
+const layout = computed(() => configStore.data?.ui.editorsLayout ?? "tabs");
+
+const topHeight = computed(() => {
+  if (selectedTemplateID.value === undefined || !hasResults.value)
+    return "h-full";
+  return layout.value === "vertical" ? "h-1/3" : "h-1/2";
+});
+
+const bottomHeight = computed(() => {
+  return layout.value === "vertical" ? "h-2/3" : "h-1/2";
+});
 </script>
 
 <template>
   <div class="h-full flex flex-col gap-1.5">
-    <div :class="selectedTemplateID ? 'h-1/2' : 'h-full'">
+    <div :class="topHeight">
       <TemplatesList />
     </div>
-    <div v-if="selectedTemplateID" class="h-1/2 flex flex-col gap-1.5 min-h-0">
-      <ResultsBar v-if="selectedTemplate?.results.length ?? 0 > 0" />
-      <div class="flex-1 min-h-0">
-        <Editors :request-id="selectedRequestID" />
-      </div>
+    <div
+      v-if="selectedTemplate !== undefined && hasResults"
+      :class="bottomHeight"
+      class="flex flex-col gap-1.5 min-h-0"
+    >
+      <PreviewLayout />
     </div>
   </div>
 </template>
