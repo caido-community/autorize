@@ -10,4 +10,5 @@ export type BackendEvents = DefineEvents<{
   "template:deleted": (templateId: number) => void;
   "templates:cleared": () => void;
   "project:changed": (projectID: string | undefined) => void;
+  "queue:status-changed": (hasActiveJobs: boolean) => void;
 }>;

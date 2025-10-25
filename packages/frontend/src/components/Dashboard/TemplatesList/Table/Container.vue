@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import Column from "primevue/column";
-import DataTable from "primevue/datatable";
-import type { DataTableRowContextMenuEvent } from "primevue/datatable";
 import type { Template } from "shared";
 import { computed, ref } from "vue";
+import { DynamicScroller } from "vue-virtual-scroller";
+import "vue-virtual-scroller/dist/vue-virtual-scroller.css";
 
 import { RowContextMenu } from "../ContextMenu";
 
@@ -32,168 +31,176 @@ const selectedTemplate = computed({
   set: (template) => store.select(template),
 });
 
-const onRowContextMenu = (event: DataTableRowContextMenuEvent) => {
-  const template = event.data as Template;
-  contextMenu.value?.show(event.originalEvent as MouseEvent, template);
+const onRowClick = (template: Template) => {
+  if (selectedTemplate.value?.id === template.id) {
+    selectedTemplate.value = undefined;
+  } else {
+    selectedTemplate.value = template;
+  }
+};
+
+const onRowContextMenu = (event: MouseEvent, template: Template) => {
+  event.preventDefault();
+  contextMenu.value?.show(event, template);
 };
 </script>
 
 <template>
-  <!-- isOnAutorizePage makes sure that performance is not affected when not on the Autorize page -->
-  <DataTable
-    v-if="isOnAutorizePage"
-    v-model:selection="selectedTemplate"
-    :value="store.data"
-    striped-rows
-    selection-mode="single"
-    size="small"
-    scroll-height="flex"
-    scrollable
-    context-menu
-    :pt="{
-      root: {
-        class:
-          'relative flex flex-col grow min-h-0 min-w-[800px] overflow-auto',
-      },
-      table: { class: 'w-full border-spacing-0 border-separate table-fixed' },
-    }"
-    @row-contextmenu="onRowContextMenu"
-  >
-    <Column
-      field="id"
-      header="ID"
-      style="width: 3%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    />
-    <Column
-      field="request.method"
-      header="Method"
-      style="width: 5%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
+  <div v-if="isOnAutorizePage" class="flex flex-col grow min-h-0 min-w-[800px]">
+    <div class="pr-[12px]">
+      <table class="w-full border-spacing-0 border-separate table-fixed">
+        <thead class="bg-surface-900">
+          <tr class="bg-surface-800/50 text-surface-0/50">
+            <th
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 3%"
+            >
+              ID
+            </th>
+            <th
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 5%"
+            >
+              Method
+            </th>
+            <th
+              v-if="configStore.data?.ui?.showFullURL"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 10%"
+            >
+              Host
+            </th>
+            <th
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 25%"
+            >
+              Path
+            </th>
+            <th
+              v-if="!configStore.data?.ui?.showOnlyLengths"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 8%"
+            >
+              Orig. Code
+            </th>
+            <th
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 8%"
+            >
+              Orig. Len
+            </th>
+            <th
+              v-for="column in codeAndLengthColumns"
+              :key="column.field"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 8%"
+            >
+              {{ column.header }}
+            </th>
+            <th
+              v-for="column in accessColumns"
+              :key="column.field"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              style="width: 8%"
+            >
+              {{ column.header }}
+            </th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+    <DynamicScroller
+      class="flex-1 overflow-auto bg-surface-800"
+      :items="store.data"
+      :min-item-size="30"
+      key-field="id"
     >
-      <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {{ data.request.method }}
-        </div>
-      </template>
-    </Column>
-    <Column
-      v-if="configStore.data?.ui?.showFullURL"
-      header="Host"
-      style="width: 12%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {{ parseURL(data.request.url).host }}
-        </div>
-      </template>
-    </Column>
-    <Column
-      header="Path"
-      style="width: 23%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {{ parseURL(data.request.url).pathWithQuery }}
-        </div>
-      </template>
-    </Column>
-    <Column
-      v-if="!configStore.data?.ui?.showOnlyLengths"
-      header="Orig. Code"
-      style="width: 8%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div
-          class="overflow-hidden text-ellipsis whitespace-nowrap"
-          :style="{ color: getStatusCodeColor(getBaselineCode(data)) }"
+      <template #default="{ item, index }">
+        <table
+          class="w-full border-spacing-0 border-separate table-fixed h-[30px]"
         >
-          {{ getBaselineCode(data) ?? "-" }}
-        </div>
+          <tbody class="bg-surface-800">
+            <tr
+              :class="[
+                'cursor-pointer text-white/80',
+                {
+                  'bg-highlight': selectedTemplate?.id === item.id,
+                  'bg-surface-800':
+                    index % 2 === 0 && selectedTemplate?.id !== item.id,
+                  'bg-surface-900':
+                    index % 2 === 1 && selectedTemplate?.id !== item.id,
+                  'hover:bg-surface-700/50': selectedTemplate?.id !== item.id,
+                },
+              ]"
+              @mousedown="onRowClick(item)"
+              @contextmenu="onRowContextMenu($event, item)"
+            >
+              <td
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                style="width: 3%"
+              >
+                {{ item.id }}
+              </td>
+              <td
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                style="width: 5%"
+              >
+                {{ item.request.method }}
+              </td>
+              <td
+                v-if="configStore.data?.ui?.showFullURL"
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                style="width: 10%"
+              >
+                {{ parseURL(item.request.url).host }}
+              </td>
+              <td
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                style="width: 25%"
+              >
+                {{ parseURL(item.request.url).pathWithQuery }}
+              </td>
+              <td
+                v-if="!configStore.data?.ui?.showOnlyLengths"
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                :style="{ color: getStatusCodeColor(getBaselineCode(item)) }"
+                style="width: 8%"
+              >
+                {{ getBaselineCode(item) ?? "-" }}
+              </td>
+              <td
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                style="width: 8%"
+              >
+                {{ getBaselineRespLen(item) ?? "-" }}
+              </td>
+              <td
+                v-for="column in codeAndLengthColumns"
+                :key="column.field"
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
+                :style="{ color: column.colorGetter?.(item) }"
+                style="width: 8%"
+              >
+                {{ column.getter(item) ?? "-" }}
+              </td>
+              <td
+                v-for="column in accessColumns"
+                :key="column.field"
+                class="leading-[normal] text-ellipsis whitespace-nowrap border-0 h-full"
+                :style="{
+                  backgroundColor: column.colorGetter?.(item),
+                  padding: '0.25rem 0',
+                  textAlign: 'center',
+                  width: '8%',
+                }"
+              >
+                {{ column.getter(item) ?? "" }}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </template>
-    </Column>
-    <Column
-      header="Orig. Len"
-      style="width: 6%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div class="overflow-hidden text-ellipsis whitespace-nowrap">
-          {{ getBaselineRespLen(data) ?? "-" }}
-        </div>
-      </template>
-    </Column>
-    <Column
-      v-for="column in codeAndLengthColumns"
-      :key="column.field"
-      :header="column.header"
-      style="width: 6%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div
-          class="overflow-hidden text-ellipsis whitespace-nowrap"
-          :style="{ color: column.colorGetter?.(data) }"
-        >
-          {{ column.getter(data) ?? "-" }}
-        </div>
-      </template>
-    </Column>
-    <Column
-      v-for="column in accessColumns"
-      :key="column.field"
-      :header="column.header"
-      style="width: 7%"
-      :pt="{
-        headerCell: {
-          class: 'overflow-hidden text-ellipsis whitespace-nowrap',
-        },
-      }"
-    >
-      <template #body="{ data }">
-        <div
-          class="text-ellipsis whitespace-nowrap"
-          :style="{
-            backgroundColor: column.colorGetter?.(data),
-            padding: '0.25rem 0',
-            textAlign: 'center',
-          }"
-        >
-          {{ column.getter(data) ?? "-" }}
-        </div>
-      </template>
-    </Column>
-  </DataTable>
+    </DynamicScroller>
+  </div>
   <RowContextMenu ref="contextMenu" />
 </template>

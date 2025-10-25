@@ -12,7 +12,7 @@ import Card from "primevue/card";
         <i
           class="fas fa-file-circle-xmark text-4xl text-gray-600 mb-3 grayscale invert opacity-35"
         ></i>
-        <span class="text-gray-400">No request selected</span>
+        <span class="text-gray-400">No request to show</span>
       </div>
     </template>
   </Card>

@@ -12,7 +12,8 @@
     "pinia": "^3.0.3",
     "primevue": "4.1.0",
     "shared": "workspace:*",
-    "vue": "3.5.22"
+    "vue": "3.5.22",
+    "vue-virtual-scroller": "2.0.0-beta.8"
   },
   "devDependencies": {
     "@caido/sdk-backend": "^0.52.0",

@@ -2,6 +2,7 @@ import { type Request, type Response } from "caido:utils";
 import PQueue from "p-queue";
 import { type Job, type Template } from "shared";
 
+import { requireSDK } from "../sdk";
 import { configStore } from "../stores/config";
 import { templatesStore } from "../stores/templates";
 import { debugLog, generateId } from "../utils";
@@ -20,6 +21,7 @@ export type AddRequestResult =
 
 class JobsQueue {
   private queue = new PQueue({ concurrency: 3 });
+  private lastEmittedStatus = false;
 
   constructor() {
     const adjust = () => {
@@ -29,6 +31,26 @@ class JobsQueue {
 
     adjust();
     configStore.subscribe(adjust);
+
+    this.queue.on("add", () => this.emitStatusChange());
+    this.queue.on("completed", () => this.emitStatusChange());
+    this.queue.on("idle", () => this.emitStatusChange());
+  }
+
+  hasActiveJobs(): boolean {
+    return this.queue.size > 0;
+  }
+
+  private emitStatusChange() {
+    const hasActive = this.hasActiveJobs();
+    if (hasActive !== this.lastEmittedStatus) {
+      this.lastEmittedStatus = hasActive;
+      const sdk = requireSDK();
+      sdk.api.send("queue:status-changed", hasActive);
+      debugLog(
+        `Queue status changed: hasActiveJobs=${hasActive} (size=${this.queue.size}, pending=${this.queue.pending})`,
+      );
+    }
   }
 
   addRequest(
@@ -138,6 +160,7 @@ class JobsQueue {
     );
     this.queue.clear();
     debugLog(`Job queue cleared, new size: ${this.queue.size}`);
+    this.emitStatusChange();
   }
 
   private async worker(job: Job) {

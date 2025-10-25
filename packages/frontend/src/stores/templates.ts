@@ -10,6 +10,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const lastSelectedResultType = ref<MutationType>("baseline");
+  const hasActiveJobs = ref(false);
 
   const initialize = async () => {
     await fetch();
@@ -28,6 +29,10 @@ export const useTemplatesStore = defineStore("templates", () => {
 
     sdk.backend.onEvent("templates:cleared", () => {
       clearAllClientSide();
+    });
+
+    sdk.backend.onEvent("queue:status-changed", (hasJobs) => {
+      hasActiveJobs.value = hasJobs;
     });
   };
 
@@ -132,6 +137,32 @@ export const useTemplatesStore = defineStore("templates", () => {
     }
   };
 
+  const stopQueue = async () => {
+    const result = await sdk.backend.clearQueue();
+    switch (result.kind) {
+      case "Ok":
+        // wait for queue to be idle
+        if (hasActiveJobs.value) {
+          await new Promise<void>((resolve) => {
+            const listener = sdk.backend.onEvent(
+              "queue:status-changed",
+              (hasJobs) => {
+                if (!hasJobs) {
+                  listener.stop();
+                  resolve();
+                }
+              },
+            );
+          });
+        }
+        sdk.window.showToast("Queue stopped", { variant: "success" });
+        break;
+      case "Error":
+        sdk.window.showToast(result.error, { variant: "error" });
+        break;
+    }
+  };
+
   const selectedTemplate = computed<Template | undefined>({
     get() {
       return data.find((t) => t.id === selectedID.value);
@@ -185,6 +216,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     selectedID,
     selectedRequestID,
     lastSelectedResultType,
+    hasActiveJobs,
     fetch,
     add,
     update,
@@ -195,6 +227,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     rerun,
     clearAll,
     rescanAll,
+    stopQueue,
     initialize,
     selectedTemplate,
     orderedResults,

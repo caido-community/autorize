@@ -11,14 +11,10 @@ const configStore = useConfigStore();
 
 const selectedTemplateID = computed(() => templatesStore.selectedID);
 const selectedTemplate = computed(() => templatesStore.selectedTemplate);
-const hasResults = computed(
-  () => (selectedTemplate.value?.results.length ?? 0) > 0,
-);
 const layout = computed(() => configStore.data?.ui.editorsLayout ?? "tabs");
 
 const topHeight = computed(() => {
-  if (selectedTemplateID.value === undefined || !hasResults.value)
-    return "h-full";
+  if (selectedTemplateID.value === undefined) return "h-full";
   return layout.value === "vertical" ? "h-1/3" : "h-1/2";
 });
 
@@ -33,7 +29,7 @@ const bottomHeight = computed(() => {
       <TemplatesList />
     </div>
     <div
-      v-if="selectedTemplate !== undefined && hasResults"
+      v-if="selectedTemplate !== undefined"
       :class="bottomHeight"
       class="flex flex-col gap-1.5 min-h-0"
     >

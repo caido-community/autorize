@@ -83,14 +83,7 @@ export function rerunTemplate(
 }
 
 export function clearQueue(_sdk: BackendSDK): APIResult<void> {
-  const config = configStore.getConfig();
-
   debugLog("clearQueue API called");
-
-  if (!config.enabled) {
-    debugLog("clearQueue rejected: plugin not enabled");
-    return { kind: "Error", error: "Plugin must be enabled to control queue" };
-  }
 
   jobsQueue.clear();
   requestGate.clear();

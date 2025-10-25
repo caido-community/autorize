@@ -10,9 +10,9 @@ import Card from "primevue/card";
     <template #content>
       <div class="flex flex-col justify-center items-center h-full">
         <i
-          class="fas fa-file-circle-xmark text-4xl text-gray-600 mb-3 grayscale invert opacity-35"
+          class="fas fa-chart-line text-4xl text-gray-600 mb-3 grayscale invert opacity-35"
         ></i>
-        <span class="text-gray-400">No request to show</span>
+        <span class="text-gray-400">No results to show</span>
       </div>
     </template>
   </Card>

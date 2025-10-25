@@ -13,9 +13,9 @@ class ConfigStore {
     debug: false,
     mutations: [],
     queue: {
-      maxConcurrentRequests: 3,
-      requestsPerSecond: 10,
-      requestTimeoutSeconds: 30,
+      maxConcurrentRequests: 5,
+      requestsPerSecond: 30,
+      requestTimeoutSeconds: 15,
     },
     ui: {
       showOnlyLengths: true,

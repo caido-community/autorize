@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Card from "primevue/card";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import { TemplatesTable } from "./Table";
 
@@ -10,12 +10,23 @@ import { useTemplatesStore } from "@/stores/templates";
 const store = useTemplatesStore();
 const hasTemplates = computed(() => store.data.length > 0);
 
+const isRescanningAll = ref(false);
+const isStoppingQueue = ref(false);
+
 const handleClearAll = async () => {
   await store.clearAll();
 };
 
 const handleRescanAll = async () => {
+  isRescanningAll.value = true;
   await store.rescanAll();
+  isRescanningAll.value = false;
+};
+
+const handleStopQueue = async () => {
+  isStoppingQueue.value = true;
+  await store.stopQueue();
+  isStoppingQueue.value = false;
 };
 </script>
 
@@ -41,12 +52,26 @@ const handleRescanAll = async () => {
         </div>
         <div class="flex items-center gap-2">
           <Button
+            v-if="store.hasActiveJobs"
+            v-tooltip.left="
+              'Stop processing queue and clear all pending requests'
+            "
+            label="Stop"
+            severity="danger"
+            size="small"
+            icon="fas fa-stop"
+            outlined
+            :loading="isStoppingQueue"
+            @click="handleStopQueue"
+          />
+          <Button
             label="Rescan All"
             severity="info"
             size="small"
             icon="fas fa-redo"
             outlined
-            :disabled="!hasTemplates"
+            :disabled="!hasTemplates || isStoppingQueue"
+            :loading="isRescanningAll"
             @click="handleRescanAll"
           />
           <Button
@@ -55,7 +80,7 @@ const handleRescanAll = async () => {
             size="small"
             icon="fas fa-trash-alt"
             outlined
-            :disabled="!hasTemplates"
+            :disabled="!hasTemplates || isStoppingQueue"
             @click="handleClearAll"
           />
         </div>

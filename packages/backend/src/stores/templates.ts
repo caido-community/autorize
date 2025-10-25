@@ -31,7 +31,7 @@ class TemplatesStore {
     }
     this.saveTimeout = setTimeout(() => {
       this.saveToFile();
-    }, 5000);
+    }, 2000);
   }
 
   private async loadFromFile(): Promise<void> {
