@@ -26,7 +26,7 @@ export type EditorState =
   | { type: "TooLarge" }
   | ({ type: "Success" } & EditorData);
 
-const MAX_RESPONSE_SIZE = 10 * 1024 * 1024;
+const MAX_RESPONSE_SIZE = 6 * 1024 * 1024;
 
 export const useEditor = () => {
   const sdk = useSDK();

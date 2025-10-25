@@ -30,7 +30,11 @@ const selectedTemplate = computed({
   set: (template) => store.select(template),
 });
 
-const onRowClick = (template: Template) => {
+const onRowClick = (event: MouseEvent, template: Template) => {
+  if (event.button !== 0) {
+    return;
+  }
+
   if (selectedTemplate.value?.id === template.id) {
     selectedTemplate.value = undefined;
   } else {
@@ -131,7 +135,7 @@ const onRowContextMenu = (event: MouseEvent, template: Template) => {
                   'hover:bg-surface-700/50': selectedTemplate?.id !== item.id,
                 },
               ]"
-              @mousedown="onRowClick(item)"
+              @mousedown="onRowClick($event, item)"
               @contextmenu="onRowContextMenu($event, item)"
             >
               <td

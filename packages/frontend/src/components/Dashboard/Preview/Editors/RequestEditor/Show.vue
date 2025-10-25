@@ -40,7 +40,7 @@ watch(
   () => editorState.value.request.raw,
   (newContent) => {
     updateEditorContent(newContent);
-  },
+  }
 );
 </script>
 
