@@ -1,28 +1,19 @@
-import { readFile, writeFile } from "fs/promises";
-import path from "path";
-
 import { create } from "mutative";
 import { type JobResult, type Template } from "shared";
 
 import { requireSDK } from "../sdk";
 
-class TemplatesStore {
-  private templates: Template[] = [];
-  private subscribers = new Set<(templates: Template[]) => void>();
+import { ProjectScopedStore } from "./project-store";
+
+class TemplatesStore extends ProjectScopedStore<Template[]> {
   private saveTimeout: Timeout | undefined;
 
-  async initialize(): Promise<void> {
-    await this.loadFromFile();
+  constructor() {
+    super("templates");
   }
 
-  private getFilePath(): string {
-    const sdk = requireSDK();
-    return path.join(sdk.meta.path(), "templates.json");
-  }
-
-  private async saveToFile(): Promise<void> {
-    const filePath = this.getFilePath();
-    await writeFile(filePath, JSON.stringify(this.templates, null, 2));
+  protected getDefaultData(): Template[] {
+    return [];
   }
 
   private debouncedSave(): void {
@@ -31,28 +22,17 @@ class TemplatesStore {
     }
     this.saveTimeout = setTimeout(() => {
       this.saveToFile();
-    }, 2000);
-  }
-
-  private async loadFromFile(): Promise<void> {
-    const filePath = this.getFilePath();
-    try {
-      const data = await readFile(filePath, "utf-8");
-      this.templates = JSON.parse(data);
-      this.notify();
-    } catch {
-      await this.saveToFile();
-    }
+    }, 1000);
   }
 
   getTemplates(): Template[] {
-    return this.templates;
+    return this.data;
   }
 
   addTemplate(template: Template): void {
     const sdk = requireSDK();
 
-    this.templates = create(this.templates, (draft) => {
+    this.data = create(this.data, (draft) => {
       draft.push(template);
     });
 
@@ -64,7 +44,7 @@ class TemplatesStore {
   deleteTemplate(templateId: number): void {
     const sdk = requireSDK();
 
-    this.templates = create(this.templates, (draft) => {
+    this.data = create(this.data, (draft) => {
       return draft.filter((t) => t.id !== templateId);
     });
 
@@ -76,7 +56,7 @@ class TemplatesStore {
   addTemplateResult(templateId: number, result: JobResult): void {
     const sdk = requireSDK();
 
-    this.templates = create(this.templates, (draft) => {
+    this.data = create(this.data, (draft) => {
       const template = draft.find((t) => t.id === templateId);
       if (template) {
         if (result.kind === "Ok") {
@@ -102,7 +82,7 @@ class TemplatesStore {
   clearTemplateResults(templateId: number): void {
     const sdk = requireSDK();
 
-    this.templates = create(this.templates, (draft) => {
+    this.data = create(this.data, (draft) => {
       const template = draft.find((t) => t.id === templateId);
       if (template) {
         template.results = [];
@@ -112,17 +92,6 @@ class TemplatesStore {
 
     this.notify();
     this.debouncedSave();
-  }
-
-  subscribe(subscriber: (templates: Template[]) => void): () => void {
-    this.subscribers.add(subscriber);
-    return () => this.subscribers.delete(subscriber);
-  }
-
-  private notify(): void {
-    for (const subscriber of this.subscribers) {
-      subscriber(this.templates);
-    }
   }
 }
 

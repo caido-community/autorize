@@ -11,6 +11,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const selectedID = ref<number | undefined>(undefined);
   const lastSelectedResultType = ref<MutationType>("baseline");
   const hasActiveJobs = ref(false);
+  const projectID = ref<string | undefined>(undefined);
 
   const initialize = async () => {
     await fetch();
@@ -33,6 +34,12 @@ export const useTemplatesStore = defineStore("templates", () => {
 
     sdk.backend.onEvent("queue:status-changed", (hasJobs) => {
       hasActiveJobs.value = hasJobs;
+    });
+
+    sdk.backend.onEvent("project:changed", async (id) => {
+      projectID.value = id;
+      clearAllClientSide();
+      await fetch();
     });
   };
 
@@ -217,6 +224,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     selectedRequestID,
     lastSelectedResultType,
     hasActiveJobs,
+    projectID,
     fetch,
     add,
     update,

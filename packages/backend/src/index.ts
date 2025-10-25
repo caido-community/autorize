@@ -55,8 +55,13 @@ export function init(sdk: BackendSDK) {
 
   initPassiveListener(sdk);
 
-  sdk.events.onProjectChange((sdk, project) => {
+  sdk.events.onProjectChange(async (sdk, project) => {
     const projectID = project?.getId();
+
+    clearQueue(sdk);
+    await configStore.switchProject(projectID);
+    await templatesStore.switchProject(projectID);
+
     sdk.api.send("project:changed", projectID);
   });
 }

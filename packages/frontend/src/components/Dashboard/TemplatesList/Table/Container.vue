@@ -113,6 +113,7 @@ const onRowContextMenu = (event: MouseEvent, template: Template) => {
       </table>
     </div>
     <DynamicScroller
+      :key="store.projectID"
       class="flex-1 overflow-auto bg-surface-800"
       :items="store.data"
       :min-item-size="30"

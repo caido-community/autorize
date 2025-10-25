@@ -11,6 +11,10 @@ export const useConfigStore = defineStore("config", () => {
 
   const initialize = async () => {
     await fetch();
+
+    sdk.backend.onEvent("project:changed", async () => {
+      await fetch();
+    });
   };
 
   const fetch = async () => {
