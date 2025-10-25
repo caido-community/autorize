@@ -1,17 +1,19 @@
 // Type definitions for vue-virtual-scroller
 // Project: https://github.com/Akryum/vue-virtual-scroller/
-declare module 'vue-virtual-scroller' {
-  import Vue, { ComponentOptions, PluginObject } from 'vue';
+declare module "vue-virtual-scroller" {
+  import Vue, { ComponentOptions, type PluginObject } from "vue";
 
   interface PluginOptions {
     installComponents?: boolean;
     componentsPrefix?: string;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
   declare const plugin: PluginObject<PluginOptions> & { version: string };
 
   export class RecycleScroller extends Vue {
     sizes: Array<{ accumulator: number }>;
+    // eslint-disable-next-line @typescript-eslint/no-restricted-types
     itemSize: number | null;
     totalSize: number;
     ready: boolean;
@@ -21,8 +23,9 @@ declare module 'vue-virtual-scroller' {
     buffer: number;
     typeField: string;
     sizeField: string;
+    // eslint-disable-next-line @typescript-eslint/no-restricted-types
     minItemSize: number | string | null;
-    direction: 'horizontal' | 'vertical';
+    direction: "horizontal" | "vertical";
     pool: Array<{
       item: unknown;
       position: number;
@@ -69,9 +72,7 @@ declare module 'vue-virtual-scroller' {
     scrollToBottom(): void;
   }
 
-  export class DynamicScrollerItem extends Vue {
-
-  }
+  export class DynamicScrollerItem extends Vue {}
 
   export default plugin;
 }

@@ -143,9 +143,12 @@ export const useTable = () => {
     if (state === undefined) return undefined;
 
     const labels = configStore.data?.ui.accessStateLabels;
-    if (state === (labels?.unauthorized ?? "DENY")) return "rgba(185, 28, 28, 0.6)";
-    if (state === (labels?.authorized ?? "ALLOW")) return "rgba(15, 110, 50, 0.6)";
-    if (state === (labels?.uncertain ?? "UNCERTAIN")) return "rgba(217, 119, 6, 0.6)";
+    if (state === (labels?.unauthorized ?? "DENY"))
+      return "rgba(185, 28, 28, 0.6)";
+    if (state === (labels?.authorized ?? "ALLOW"))
+      return "rgba(15, 110, 50, 0.6)";
+    if (state === (labels?.uncertain ?? "UNCERTAIN"))
+      return "rgba(217, 119, 6, 0.6)";
     return undefined;
   };
 
