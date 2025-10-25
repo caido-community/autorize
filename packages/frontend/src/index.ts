@@ -4,6 +4,7 @@ import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
 
+import { usePageLifecycle } from "./plugins/page-lifecycle";
 import { SDKPlugin } from "./plugins/sdk";
 import "./styles/index.css";
 import type { FrontendSDK } from "./types";
@@ -35,12 +36,15 @@ export const init = (sdk: FrontendSDK) => {
 
   app.mount(root);
 
+  const lifecycle = usePageLifecycle();
+
   let sidebarCount = 0;
   sdk.navigation.addPage("/autorize", {
     body: root,
     onEnter: () => {
       sidebarCount = 0;
       sidebarItem.setCount(sidebarCount);
+      lifecycle.triggerPageEnter();
     },
   });
 

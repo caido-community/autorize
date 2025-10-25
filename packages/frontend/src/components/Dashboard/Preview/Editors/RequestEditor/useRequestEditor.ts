@@ -1,9 +1,10 @@
 import { type EditorView } from "@codemirror/view";
 import { useMagicKeys, whenever } from "@vueuse/core";
-import { type Ref, ref } from "vue";
+import { type Ref, ref, watch } from "vue";
 
 import { type EditorState } from "../useEditor";
 
+import { usePageLifecycle } from "@/plugins/page-lifecycle";
 import { type FrontendSDK } from "@/types";
 
 export const useRequestEditor = (
@@ -53,6 +54,20 @@ export const useRequestEditor = (
     editorView.value = editor.getEditorView();
     updateEditorContent(initialContent);
   };
+
+  // for some reason once we switch between pages, the editor breaks and we need to reinitialize it, this is a workaround to fix it
+  const lifecycle = usePageLifecycle();
+  watch(lifecycle.getPageEnterCounter(), () => {
+    editorView.value = undefined;
+
+    setTimeout(() => {
+      Array.from(root.value?.children ?? []).forEach((child) => {
+        child.remove();
+      });
+
+      initializeEditor(editorState.value.request.raw);
+    }, 0);
+  });
 
   if (Meta_r !== undefined) {
     whenever(Meta_r, () => {

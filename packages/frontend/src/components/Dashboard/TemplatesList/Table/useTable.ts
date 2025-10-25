@@ -1,71 +1,10 @@
 import type { JobResult, MutationType, Template } from "shared";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
-// This is a temporary solution to track location changes until we have sdk support for navigation events
-type LocationChange = {
-  oldHash: string;
-  newHash: string;
-};
-
-type Callback = (change: LocationChange) => void;
-
-const subscribers = new Set<Callback>();
-let lastHash = window.location.hash;
-
-function notify(): void {
-  const newHash = window.location.hash;
-  if (newHash === lastHash) return;
-  for (const cb of subscribers) {
-    cb({ oldHash: lastHash, newHash });
-  }
-  lastHash = newHash;
-}
-
-const patchHistoryMethod = (method: "pushState" | "replaceState"): void => {
-  const original = history[method];
-  history[method] = function (...args: Parameters<typeof original>) {
-    const result = original.apply(this, args);
-    window.dispatchEvent(new Event("locationchange"));
-    return result;
-  };
-};
-
-function onLocationChange(cb: Callback): () => void {
-  subscribers.add(cb);
-  return () => {
-    subscribers.delete(cb);
-  };
-}
-
-let isPatched = false;
-
-function ensurePatched(): void {
-  if (isPatched) return;
-  patchHistoryMethod("pushState");
-  patchHistoryMethod("replaceState");
-  window.addEventListener("locationchange", notify);
-  window.addEventListener("hashchange", notify);
-  isPatched = true;
-}
-
 export const useTable = () => {
   const configStore = useConfigStore();
-
-  const isOnAutorizePage = ref(window.location.hash === "#/autorize");
-
-  onMounted(() => {
-    ensurePatched();
-
-    const unsubscribe = onLocationChange(({ newHash }) => {
-      isOnAutorizePage.value = newHash === "#/autorize";
-    });
-
-    onUnmounted(() => {
-      unsubscribe();
-    });
-  });
 
   const parseURL = (url: string) => {
     const parsed = new URL(url);
@@ -249,7 +188,6 @@ export const useTable = () => {
   });
 
   return {
-    isOnAutorizePage,
     parseURL,
     getBaselineCode,
     getBaselineRespLen,

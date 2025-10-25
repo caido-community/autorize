@@ -15,7 +15,6 @@ const store = useTemplatesStore();
 const configStore = useConfigStore();
 
 const {
-  isOnAutorizePage,
   parseURL,
   getBaselineCode,
   getBaselineRespLen,
@@ -46,7 +45,7 @@ const onRowContextMenu = (event: MouseEvent, template: Template) => {
 </script>
 
 <template>
-  <div v-if="isOnAutorizePage" class="flex flex-col grow min-h-0 min-w-[800px]">
+  <div class="flex flex-col grow min-h-0 min-w-[800px]">
     <div class="pr-[12px]">
       <table class="w-full border-spacing-0 border-separate table-fixed">
         <thead class="bg-surface-900">

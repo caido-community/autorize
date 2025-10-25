@@ -4,6 +4,7 @@ import { onMounted, ref, toRefs, watch } from "vue";
 
 import { type EditorState } from "../useEditor";
 
+import { usePageLifecycle } from "@/plugins/page-lifecycle";
 import { useSDK } from "@/plugins/sdk";
 
 const props = defineProps<{
@@ -28,12 +29,19 @@ const updateEditorContent = (content: string) => {
   }
 };
 
-onMounted(() => {
+const initializeEditor = () => {
   const editor = sdk.ui.httpResponseEditor();
-  root.value.appendChild(editor.getElement());
+  if (root.value === undefined) {
+    return;
+  }
 
+  root.value.appendChild(editor.getElement());
   editorView = editor.getEditorView();
   updateEditorContent(props.editorState.response.raw);
+};
+
+onMounted(() => {
+  initializeEditor();
 });
 
 watch(
@@ -42,6 +50,22 @@ watch(
     updateEditorContent(newContent);
   },
 );
+
+// for some reason once we switch between pages, the editor breaks and we need to reinitialize it, this is a workaround to fix it
+const lifecycle = usePageLifecycle();
+watch(lifecycle.getPageEnterCounter(), () => {
+  editorView = undefined;
+
+  setTimeout(() => {
+    Array.from(root.value?.children ?? []).forEach((child) => {
+      if (child instanceof HTMLElement) {
+        child.remove();
+      }
+    });
+
+    initializeEditor();
+  }, 0);
+});
 </script>
 
 <template>
