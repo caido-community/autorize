@@ -209,6 +209,10 @@ const columnWidths = {
                 {{ parseURL(item.request.url).host }}
               </td>
               <td
+                v-tooltip.top="{
+                  value: parseURL(item.request.url).pathWithQuery,
+                  showDelay: 500,
+                }"
                 class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
                 :style="{ width: columnWidths.path }"
               >
