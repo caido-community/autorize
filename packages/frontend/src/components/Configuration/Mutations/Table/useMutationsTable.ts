@@ -48,6 +48,17 @@ export const useMutationsTable = () => {
     configStore.update({ mutations: [...mutations.value] });
   };
 
+  const handleRegexUpdate = (index: number, value: boolean) => {
+    const mutation = mutations.value[index];
+    if (mutation === undefined) return;
+
+    if (mutation.kind === "RawMatchAndReplace") {
+      mutation.regex = value;
+    }
+
+    configStore.update({ mutations: [...mutations.value] });
+  };
+
   const handleRemove = (index: number) => {
     const updated = [...mutations.value];
     updated.splice(index, 1);
@@ -76,6 +87,7 @@ export const useMutationsTable = () => {
     isEditing,
     handleFieldUpdate,
     handleValueUpdate,
+    handleRegexUpdate,
     handleRemove,
     getMutationField,
     getMutationValue,

@@ -194,7 +194,11 @@ function applyMutation(
     case "RawMatchAndReplace": {
       const resolvedMatch = resolveEnvVariables(mutation.match);
       const resolvedValue = resolveEnvVariables(mutation.value);
-      const newRaw = forge.build().replaceAll(resolvedMatch, resolvedValue);
+      const raw = forge.build();
+      const newRaw =
+        mutation.regex === true
+          ? raw.replace(new RegExp(resolvedMatch, "g"), resolvedValue)
+          : raw.replaceAll(resolvedMatch, resolvedValue);
       return HttpForge.create(newRaw).removeHeader("Content-Length");
     }
   }

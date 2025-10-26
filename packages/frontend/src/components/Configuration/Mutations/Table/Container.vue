@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
@@ -21,6 +22,7 @@ const {
   isEditing,
   handleFieldUpdate,
   handleValueUpdate,
+  handleRegexUpdate,
   handleRemove,
   getMutationField,
   getMutationValue,
@@ -58,7 +60,7 @@ const filteredMutations = computed(() => {
         {{ getMutationTypeLabel(data.kind) }}
       </template>
     </Column>
-    <Column style="width: 30%">
+    <Column style="width: 28%">
       <template #header>
         <span
           v-tooltip.top="
@@ -85,7 +87,7 @@ const filteredMutations = computed(() => {
         </div>
       </template>
     </Column>
-    <Column style="width: 45%">
+    <Column style="width: 40%">
       <template #header>
         <span
           v-tooltip.top="'Supports {{ VAR_NAME }} for environment variables'"
@@ -108,6 +110,20 @@ const filteredMutations = computed(() => {
         >
           <HighlightedValue :value="getMutationValue(data)" />
         </div>
+      </template>
+    </Column>
+    <Column style="width: 7%">
+      <template #header>
+        <span v-tooltip.top="'Use regex for pattern matching'"> Regex </span>
+      </template>
+      <template #body="{ data, index }">
+        <Checkbox
+          v-if="data.kind === 'RawMatchAndReplace'"
+          :model-value="data.regex"
+          :disabled="isPluginEnabled"
+          binary
+          @update:model-value="handleRegexUpdate(index, $event)"
+        />
       </template>
     </Column>
     <Column header="Actions" style="width: 10%">

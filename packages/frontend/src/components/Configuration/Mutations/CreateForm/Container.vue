@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import Button from "primevue/button";
+import Checkbox from "primevue/checkbox";
 import InputText from "primevue/inputtext";
 import Select from "primevue/select";
 import type { MutationType } from "shared";
@@ -45,54 +46,57 @@ const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
     <div class="flex justify-between items-start">
       <h4 class="text-sm font-semibold">Add Mutation</h4>
     </div>
-    <div class="grid grid-cols-12 gap-3">
-      <div class="col-span-3">
-        <Select
-          v-model="newMutation.kind"
-          :options="mutationTypes"
-          option-label="label"
-          option-value="value"
-          class="w-full"
-          placeholder="Type"
+    <div class="flex gap-3 items-center">
+      <Select
+        v-model="newMutation.kind"
+        :options="mutationTypes"
+        option-label="label"
+        option-value="value"
+        class="w-48"
+        placeholder="Type"
+        :disabled="isPluginEnabled"
+      >
+        <template #option="{ option }">
+          <span v-tooltip.top="option.tooltip">{{ option.label }}</span>
+        </template>
+      </Select>
+      <InputText
+        v-if="newMutation.kind === 'RawMatchAndReplace'"
+        v-model="newMutation.match"
+        placeholder="Match pattern"
+        class="flex-1"
+        :disabled="isPluginEnabled"
+      />
+      <InputText
+        v-else
+        v-model="newMutation.header"
+        placeholder="Header name"
+        class="flex-1"
+        :disabled="isPluginEnabled"
+      />
+      <InputText
+        v-model="newMutation.value"
+        placeholder="Value"
+        :disabled="isPluginEnabled || newMutation.kind === 'HeaderRemove'"
+        class="flex-1"
+      />
+      <div
+        v-if="newMutation.kind === 'RawMatchAndReplace'"
+        class="flex items-center gap-2"
+      >
+        <Checkbox
+          v-model="newMutation.regex"
+          v-tooltip.top="'Use regex for matching'"
           :disabled="isPluginEnabled"
-        >
-          <template #option="{ option }">
-            <span v-tooltip.top="option.tooltip">{{ option.label }}</span>
-          </template>
-        </Select>
-      </div>
-      <div class="col-span-4">
-        <InputText
-          v-if="newMutation.kind === 'RawMatchAndReplace'"
-          v-model="newMutation.match"
-          placeholder="Match pattern"
-          class="w-full"
-          :disabled="isPluginEnabled"
+          binary
         />
-        <InputText
-          v-else
-          v-model="newMutation.header"
-          placeholder="Header name"
-          class="w-full"
-          :disabled="isPluginEnabled"
-        />
+        <label class="text-sm">Regex</label>
       </div>
-      <div class="col-span-4">
-        <InputText
-          v-model="newMutation.value"
-          placeholder="Value"
-          :disabled="isPluginEnabled || newMutation.kind === 'HeaderRemove'"
-          class="w-full"
-        />
-      </div>
-      <div class="col-span-1">
-        <Button
-          icon="fas fa-plus"
-          :disabled="isPluginEnabled || !canAddMutation"
-          class="w-full"
-          @click="handleAdd"
-        />
-      </div>
+      <Button
+        icon="fas fa-plus"
+        :disabled="isPluginEnabled || !canAddMutation"
+        @click="handleAdd"
+      />
     </div>
   </div>
 </template>

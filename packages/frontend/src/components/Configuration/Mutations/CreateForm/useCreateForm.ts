@@ -9,6 +9,7 @@ type MutationInput = {
   header: string;
   match: string;
   value: string;
+  regex: boolean;
 };
 
 export const useCreateForm = (selectedType: Ref<MutationType>) => {
@@ -20,6 +21,7 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
     header: "",
     match: "",
     value: "",
+    regex: false,
   });
 
   watch(selectedType, (newType) => {
@@ -58,6 +60,7 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
         kind: "RawMatchAndReplace",
         match: mutation.match,
         value: mutation.value,
+        regex: mutation.regex,
       });
     } else {
       mutations.push({
@@ -76,6 +79,7 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
       header: "",
       match: "",
       value: "",
+      regex: false,
     };
   };
 
