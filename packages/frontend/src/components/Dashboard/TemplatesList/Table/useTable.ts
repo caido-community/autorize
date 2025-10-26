@@ -1,10 +1,15 @@
 import type { JobResult, MutationType, Template } from "shared";
-import { computed } from "vue";
+import { computed, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
+type SortDirection = "asc" | "desc" | undefined;
+
 export const useTable = () => {
   const configStore = useConfigStore();
+
+  const sortColumn = ref<string | undefined>(undefined);
+  const sortDirection = ref<SortDirection>(undefined);
 
   const parseURL = (url: string) => {
     const parsed = new URL(url);
@@ -187,6 +192,80 @@ export const useTable = () => {
     return columns;
   });
 
+  const toggleSort = (column: string) => {
+    if (sortColumn.value === column) {
+      if (sortDirection.value === "asc") {
+        sortDirection.value = "desc";
+      } else if (sortDirection.value === "desc") {
+        sortColumn.value = undefined;
+        sortDirection.value = undefined;
+      } else {
+        sortDirection.value = "asc";
+      }
+    } else {
+      sortColumn.value = column;
+      sortDirection.value = "asc";
+    }
+  };
+
+  const sortData = (data: Template[]) => {
+    if (sortColumn.value === undefined || sortDirection.value === undefined) {
+      return data;
+    }
+
+    const sorted = [...data];
+    const direction = sortDirection.value === "asc" ? 1 : -1;
+
+    sorted.sort((a, b) => {
+      let aVal: string | number | undefined;
+      let bVal: string | number | undefined;
+
+      if (sortColumn.value === "id") {
+        aVal = a.id;
+        bVal = b.id;
+      } else if (sortColumn.value === "method") {
+        aVal = a.request.method;
+        bVal = b.request.method;
+      } else if (sortColumn.value === "host") {
+        aVal = parseURL(a.request.url).host;
+        bVal = parseURL(b.request.url).host;
+      } else if (sortColumn.value === "path") {
+        aVal = parseURL(a.request.url).pathWithQuery;
+        bVal = parseURL(b.request.url).pathWithQuery;
+      } else if (sortColumn.value === "baselineCode") {
+        aVal = getBaselineCode(a);
+        bVal = getBaselineCode(b);
+      } else if (sortColumn.value === "baselineLength") {
+        aVal = getBaselineRespLen(a);
+        bVal = getBaselineRespLen(b);
+      } else if (sortColumn.value === "noAuthCode") {
+        aVal = getNoAuthCode(a);
+        bVal = getNoAuthCode(b);
+      } else if (sortColumn.value === "noAuthRespLen") {
+        aVal = getNoAuthRespLen(a);
+        bVal = getNoAuthRespLen(b);
+      } else if (sortColumn.value === "mutatedCode") {
+        aVal = getMutatedCode(a);
+        bVal = getMutatedCode(b);
+      } else if (sortColumn.value === "mutatedRespLen") {
+        aVal = getMutatedRespLen(a);
+        bVal = getMutatedRespLen(b);
+      }
+
+      if (aVal === undefined && bVal === undefined) return 0;
+      if (aVal === undefined) return 1;
+      if (bVal === undefined) return -1;
+
+      if (typeof aVal === "number" && typeof bVal === "number") {
+        return (aVal - bVal) * direction;
+      }
+
+      return aVal.toString().localeCompare(bVal.toString()) * direction;
+    });
+
+    return sorted;
+  };
+
   return {
     parseURL,
     getBaselineCode,
@@ -194,5 +273,9 @@ export const useTable = () => {
     getStatusCodeColor,
     codeAndLengthColumns,
     accessColumns,
+    sortColumn,
+    sortDirection,
+    toggleSort,
+    sortData,
   };
 };

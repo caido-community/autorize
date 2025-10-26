@@ -25,6 +25,7 @@ export const MutationSchema = z.discriminatedUnion("kind", [
     kind: z.literal("RawMatchAndReplace"),
     match: z.string().min(1),
     value: z.string(),
+    regex: z.boolean(),
   }),
 ]);
 
