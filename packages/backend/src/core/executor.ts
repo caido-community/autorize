@@ -191,6 +191,18 @@ function applyMutation(
         mutation.header,
         resolveEnvVariables(mutation.value),
       );
+    case "CookieAdd":
+      return forge.addCookie(
+        mutation.cookie,
+        resolveEnvVariables(mutation.value),
+      );
+    case "CookieRemove":
+      return forge.removeCookie(mutation.cookie);
+    case "CookieReplace":
+      return forge.setCookie(
+        mutation.cookie,
+        resolveEnvVariables(mutation.value),
+      );
     case "RawMatchAndReplace": {
       const resolvedMatch = resolveEnvVariables(mutation.match);
       const resolvedValue = resolveEnvVariables(mutation.value);

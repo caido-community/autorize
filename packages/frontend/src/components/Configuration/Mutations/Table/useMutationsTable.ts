@@ -30,6 +30,12 @@ export const useMutationsTable = () => {
 
     if (mutation.kind === "RawMatchAndReplace") {
       mutation.match = value;
+    } else if (
+      mutation.kind === "CookieAdd" ||
+      mutation.kind === "CookieRemove" ||
+      mutation.kind === "CookieReplace"
+    ) {
+      mutation.cookie = value;
     } else {
       mutation.header = value;
     }
@@ -41,7 +47,7 @@ export const useMutationsTable = () => {
     const mutation = mutations.value[index];
     if (mutation === undefined) return;
 
-    if (mutation.kind !== "HeaderRemove") {
+    if (mutation.kind !== "HeaderRemove" && mutation.kind !== "CookieRemove") {
       mutation.value = value;
     }
 
@@ -69,11 +75,18 @@ export const useMutationsTable = () => {
     if (mutation.kind === "RawMatchAndReplace") {
       return mutation.match;
     }
+    if (
+      mutation.kind === "CookieAdd" ||
+      mutation.kind === "CookieRemove" ||
+      mutation.kind === "CookieReplace"
+    ) {
+      return mutation.cookie;
+    }
     return mutation.header;
   };
 
   const getMutationValue = (mutation: Mutation): string => {
-    if (mutation.kind === "HeaderRemove") {
+    if (mutation.kind === "HeaderRemove" || mutation.kind === "CookieRemove") {
       return "-";
     }
     return mutation.value;

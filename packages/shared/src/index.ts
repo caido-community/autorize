@@ -22,6 +22,23 @@ export const MutationSchema = z.discriminatedUnion("kind", [
   }),
   z.object({
     type: MutationTypeSchema,
+    kind: z.literal("CookieAdd"),
+    cookie: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    type: MutationTypeSchema,
+    kind: z.literal("CookieRemove"),
+    cookie: z.string().min(1),
+  }),
+  z.object({
+    type: MutationTypeSchema,
+    kind: z.literal("CookieReplace"),
+    cookie: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    type: MutationTypeSchema,
     kind: z.literal("RawMatchAndReplace"),
     match: z.string().min(1),
     value: z.string(),

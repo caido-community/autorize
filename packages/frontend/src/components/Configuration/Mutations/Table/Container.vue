@@ -7,6 +7,8 @@ import InputText from "primevue/inputtext";
 import type { MutationType } from "shared";
 import { computed } from "vue";
 
+import { MUTATION_TYPES } from "../constants";
+
 import HighlightedValue from "./HighlightedValue.vue";
 import { useMutationsTable } from "./useMutationsTable";
 
@@ -28,15 +30,8 @@ const {
   getMutationValue,
 } = useMutationsTable();
 
-const mutationTypes = [
-  { label: "Add Header", value: "HeaderAdd" },
-  { label: "Remove Header", value: "HeaderRemove" },
-  { label: "Replace Header", value: "HeaderReplace" },
-  { label: "Match and Replace", value: "RawMatchAndReplace" },
-] as const;
-
 const getMutationTypeLabel = (kind: string) => {
-  const type = mutationTypes.find((t) => t.value === kind);
+  const type = MUTATION_TYPES.find((t) => t.value === kind);
   return type?.label ?? kind;
 };
 
@@ -64,7 +59,7 @@ const filteredMutations = computed(() => {
       <template #header>
         <span
           v-tooltip.top="
-            'Header name or match pattern (supports {{ VAR_NAME }} for Match and Replace)'
+            'Header/cookie name or match pattern (supports {{ VAR_NAME }} for Match and Replace)'
           "
         >
           Field
@@ -97,7 +92,11 @@ const filteredMutations = computed(() => {
       </template>
       <template #body="{ data, index }">
         <InputText
-          v-if="isEditing(index) && data.kind !== 'HeaderRemove'"
+          v-if="
+            isEditing(index) &&
+            data.kind !== 'HeaderRemove' &&
+            data.kind !== 'CookieRemove'
+          "
           :model-value="getMutationValue(data)"
           autofocus
           fluid

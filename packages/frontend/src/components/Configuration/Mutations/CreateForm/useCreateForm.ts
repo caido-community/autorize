@@ -7,6 +7,7 @@ type MutationInput = {
   type: MutationType;
   kind: Mutation["kind"];
   header: string;
+  cookie: string;
   match: string;
   value: string;
   regex: boolean;
@@ -19,6 +20,7 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
     type: selectedType.value,
     kind: "HeaderReplace",
     header: "",
+    cookie: "",
     match: "",
     value: "",
     regex: false,
@@ -39,6 +41,14 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
       return mutation.header !== "";
     }
 
+    if (mutation.kind === "CookieRemove") {
+      return mutation.cookie !== "";
+    }
+
+    if (mutation.kind === "CookieAdd" || mutation.kind === "CookieReplace") {
+      return mutation.cookie !== "" && mutation.value !== "";
+    }
+
     return mutation.header !== "" && mutation.value !== "";
   });
 
@@ -54,6 +64,12 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
         kind: "HeaderRemove",
         header: mutation.header,
       });
+    } else if (mutation.kind === "CookieRemove") {
+      mutations.push({
+        type: mutation.type,
+        kind: "CookieRemove",
+        cookie: mutation.cookie,
+      });
     } else if (mutation.kind === "RawMatchAndReplace") {
       mutations.push({
         type: mutation.type,
@@ -61,6 +77,16 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
         match: mutation.match,
         value: mutation.value,
         regex: mutation.regex,
+      });
+    } else if (
+      mutation.kind === "CookieAdd" ||
+      mutation.kind === "CookieReplace"
+    ) {
+      mutations.push({
+        type: mutation.type,
+        kind: mutation.kind,
+        cookie: mutation.cookie,
+        value: mutation.value,
       });
     } else {
       mutations.push({
@@ -77,6 +103,7 @@ export const useCreateForm = (selectedType: Ref<MutationType>) => {
       type: selectedType.value,
       kind: "HeaderAdd",
       header: "",
+      cookie: "",
       match: "",
       value: "",
       regex: false,

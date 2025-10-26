@@ -6,35 +6,13 @@ import Select from "primevue/select";
 import type { MutationType } from "shared";
 import { toRef } from "vue";
 
+import { MUTATION_TYPES } from "../constants";
+
 import { useCreateForm } from "./useCreateForm";
 
 const props = defineProps<{
   selectedType: MutationType;
 }>();
-
-const mutationTypes = [
-  {
-    label: "Replace Header",
-    value: "HeaderReplace",
-    tooltip:
-      "Replace a header in the request. If header does not exist, it will be added.",
-  },
-  {
-    label: "Add Header",
-    value: "HeaderAdd",
-    tooltip: "Add a header to the request",
-  },
-  {
-    label: "Remove Header",
-    value: "HeaderRemove",
-    tooltip: "Remove a header from the request",
-  },
-  {
-    label: "Match and Replace",
-    value: "RawMatchAndReplace",
-    tooltip: "Match a pattern in the request and replace it with a value",
-  },
-] as const;
 
 const selectedType = toRef(props, "selectedType");
 const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
@@ -43,13 +21,11 @@ const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
 
 <template>
   <div class="border border-surface-700 rounded p-4 space-y-3">
-    <div class="flex justify-between items-start">
-      <h4 class="text-sm font-semibold">Add Mutation</h4>
-    </div>
+    <h4 class="text-sm font-semibold">Add Mutation</h4>
     <div class="flex gap-3 items-center">
       <Select
         v-model="newMutation.kind"
-        :options="mutationTypes"
+        :options="MUTATION_TYPES"
         option-label="label"
         option-value="value"
         class="w-48"
@@ -68,6 +44,17 @@ const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
         :disabled="isPluginEnabled"
       />
       <InputText
+        v-else-if="
+          newMutation.kind === 'CookieAdd' ||
+          newMutation.kind === 'CookieRemove' ||
+          newMutation.kind === 'CookieReplace'
+        "
+        v-model="newMutation.cookie"
+        placeholder="Cookie name"
+        class="flex-1"
+        :disabled="isPluginEnabled"
+      />
+      <InputText
         v-else
         v-model="newMutation.header"
         placeholder="Header name"
@@ -77,7 +64,11 @@ const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
       <InputText
         v-model="newMutation.value"
         placeholder="Value"
-        :disabled="isPluginEnabled || newMutation.kind === 'HeaderRemove'"
+        :disabled="
+          isPluginEnabled ||
+          newMutation.kind === 'HeaderRemove' ||
+          newMutation.kind === 'CookieRemove'
+        "
         class="flex-1"
       />
       <div
