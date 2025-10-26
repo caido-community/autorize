@@ -4,7 +4,7 @@ import { onMounted, ref, toRefs, watch } from "vue";
 
 import { type EditorState } from "../useEditor";
 
-import { usePageLifecycle } from "@/plugins/page-lifecycle";
+import { usePageLifecycle } from "@/plugins/lifecycle";
 import { useSDK } from "@/plugins/sdk";
 
 const props = defineProps<{

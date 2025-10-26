@@ -12,6 +12,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const lastSelectedResultType = ref<MutationType>("baseline");
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
+  const activeTemplateIds = ref<number[]>([]);
 
   const initialize = async () => {
     await fetch();
@@ -40,6 +41,20 @@ export const useTemplatesStore = defineStore("templates", () => {
       projectID.value = id;
       clearAllClientSide();
       await fetch();
+    });
+
+    sdk.backend.onEvent("cursor:mark", (templateId, active) => {
+      if (active) {
+        activeTemplateIds.value.push(templateId);
+      } else {
+        activeTemplateIds.value = activeTemplateIds.value.filter(
+          (id) => id !== templateId,
+        );
+      }
+    });
+
+    sdk.backend.onEvent("cursor:clear", () => {
+      activeTemplateIds.value = [];
     });
   };
 
@@ -225,6 +240,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     lastSelectedResultType,
     hasActiveJobs,
     projectID,
+    activeTemplateIds,
     fetch,
     add,
     update,

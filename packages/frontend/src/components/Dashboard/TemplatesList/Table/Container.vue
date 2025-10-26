@@ -59,6 +59,10 @@ const getSortIcon = (columnId: string) => {
   return "fas fa-sort-down";
 };
 
+const isTemplateScanning = (templateId: number) => {
+  return store.activeTemplateIds.includes(templateId);
+};
+
 const columnWidths = {
   id: "3%",
   method: "5%",
@@ -184,6 +188,7 @@ const columnWidths = {
                   'bg-surface-900':
                     index % 2 === 1 && selectedTemplate?.id !== item.id,
                   'hover:bg-surface-700/50': selectedTemplate?.id !== item.id,
+                  'scanning-row': isTemplateScanning(item.id),
                 },
               ]"
               @mousedown="onRowClick($event, item)"
@@ -266,3 +271,25 @@ const columnWidths = {
   </div>
   <RowContextMenu ref="contextMenu" />
 </template>
+
+<style>
+.scanning-row {
+  background: linear-gradient(
+    90deg,
+    rgba(from var(--c-bg-secondary) r g b / 0.2) 0%,
+    rgba(from var(--c-bg-secondary) r g b / 0.05) 100%
+  );
+  border-left: 3px solid #22c55e;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+</style>

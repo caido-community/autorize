@@ -4,7 +4,7 @@ import PrimeVue from "primevue/config";
 import Tooltip from "primevue/tooltip";
 import { createApp } from "vue";
 
-import { usePageLifecycle } from "./plugins/page-lifecycle";
+import { usePageLifecycle } from "./plugins/lifecycle";
 import { SDKPlugin } from "./plugins/sdk";
 import "./styles/index.css";
 import type { FrontendSDK } from "./types";

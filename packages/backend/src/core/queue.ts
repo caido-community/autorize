@@ -62,7 +62,9 @@ class JobsQueue {
     const templates = templatesStore.getTemplates();
 
     debugLog(
-      `addRequest called for ${request.getMethod()} ${request.getUrl()}, force=${options.force}`,
+      `addRequest called for ${request.getMethod()} ${request.getUrl()}, force=${
+        options.force
+      }`,
     );
 
     if (!options.force && !config.enabled) {
@@ -158,7 +160,9 @@ class JobsQueue {
     debugLog(
       `Clearing job queue, current size: ${this.queue.size}, pending: ${this.queue.pending}`,
     );
+    const sdk = requireSDK();
     this.queue.clear();
+    sdk.api.send("cursor:clear");
     debugLog(`Job queue cleared, new size: ${this.queue.size}`);
     this.emitStatusChange();
   }
@@ -175,16 +179,24 @@ class JobsQueue {
       return;
     }
 
-    for await (const result of executeJob(job)) {
-      debugLog(
-        `Job ${job.id} result:`,
-        result.kind === "Ok"
-          ? `${result.type} request`
-          : `Error: ${result.error}`,
-      );
-      templatesStore.addTemplateResult(job.templateId, result);
+    const sdk = requireSDK();
+
+    try {
+      sdk.api.send("cursor:mark", job.templateId, true);
+
+      for await (const result of executeJob(job)) {
+        debugLog(
+          `Job ${job.id} result:`,
+          result.kind === "Ok"
+            ? `${result.type} request`
+            : `Error: ${result.error}`,
+        );
+        templatesStore.addTemplateResult(job.templateId, result);
+      }
+      debugLog(`Worker finished for job ${job.id}`);
+    } finally {
+      sdk.api.send("cursor:mark", job.templateId, false);
     }
-    debugLog(`Worker finished for job ${job.id}`);
   }
 
   private getNextId() {

@@ -4,7 +4,7 @@ import { type Ref, ref, watch } from "vue";
 
 import { type EditorState } from "../useEditor";
 
-import { usePageLifecycle } from "@/plugins/page-lifecycle";
+import { usePageLifecycle } from "@/plugins/lifecycle";
 import { type FrontendSDK } from "@/types";
 
 export const useRequestEditor = (
