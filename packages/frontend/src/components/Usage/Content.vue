@@ -18,6 +18,68 @@
       </p>
     </section>
 
+    <section id="quick-start">
+      <h2 class="text-2xl font-semibold mb-4">Quick Start</h2>
+      <p class="text-surface-300 leading-relaxed mb-6">
+        Get up and running with Autorize in just a few steps:
+      </p>
+
+      <div class="space-y-4">
+        <div class="border border-surface-700 rounded p-4">
+          <h3 class="text-lg font-semibold mb-3">1. Configure a Mutation</h3>
+          <p class="text-surface-300 leading-relaxed mb-3">
+            Go to the Configuration page and set up at least one mutation for
+            the "Mutated" request type. This tells Autorize how to test with
+            different user credentials.
+          </p>
+          <p class="text-surface-300 text-sm">
+            Example: Replace the Authorization header with a lower-privilege
+            token to test if regular users can access admin resources.
+          </p>
+        </div>
+
+        <div class="border border-surface-700 rounded p-4">
+          <h3 class="text-lg font-semibold mb-3">2. Enable Passive Scanning</h3>
+          <p class="text-surface-300 leading-relaxed mb-3">
+            Toggle the plugin to "Enabled" on the Configuration page. This will
+            automatically test every request that goes through Caido's proxy.
+          </p>
+          <div class="bg-amber-900/20 border border-amber-800 rounded p-3">
+            <p class="text-amber-200 text-sm">
+              <i class="fas fa-exclamation-triangle mr-2"></i>
+              <strong>Tip:</strong> Configure filtering first to avoid testing
+              unnecessary requests like static files.
+            </p>
+          </div>
+        </div>
+
+        <div class="border border-surface-700 rounded p-4">
+          <h3 class="text-lg font-semibold mb-3">3. Start Testing</h3>
+          <p class="text-surface-300 leading-relaxed mb-3">
+            Browse your target application normally. Autorize will automatically
+            test each request and show results in the Results page.
+          </p>
+          <p class="text-surface-300 leading-relaxed">
+            Look for
+            <span
+              class="px-2 py-1 bg-green-600 rounded text-xs font-medium text-white"
+              >ALLOW</span
+            >
+            results on mutated or no-auth requests - these might indicate
+            authorization vulnerabilities!
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 bg-surface-800 border border-surface-700 rounded p-4">
+        <p class="text-surface-300 text-sm">
+          <i class="fas fa-rocket text-blue-400 mr-2"></i>
+          That's it! Continue reading below for detailed configuration options
+          and advanced features.
+        </p>
+      </div>
+    </section>
+
     <section id="how-it-works">
       <h2 class="text-2xl font-semibold mb-4">How It Works</h2>
       <p class="text-surface-300 leading-relaxed mb-6">

@@ -8,6 +8,7 @@ type Section = {
 export const useSidebar = () => {
   const sections: Section[] = [
     { id: "what-is-autorize", title: "What is Autorize?" },
+    { id: "quick-start", title: "Quick Start" },
     { id: "how-it-works", title: "How It Works" },
     { id: "request-sources", title: "Sending Requests" },
     { id: "access-states", title: "Access States" },
