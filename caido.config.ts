@@ -11,8 +11,8 @@ const id = "autorize";
 export default defineConfig({
   id,
   name: "Autorize",
-  description: "Autorize plugin for Caido",
-  version: "0.0.1",
+  description: "Automated authorization testing",
+  version: "1.0.0",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",
