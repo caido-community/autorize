@@ -10,6 +10,7 @@ export function determineAccessState(
   const rawResult = mutated.getRaw().toText();
   const rawBaseline = baseline.getRaw().toText();
 
+
   // Same length
   if (rawResult.length === rawBaseline.length) {
     return { kind: "authorized", confidence: 1 };
@@ -17,8 +18,7 @@ export function determineAccessState(
 
   // Clear denial indicators
   if (
-    [401, 403].includes(mutated.getCode()) &&
-    ![401, 403].includes(baseline.getCode())
+    [401, 403].includes(mutated.getCode())
   ) {
     return { kind: "unauthorized", confidence: 1 };
   }
