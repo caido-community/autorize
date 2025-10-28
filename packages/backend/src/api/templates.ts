@@ -1,7 +1,6 @@
 import { type APIResult, type Template } from "shared";
 
 import { jobsQueue } from "../core/queue";
-import { requestGate } from "../core/requests-gate";
 import { configStore } from "../stores/config";
 import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
@@ -86,8 +85,7 @@ export function clearQueue(_sdk: BackendSDK): APIResult<void> {
   debugLog("clearQueue API called");
 
   jobsQueue.clear();
-  requestGate.clear();
-  debugLog("Queue and request gate cleared successfully");
+  debugLog("Queue cleared successfully");
   return { kind: "Ok", value: undefined };
 }
 
@@ -100,9 +98,8 @@ export function clearAllTemplates(_sdk: BackendSDK): APIResult<void> {
     return { kind: "Ok", value: undefined };
   }
 
-  debugLog("Clearing job queue and request gate before deleting templates");
+  debugLog("Clearing job queue before deleting templates");
   jobsQueue.clear();
-  requestGate.clear();
 
   const templateIds = templates.map((tmpl) => tmpl.id);
   _sdk.api.send("templates:cleared");
@@ -128,9 +125,8 @@ export function rescanAllTemplates(_sdk: BackendSDK): APIResult<void> {
     };
   }
 
-  debugLog("Clearing job queue and request gate before rescanning templates");
+  debugLog("Clearing job queue before rescanning templates");
   jobsQueue.clear();
-  requestGate.clear();
 
   const templates = templatesStore.getTemplates();
   const templateIds = templates.map((tmpl) => tmpl.id);

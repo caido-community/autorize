@@ -59,6 +59,7 @@ export function init(sdk: BackendSDK) {
     const projectID = project?.getId();
 
     clearQueue(sdk);
+    sdk.api.send("cursor:clear");
     await configStore.switchProject(projectID);
     await templatesStore.switchProject(projectID);
 

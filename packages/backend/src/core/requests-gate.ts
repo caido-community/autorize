@@ -8,15 +8,17 @@ import { configStore } from "../stores/config";
 import { debugLog, Uint8ArrayToString } from "../utils";
 
 class RequestGate {
-  private queue = new PQueue({
-    concurrency: 2,
-    intervalCap: 1,
-    interval: 1000,
-    carryoverConcurrencyCount: true,
-  });
+  private queue: PQueue;
 
   constructor() {
-    this.updateFromConfig();
+    const config = configStore.getConfig();
+    this.queue = new PQueue({
+      concurrency: config.queue.maxConcurrentRequests,
+      intervalCap: config.queue.requestsPerSecond,
+      interval: 1000,
+      carryoverConcurrencyCount: true,
+    });
+
     configStore.subscribe(() => this.updateFromConfig());
   }
 
@@ -28,12 +30,7 @@ class RequestGate {
       `Updating request gate config: concurrency=${queue.maxConcurrentRequests}, rps=${queue.requestsPerSecond}`,
     );
 
-    this.queue = new PQueue({
-      concurrency: queue.maxConcurrentRequests,
-      intervalCap: queue.requestsPerSecond,
-      interval: 1000,
-      carryoverConcurrencyCount: true,
-    });
+    this.queue.concurrency = queue.maxConcurrentRequests;
   }
 
   add<T>(task: () => Promise<T>): Promise<T> {
@@ -58,14 +55,6 @@ class RequestGate {
 
     debugLog(`Queueing request to send via request gate`);
     return this.add(() => sendRequest(request));
-  }
-
-  clear() {
-    debugLog(
-      `Clearing request gate, current size: ${this.queue.size}, pending: ${this.queue.pending}`,
-    );
-    this.queue.clear();
-    debugLog(`Request gate cleared, new size: ${this.queue.size}`);
   }
 }
 

@@ -1,16 +1,13 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
-import MultiSelect from "primevue/multiselect";
 import ToggleSwitch from "primevue/toggleswitch";
 import { computed } from "vue";
-
-import { useFilters } from "./useFilters";
 
 import { useConfigStore } from "@/stores/config";
 
 const configStore = useConfigStore();
-const { allFilters, selectedFilterIds } = useFilters();
+// const { allFilters, selectedFilterIds } = useFilters();
 
 const onlyInScope = computed({
   get: () => configStore.data?.passiveFiltering.onlyInScope ?? false,
@@ -70,6 +67,8 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
           <ToggleSwitch v-model="onlyInScope" :disabled="isPluginEnabled" />
         </div>
 
+        <!--
+        Temporary disabled due to backend sdk bug
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1">
             <label class="text-sm font-medium">Filters</label>
@@ -88,7 +87,7 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
               class="w-full"
             />
           </div>
-        </div>
+        </div>-->
 
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1">

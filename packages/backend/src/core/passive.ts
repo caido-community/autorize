@@ -1,51 +1,50 @@
 import type { Request } from "caido:utils";
-import { z } from "zod";
 
 import { configStore } from "../stores/config";
 import { type BackendSDK } from "../types";
 
 import { jobsQueue } from "./queue";
 
-const FilterPresetSchema = z.object({
-  __typename: z.literal("FilterPreset"),
-  id: z.string(),
-  alias: z.string(),
-  name: z.string(),
-  clause: z.string(),
-});
+// const FilterPresetSchema = z.object({
+//   __typename: z.literal("FilterPreset"),
+//   id: z.string(),
+//   alias: z.string(),
+//   name: z.string(),
+//   clause: z.string(),
+// });
 
-const FilterPresetsResponseSchema = z.object({
-  data: z.object({
-    filterPresets: z.array(FilterPresetSchema),
-  }),
-});
+// const FilterPresetsResponseSchema = z.object({
+//   data: z.object({
+//     filterPresets: z.array(FilterPresetSchema),
+//   }),
+// });
 
-type FilterPreset = z.infer<typeof FilterPresetSchema>;
+// type FilterPreset = z.infer<typeof FilterPresetSchema>;
 
-const getFilterPresets = async (sdk: BackendSDK): Promise<FilterPreset[]> => {
-  const response = await sdk.graphql.execute(`
-    query filterPresets {
-      filterPresets {
-        __typename
-        id
-        alias
-        name
-        clause
-      }
-    }
-  `);
+// const getFilterPresets = async (sdk: BackendSDK): Promise<FilterPreset[]> => {
+//   const response = await sdk.graphql.execute(`
+//     query filterPresets {
+//       filterPresets {
+//         __typename
+//         id
+//         alias
+//         name
+//         clause
+//       }
+//     }
+//   `);
 
-  const result = FilterPresetsResponseSchema.safeParse(response);
-  if (result.success === false) {
-    return [];
-  }
+//   const result = FilterPresetsResponseSchema.safeParse(response);
+//   if (result.success === false) {
+//     return [];
+//   }
 
-  return result.data.data.filterPresets;
-};
+//   return result.data.data.filterPresets;
+// };
 
 export const initPassiveListener = (sdk: BackendSDK) => {
-  sdk.events.onInterceptResponse(async (_, request, response) => {
-    const shouldProcess = await shouldProcessRequest(request, sdk);
+  sdk.events.onInterceptResponse((_, request, response) => {
+    const shouldProcess = shouldProcessRequest(request, sdk);
     if (!shouldProcess) return;
 
     jobsQueue.addRequest(request, response);
@@ -53,7 +52,7 @@ export const initPassiveListener = (sdk: BackendSDK) => {
 };
 
 // Here we control which passive requests are being sent to the Autorize plugin queue
-const shouldProcessRequest = async (request: Request, sdk: BackendSDK) => {
+const shouldProcessRequest = (request: Request, sdk: BackendSDK): boolean => {
   const config = configStore.getConfig();
   const requestPath = request.getPath();
   const requestHost = request.getHost();
@@ -125,18 +124,20 @@ const shouldProcessRequest = async (request: Request, sdk: BackendSDK) => {
     if (!matchesHttpQL) return false;
   }
 
+  // Temporary disabled due to backend sdk bug
+  //
   // If filters are set, make sure request matches all of them
-  if (config.passiveFiltering.filters.length > 0) {
-    const filterPresets = await getFilterPresets(sdk);
-    const selectedFilters = filterPresets.filter((f) =>
-      config.passiveFiltering.filters.includes(f.id),
-    );
-
-    for (const filter of selectedFilters) {
-      const matchesFilter = sdk.requests.matches(filter.clause, request);
-      if (!matchesFilter) return false;
-    }
-  }
+  // if (config.passiveFiltering.filters.length > 0) {
+  //   const filterPresets = await getFilterPresets(sdk);
+  //   const selectedFilters = filterPresets.filter((f) =>
+  //     config.passiveFiltering.filters.includes(f.id),
+  //   );
+  //
+  //   for (const filter of selectedFilters) {
+  //     const matchesFilter = sdk.requests.matches(filter.clause, request);
+  //     if (!matchesFilter) return false;
+  //   }
+  // }
 
   return true;
 };

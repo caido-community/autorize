@@ -160,9 +160,7 @@ class JobsQueue {
     debugLog(
       `Clearing job queue, current size: ${this.queue.size}, pending: ${this.queue.pending}`,
     );
-    const sdk = requireSDK();
     this.queue.clear();
-    sdk.api.send("cursor:clear");
     debugLog(`Job queue cleared, new size: ${this.queue.size}`);
     this.emitStatusChange();
   }
