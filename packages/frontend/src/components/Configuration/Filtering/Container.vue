@@ -89,19 +89,17 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
           </div>
         </div>-->
 
-        <div class="flex items-center justify-between gap-4">
-          <div class="flex-1">
-            <label class="text-sm font-medium">HTTPQL Filter</label>
-            <p class="text-sm text-surface-400">
+        <div class="space-y-3">
+          <div>
+            <label class="text-sm font-medium block">HTTPQL Filter</label>
+            <p class="text-sm text-surface-400 mb-2">
               Filter passive scanning requests using HTTPQL query language
             </p>
-          </div>
-          <div class="flex-shrink-0 w-64">
             <InputText
               v-model="httpqlFilter"
               placeholder='req.path.like:"/api/%"'
               :disabled="isPluginEnabled"
-              class="w-full"
+              class="w-full font-mono text-sm"
             />
           </div>
         </div>
