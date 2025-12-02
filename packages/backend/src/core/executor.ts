@@ -211,7 +211,9 @@ function applyMutation(
         mutation.regex === true
           ? raw.replace(new RegExp(resolvedMatch, "g"), resolvedValue)
           : raw.replaceAll(resolvedMatch, resolvedValue);
-      return HttpForge.create(newRaw).removeHeader("Content-Length");
+
+      const body = newRaw.slice(newRaw.indexOf("\r\n\r\n") + 4);
+      return HttpForge.create(newRaw).setHeader("Content-Length", body.length.toString());
     }
   }
 }
