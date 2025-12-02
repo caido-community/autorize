@@ -101,6 +101,28 @@ export const init = (sdk: FrontendSDK) => {
           }
           break;
         }
+        case "RequestContext": {
+          if (context.request.type !== "RequestFull") {
+            sdk.window.showToast("Only full requests can be sent to Autorize", {
+              variant: "error",
+            });
+            break;
+          }
+
+          const result = await sdk.backend.createTemplate(context.request.id);
+          if (result.kind === "Ok") {
+            sidebarCount++;
+            sidebarItem.setCount(sidebarCount);
+            sdk.window.showToast("Sent request to Autorize", {
+              variant: "success",
+            });
+          } else {
+            sdk.window.showToast(result.error, {
+              variant: "error",
+            });
+          }
+          break;
+        }
         default: {
           break;
         }
