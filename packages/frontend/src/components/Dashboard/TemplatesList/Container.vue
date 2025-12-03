@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Button from "primevue/button";
 import Card from "primevue/card";
+import InputText from "primevue/inputtext";
 import { computed, ref } from "vue";
 
 import { TemplatesTable } from "./Table";
@@ -12,6 +13,16 @@ const hasTemplates = computed(() => store.data.length > 0);
 
 const isRescanningAll = ref(false);
 const isStoppingQueue = ref(false);
+const httpqlInput = ref("");
+
+const handleSearch = () => {
+  store.filterByHttpql(httpqlInput.value);
+};
+
+const handleClearSearch = () => {
+  httpqlInput.value = "";
+  store.filterByHttpql("");
+};
 
 const handleClearAll = async () => {
   await store.clearAll();
@@ -50,7 +61,26 @@ const handleStopQueue = async () => {
             </p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+              
+        <div class="flex items-center gap-2">          
+          <div class="relative flex-1 min-w-[30em]">
+            <InputText
+              v-model="httpqlInput"
+              placeholder='Filter with HTTPQL (e.g., req.method.eq:"GET")'
+              class="w-full font-mono text-sm"
+              :disabled="!hasTemplates"
+              @keyup.enter="handleSearch"
+            />
+            <i
+              v-if="store.isFiltering"
+              class="fas fa-spinner fa-spin absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 text-sm pointer-events-none"
+            />
+            <i
+              v-else-if="httpqlInput !== ''"
+              class="fas fa-times absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 text-sm cursor-pointer hover:text-surface-200"
+              @click="handleClearSearch"
+            />
+          </div>          
           <Button
             v-if="store.hasActiveJobs"
             v-tooltip.left="

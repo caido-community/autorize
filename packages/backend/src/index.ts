@@ -5,6 +5,7 @@ import {
   clearQueue,
   createTemplate,
   deleteTemplate,
+  filterTemplates,
   getConfig,
   getRequestResponse,
   getTemplate,
@@ -33,6 +34,7 @@ export type API = DefineAPI<{
   getRequestResponse: typeof getRequestResponse;
   clearAllTemplates: typeof clearAllTemplates;
   rescanAllTemplates: typeof rescanAllTemplates;
+  filterTemplates: typeof filterTemplates;
 }>;
 
 export function init(sdk: BackendSDK) {
@@ -52,6 +54,7 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("clearAllTemplates", clearAllTemplates);
   sdk.api.register("rescanAllTemplates", rescanAllTemplates);
+  sdk.api.register("filterTemplates", filterTemplates);
 
   initPassiveListener(sdk);
 
