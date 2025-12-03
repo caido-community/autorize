@@ -34,7 +34,7 @@ const selectedTemplate = computed({
   set: (template) => store.select(template),
 });
 
-const sortedData = computed(() => sortData(store.data));
+const sortedData = computed(() => sortData(store.filteredData));
 
 const onRowClick = (event: MouseEvent, template: Template) => {
   if (event.button !== 0) {

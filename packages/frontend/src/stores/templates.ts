@@ -13,6 +13,9 @@ export const useTemplatesStore = defineStore("templates", () => {
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
   const activeTemplateIds = ref<number[]>([]);
+  const httpqlQuery = ref<string>("");
+  const filteredTemplateIds = ref<number[] | undefined>(undefined);
+  const isFiltering = ref(false);
 
   const initialize = async () => {
     await fetch();
@@ -39,6 +42,9 @@ export const useTemplatesStore = defineStore("templates", () => {
 
     sdk.backend.onEvent("project:changed", async (id) => {
       projectID.value = id;
+      httpqlQuery.value = "";
+      filteredTemplateIds.value = undefined;
+      isFiltering.value = false;
       clearAllClientSide();
       await fetch();
     });
@@ -185,6 +191,26 @@ export const useTemplatesStore = defineStore("templates", () => {
     }
   };
 
+  const filterByHttpql = async (query: string) => {
+    httpqlQuery.value = query;
+
+    if (query === "") {
+      filteredTemplateIds.value = undefined;
+      isFiltering.value = false;
+      return;
+    }
+
+    isFiltering.value = true;
+    const result = await sdk.backend.filterTemplates(query);
+    if (result.kind === "Ok") {
+      filteredTemplateIds.value = result.value;
+    } else {
+      sdk.window.showToast(result.error, { variant: "error" });
+      filteredTemplateIds.value = undefined;
+    }
+    isFiltering.value = false;
+  };
+
   const selectedTemplate = computed<Template | undefined>({
     get() {
       return data.find((t) => t.id === selectedID.value);
@@ -210,6 +236,13 @@ export const useTemplatesStore = defineStore("templates", () => {
     return fallbackResult !== undefined && fallbackResult.kind === "Ok"
       ? fallbackResult.request.id
       : undefined;
+  });
+
+  const filteredData = computed(() => {
+    if (filteredTemplateIds.value === undefined) {
+      return data;
+    }
+    return data.filter((t) => filteredTemplateIds.value?.includes(t.id));
   });
 
   const orderedResults = computed(() => {
@@ -241,6 +274,10 @@ export const useTemplatesStore = defineStore("templates", () => {
     hasActiveJobs,
     projectID,
     activeTemplateIds,
+    httpqlQuery,
+    filteredTemplateIds,
+    isFiltering,
+    filteredData,
     fetch,
     add,
     update,
@@ -252,6 +289,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     clearAll,
     rescanAll,
     stopQueue,
+    filterByHttpql,
     initialize,
     selectedTemplate,
     orderedResults,
