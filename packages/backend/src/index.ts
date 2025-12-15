@@ -5,11 +5,13 @@ import {
   clearQueue,
   createTemplate,
   deleteTemplate,
+  deleteTemplates,
   filterTemplates,
   getConfig,
   getRequestResponse,
   getTemplate,
   getTemplates,
+  getTemplatesExportData,
   rerunTemplate,
   rescanAllTemplates,
   updateConfig,
@@ -21,12 +23,14 @@ import { templatesStore } from "./stores/templates";
 import { type BackendSDK } from "./types";
 
 export { type BackendEvents } from "./types";
+export { type TemplateExportData } from "./api/export";
 
 export type API = DefineAPI<{
   getTemplates: typeof getTemplates;
   getTemplate: typeof getTemplate;
   createTemplate: typeof createTemplate;
   deleteTemplate: typeof deleteTemplate;
+  deleteTemplates: typeof deleteTemplates;
   updateConfig: typeof updateConfig;
   getConfig: typeof getConfig;
   rerunTemplate: typeof rerunTemplate;
@@ -35,6 +39,7 @@ export type API = DefineAPI<{
   clearAllTemplates: typeof clearAllTemplates;
   rescanAllTemplates: typeof rescanAllTemplates;
   filterTemplates: typeof filterTemplates;
+  getTemplatesExportData: typeof getTemplatesExportData;
 }>;
 
 export function init(sdk: BackendSDK) {
@@ -55,6 +60,8 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("clearAllTemplates", clearAllTemplates);
   sdk.api.register("rescanAllTemplates", rescanAllTemplates);
   sdk.api.register("filterTemplates", filterTemplates);
+  sdk.api.register("deleteTemplates", deleteTemplates);
+  sdk.api.register("getTemplatesExportData", getTemplatesExportData);
 
   initPassiveListener(sdk);
 

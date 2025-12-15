@@ -16,6 +16,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const httpqlQuery = ref<string>("");
   const filteredTemplateIds = ref<number[] | undefined>(undefined);
   const isFiltering = ref(false);
+  const selectedIds = ref<Set<number>>(new Set());
 
   const initialize = async () => {
     await fetch();
@@ -45,6 +46,7 @@ export const useTemplatesStore = defineStore("templates", () => {
       httpqlQuery.value = "";
       filteredTemplateIds.value = undefined;
       isFiltering.value = false;
+      selectedIds.value = new Set();
       clearAllClientSide();
       await fetch();
     });
@@ -245,6 +247,63 @@ export const useTemplatesStore = defineStore("templates", () => {
     return data.filter((t) => filteredTemplateIds.value?.includes(t.id));
   });
 
+  const hasSelection = computed(() => selectedIds.value.size > 0);
+
+  const allSelected = computed(() => {
+    const visibleData = filteredData.value;
+    return visibleData.length > 0 && selectedIds.value.size === visibleData.length;
+  });
+
+  const toggleSelection = (id: number) => {
+    const newSet = new Set(selectedIds.value);
+    if (newSet.has(id)) {
+      newSet.delete(id);
+    } else {
+      newSet.add(id);
+    }
+    selectedIds.value = newSet;
+  };
+
+  const selectAll = () => {
+    const visibleIds = filteredData.value.map((t) => t.id);
+    selectedIds.value = new Set(visibleIds);
+  };
+
+  const clearSelection = () => {
+    selectedIds.value = new Set();
+  };
+
+  const toggleSelectAll = () => {
+    if (allSelected.value) {
+      clearSelection();
+    } else {
+      selectAll();
+    }
+  };
+
+  const deleteSelected = async () => {
+    if (selectedIds.value.size === 0) return;
+
+    const idsToDelete = Array.from(selectedIds.value);
+    const result = await sdk.backend.deleteTemplates(idsToDelete);
+
+    if (result.kind === "Ok") {
+      for (const id of idsToDelete) {
+        remove(id);
+      }
+      selectedIds.value = new Set();
+      sdk.window.showToast(`Deleted ${result.value} templates`, {
+        variant: "success",
+      });
+    } else {
+      sdk.window.showToast(result.error, { variant: "error" });
+    }
+  };
+
+  const getSelectedTemplates = () => {
+    return data.filter((t) => selectedIds.value.has(t.id));
+  };
+
   const orderedResults = computed(() => {
     const template = selectedTemplate.value;
     if (template === undefined) return [];
@@ -278,6 +337,9 @@ export const useTemplatesStore = defineStore("templates", () => {
     filteredTemplateIds,
     isFiltering,
     filteredData,
+    selectedIds,
+    hasSelection,
+    allSelected,
     fetch,
     add,
     update,
@@ -290,6 +352,12 @@ export const useTemplatesStore = defineStore("templates", () => {
     rescanAll,
     stopQueue,
     filterByHttpql,
+    toggleSelection,
+    selectAll,
+    clearSelection,
+    toggleSelectAll,
+    deleteSelected,
+    getSelectedTemplates,
     initialize,
     selectedTemplate,
     orderedResults,
