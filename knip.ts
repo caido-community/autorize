@@ -14,6 +14,10 @@ const config: RawConfigurationOrFn = {
       entry: ["src/index.ts"],
       project: ["src/**/*.{ts,tsx,vue}"],
     },
+    "packages/shared": {
+      entry: ["src/index.ts"],
+      project: ["src/**/*.ts"],
+    },
   },
 };
 

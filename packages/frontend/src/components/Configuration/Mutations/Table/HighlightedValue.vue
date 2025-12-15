@@ -3,7 +3,7 @@ import { computed } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
 
-const props = defineProps<{
+const { value } = defineProps<{
   value: string;
 }>();
 
@@ -17,11 +17,11 @@ const parts = computed<TextPart[]>(() => {
   let lastIndex = 0;
   let match: RegExpExecArray | undefined;
 
-  while ((match = envVarPattern.exec(props.value) ?? undefined) !== undefined) {
+  while ((match = envVarPattern.exec(value) ?? undefined) !== undefined) {
     if (match.index > lastIndex) {
       result.push({
         type: "text",
-        content: props.value.slice(lastIndex, match.index),
+        content: value.slice(lastIndex, match.index),
       });
     }
 
@@ -33,10 +33,10 @@ const parts = computed<TextPart[]>(() => {
     lastIndex = match.index + match[0].length;
   }
 
-  if (lastIndex < props.value.length) {
+  if (lastIndex < value.length) {
     result.push({
       type: "text",
-      content: props.value.slice(lastIndex),
+      content: value.slice(lastIndex),
     });
   }
 

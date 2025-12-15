@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 
 import { useSDK } from "@/plugins/sdk";
 
-export type EditorData = {
+type EditorData = {
   requestID: string;
   request: {
     id: string;

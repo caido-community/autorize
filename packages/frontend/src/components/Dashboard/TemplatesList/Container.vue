@@ -97,12 +97,12 @@ const handleDeleteSelected = async () => {
             </p>
           </div>
         </div>
-              
-        <div class="flex items-center gap-2">          
-          <div class="relative flex-1 min-w-[30em]">
+
+        <div class="flex items-center gap-2">
+          <div class="relative flex-1 min-w-[20em]">
             <InputText
               v-model="httpqlInput"
-              placeholder='Filter with HTTPQL (e.g., req.method.eq:"GET")'
+              placeholder='req.method.eq:"POST"'
               class="w-full font-mono text-sm"
               :disabled="!hasTemplates"
               @keyup.enter="handleSearch"
@@ -118,47 +118,44 @@ const handleDeleteSelected = async () => {
             />
           </div>
 
-          <span
+          <div
             v-if="canShowBulkActions"
-            class="text-sm text-surface-400 whitespace-nowrap"
+            class="flex items-center gap-2 border-r border-surface-600 pr-2"
           >
-            {{ store.selectedIds.size }} selected
-          </span>
-          <Button
-            v-if="canShowBulkActions"
-            v-tooltip.left="'Delete selected templates'"
-            label="Delete"
-            severity="danger"
-            size="small"
-            icon="fas fa-trash"
-            outlined
-            :loading="isDeletingSelected"
-            @click="handleDeleteSelected"
-          />
-          <Button
-            v-if="canShowBulkActions"
-            v-tooltip.left="'Export to file'"
-            label="Export"
-            severity="secondary"
-            size="small"
-            icon="fas fa-download"
-            outlined
-            @click="toggleExportMenu"
-          />
-          <Menu ref="exportMenu" :model="exportMenuItems" popup />
-
-
+            <Button
+              v-tooltip.left="'Delete selected templates'"
+              label="Delete"
+              severity="danger"
+              size="small"
+              icon="fas fa-trash"
+              outlined
+              :loading="isDeletingSelected"
+              @click="handleDeleteSelected"
+            />
+            <Button
+              v-tooltip.left="'Export to file'"
+              label="Export"
+              severity="secondary"
+              size="small"
+              icon="fas fa-download"
+              outlined
+              @click="toggleExportMenu"
+            />
+            <Menu ref="exportMenu" :model="exportMenuItems" popup />
+          </div>
 
           <Button
-            v-if="store.hasActiveJobs"
             v-tooltip.left="
-              'Stop processing queue and clear all pending requests'
+              store.hasActiveJobs
+                ? 'Stop processing queue and clear all pending requests'
+                : 'No active jobs in queue'
             "
             label="Stop"
             severity="danger"
             size="small"
             icon="fas fa-stop"
             outlined
+            :disabled="!store.hasActiveJobs"
             :loading="isStoppingQueue"
             @click="handleStopQueue"
           />

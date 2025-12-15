@@ -10,13 +10,11 @@ import { MUTATION_TYPES } from "../constants";
 
 import { useCreateForm } from "./useCreateForm";
 
-const props = defineProps<{
+const { selectedType } = defineProps<{
   selectedType: MutationType;
 }>();
-
-const selectedType = toRef(props, "selectedType");
 const { newMutation, canAddMutation, handleAdd, isPluginEnabled } =
-  useCreateForm(selectedType);
+  useCreateForm(toRef(() => selectedType));
 </script>
 
 <template>

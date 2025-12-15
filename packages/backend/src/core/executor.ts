@@ -213,7 +213,10 @@ function applyMutation(
           : raw.replaceAll(resolvedMatch, resolvedValue);
 
       const body = newRaw.slice(newRaw.indexOf("\r\n\r\n") + 4);
-      return HttpForge.create(newRaw).setHeader("Content-Length", body.length.toString());
+      return HttpForge.create(newRaw).setHeader(
+        "Content-Length",
+        body.length.toString(),
+      );
     }
   }
 }

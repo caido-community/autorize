@@ -12,7 +12,7 @@ import { MUTATION_TYPES } from "../constants";
 import HighlightedValue from "./HighlightedValue.vue";
 import { useMutationsTable } from "./useMutationsTable";
 
-const props = defineProps<{
+const { selectedType, requestTypes } = defineProps<{
   selectedType: MutationType;
   requestTypes: ReadonlyArray<{ label: string; value: string }>;
 }>();
@@ -36,7 +36,7 @@ const getMutationTypeLabel = (kind: string) => {
 };
 
 const filteredMutations = computed(() => {
-  return mutations.value.filter((m) => m.type === props.selectedType);
+  return mutations.value.filter((m) => m.type === selectedType);
 });
 </script>
 

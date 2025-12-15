@@ -10,8 +10,8 @@ import { type FrontendSDK } from "@/types";
 export const useRequestEditor = (
   sdk: FrontendSDK,
   editorState: Ref<EditorState & { type: "Success" }>,
+  root: Ref<HTMLElement | undefined>,
 ) => {
-  const root = ref<HTMLElement>();
   const editorView = ref<EditorView>();
 
   const { Meta_r, Ctrl_r } = useMagicKeys();
@@ -90,7 +90,6 @@ export const useRequestEditor = (
   }
 
   return {
-    root,
     initializeEditor,
     updateEditorContent,
     sendToReplay,

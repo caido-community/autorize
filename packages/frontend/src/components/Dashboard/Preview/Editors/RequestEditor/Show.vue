@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ContextMenu from "primevue/contextmenu";
-import { onMounted, ref, toRefs, watch } from "vue";
+import { onMounted, ref, toRef, watch } from "vue";
 
 import { type EditorState } from "../useEditor";
 
@@ -8,15 +8,18 @@ import { useRequestEditor } from "./useRequestEditor";
 
 import { useSDK } from "@/plugins/sdk";
 
-const props = defineProps<{
+const { editorState } = defineProps<{
   editorState: EditorState & { type: "Success" };
 }>();
-
-const { editorState } = toRefs(props);
 const sdk = useSDK();
 
-const { root, initializeEditor, updateEditorContent, sendToReplay } =
-  useRequestEditor(sdk, editorState);
+const root = ref<HTMLElement>();
+const { initializeEditor, updateEditorContent, sendToReplay } =
+  useRequestEditor(
+    sdk,
+    toRef(() => editorState),
+    root,
+  );
 
 const contextMenu = ref();
 
@@ -33,11 +36,11 @@ const onRightClick = (event: MouseEvent) => {
 };
 
 onMounted(() => {
-  initializeEditor(props.editorState.request.raw);
+  initializeEditor(editorState.request.raw);
 });
 
 watch(
-  () => editorState.value.request.raw,
+  () => editorState.request.raw,
   (newContent) => {
     updateEditorContent(newContent);
   },

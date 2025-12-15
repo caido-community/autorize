@@ -6,7 +6,7 @@ import None from "./None.vue";
 import Show from "./Show.vue";
 import TooLarge from "./TooLarge.vue";
 
-defineProps<{
+const { editorState } = defineProps<{
   editorState: EditorState;
 }>();
 </script>

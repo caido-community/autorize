@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Splitter from "primevue/splitter";
 import SplitterPanel from "primevue/splitterpanel";
-import { toRefs, watch } from "vue";
+import { toRef, watch } from "vue";
 
 import { useEditor } from "./useEditor";
 
@@ -10,15 +10,13 @@ import {
   ResponseEditor,
 } from "@/components/Dashboard/Preview/Editors";
 
-const props = defineProps<{
+const { requestId } = defineProps<{
   requestId: string | undefined;
 }>();
-
-const { requestId } = toRefs(props);
 const editor = useEditor();
 
 watch(
-  requestId,
+  toRef(() => requestId),
   (newRequestId) => {
     if (newRequestId !== undefined) {
       editor.loadRequest(newRequestId);

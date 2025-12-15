@@ -1,18 +1,18 @@
-import { defineConfig } from "@caido-community/dev";
-import tailwindCaido from "@caido/tailwindcss";
-import vue from "@vitejs/plugin-vue";
-import path from "path";
-import prefixwrap from "postcss-prefixwrap";
+import { defineConfig } from '@caido-community/dev';
+import vue from '@vitejs/plugin-vue';
 import tailwindcss from "tailwindcss";
 // @ts-expect-error no declared types at this time
 import tailwindPrimeui from "tailwindcss-primeui";
+import tailwindCaido from "@caido/tailwindcss";
+import path from "path";
+import prefixwrap from "postcss-prefixwrap";
 
 const id = "autorize";
 export default defineConfig({
   id,
   name: "Autorize",
   description: "Automated authorization testing",
-  version: "1.0.1",
+  version: "1.1.0",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",

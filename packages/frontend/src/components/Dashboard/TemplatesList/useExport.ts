@@ -1,6 +1,5 @@
-import type { Template } from "shared";
-
 import type { TemplateExportData } from "backend";
+import type { Template } from "shared";
 
 import { useSDK } from "@/plugins/sdk";
 import { useTemplatesStore } from "@/stores/templates";
@@ -10,7 +9,7 @@ export function useExport() {
   const store = useTemplatesStore();
 
   const formatAccessState = (access: string | undefined): string => {
-    if (!access) return "-";
+    if (access === undefined) return "-";
     return access.toUpperCase();
   };
 
@@ -58,7 +57,9 @@ export function useExport() {
 
       if (item.baseline) {
         lines.push("<details>");
-        lines.push(`<summary><strong>Baseline</strong> - ${item.baseline.code} (${item.baseline.length} bytes)</summary>`);
+        lines.push(
+          `<summary><strong>Baseline</strong> - ${item.baseline.code} (${item.baseline.length} bytes)</summary>`,
+        );
         lines.push("");
         lines.push("**Request:**");
         lines.push("```http");
@@ -75,7 +76,9 @@ export function useExport() {
 
       if (item.mutated.data) {
         lines.push("<details>");
-        lines.push(`<summary><strong>Mutated</strong> - ${item.mutated.data.code} (${item.mutated.data.length} bytes) - ${formatAccessState(item.mutated.access)}</summary>`);
+        lines.push(
+          `<summary><strong>Mutated</strong> - ${item.mutated.data.code} (${item.mutated.data.length} bytes) - ${formatAccessState(item.mutated.access)}</summary>`,
+        );
         lines.push("");
         lines.push("**Request:**");
         lines.push("```http");
@@ -92,7 +95,9 @@ export function useExport() {
 
       if (item.noAuth.data) {
         lines.push("<details>");
-        lines.push(`<summary><strong>No-Auth</strong> - ${item.noAuth.data.code} (${item.noAuth.data.length} bytes) - ${formatAccessState(item.noAuth.access)}</summary>`);
+        lines.push(
+          `<summary><strong>No-Auth</strong> - ${item.noAuth.data.code} (${item.noAuth.data.length} bytes) - ${formatAccessState(item.noAuth.access)}</summary>`,
+        );
         lines.push("");
         lines.push("**Request:**");
         lines.push("```http");
@@ -180,10 +185,9 @@ export function useExport() {
 
     try {
       await navigator.clipboard.writeText(markdown);
-      sdk.window.showToast(
-        `Copied ${templates.length} templates as Markdown`,
-        { variant: "success" },
-      );
+      sdk.window.showToast(`Copied ${templates.length} templates as Markdown`, {
+        variant: "success",
+      });
     } catch {
       sdk.window.showToast("Failed to copy to clipboard", { variant: "error" });
     }

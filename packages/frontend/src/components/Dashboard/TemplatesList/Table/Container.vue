@@ -78,7 +78,7 @@ const onSelectAllClick = (event: Event) => {
 };
 
 const columnWidths = {
-  checkbox: "3%",
+  checkbox: "1.5%",
   id: "3%",
   method: "5%",
   host: "8%",
@@ -91,7 +91,7 @@ const columnWidths = {
 
 <template>
   <div class="flex flex-col grow min-h-0 min-w-[800px]">
-    <div class="pr-[12px]">
+    <div>
       <table class="w-full border-spacing-0 border-separate table-fixed">
         <thead class="bg-surface-900">
           <tr class="bg-surface-800/50 text-surface-0/50">

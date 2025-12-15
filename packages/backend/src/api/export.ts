@@ -5,7 +5,7 @@ import { type BackendSDK } from "../types";
 
 import { getRequestResponse } from "./utils";
 
-export type RequestResponseData = {
+type RequestResponseData = {
   requestRaw: string;
   responseRaw: string;
   code: number;
@@ -28,7 +28,7 @@ export type TemplateExportData = {
 };
 
 function sanitizeText(text: string): string {
-  // Remove null bytes and other non-printable characters that break CSV/text
+  // eslint-disable-next-line no-control-regex
   return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "");
 }
 
@@ -114,4 +114,3 @@ export async function getTemplatesExportData(
 
   return { kind: "Ok", value: exportData };
 }
-
