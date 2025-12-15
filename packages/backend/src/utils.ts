@@ -1,4 +1,10 @@
+import { createHash } from "crypto";
+
 import { configStore } from "./stores/config";
+
+export function md5Hash(str: string): string {
+  return createHash("md5").update(str).digest("hex");
+}
 
 export function generateId(): string {
   return `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
