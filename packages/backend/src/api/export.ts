@@ -1,31 +1,9 @@
-import { type APIResult, type Template } from "shared";
+import { type APIResult } from "shared";
 
-import { jobsQueue } from "../core/queue";
 import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
 
-export function deleteTemplates(
-  _sdk: BackendSDK,
-  templateIds: number[],
-): APIResult<number> {
-  if (templateIds.length === 0) {
-    return { kind: "Ok", value: 0 };
-  }
-
-  jobsQueue.clear();
-
-  let deletedCount = 0;
-  for (const id of templateIds) {
-    const templates = templatesStore.getTemplates();
-    const template = templates.find((t: Template) => t.id === id);
-    if (template) {
-      templatesStore.deleteTemplate(id);
-      deletedCount++;
-    }
-  }
-
-  return { kind: "Ok", value: deletedCount };
-}
+import { getRequestResponse } from "./utils";
 
 export type RequestResponseData = {
   requestRaw: string;
@@ -51,24 +29,26 @@ export type TemplateExportData = {
 
 function sanitizeText(text: string): string {
   // Remove null bytes and other non-printable characters that break CSV/text
-  // Keep common whitespace (newlines, tabs, etc)
   return text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, "");
 }
 
-async function fetchRequestResponse(
+async function fetchSanitizedDataWithCode(
   sdk: BackendSDK,
   requestId: string,
 ): Promise<RequestResponseData | undefined> {
   try {
-    const result = await sdk.requests.get(requestId);
-    if (!result) return undefined;
+    const result = await getRequestResponse(sdk, requestId);
+    if (result.kind === "Error") return undefined;
 
-    const requestRaw = sanitizeText(result.request.getRaw().toText());
-    const responseRaw = sanitizeText(result.response?.getRaw().toText() ?? "");
-    const code = result.response?.getCode() ?? 0;
-    const length = result.response?.getRaw().toBytes().length ?? 0;
+    const requestResult = await sdk.requests.get(requestId);
+    const code = requestResult?.response?.getCode() ?? 0;
 
-    return { requestRaw, responseRaw, code, length };
+    return {
+      requestRaw: sanitizeText(result.value.request.raw),
+      responseRaw: sanitizeText(result.value.response.raw),
+      code,
+      length: result.value.response.raw.length,
+    };
   } catch {
     return undefined;
   }
@@ -97,17 +77,17 @@ export async function getTemplatesExportData(
 
     const baselineData =
       baselineResult?.kind === "Ok"
-        ? await fetchRequestResponse(sdk, baselineResult.request.id)
+        ? await fetchSanitizedDataWithCode(sdk, baselineResult.request.id)
         : undefined;
 
     const mutatedData =
       mutatedResult?.kind === "Ok"
-        ? await fetchRequestResponse(sdk, mutatedResult.request.id)
+        ? await fetchSanitizedDataWithCode(sdk, mutatedResult.request.id)
         : undefined;
 
     const noAuthData =
       noAuthResult?.kind === "Ok"
-        ? await fetchRequestResponse(sdk, noAuthResult.request.id)
+        ? await fetchSanitizedDataWithCode(sdk, noAuthResult.request.id)
         : undefined;
 
     exportData.push({

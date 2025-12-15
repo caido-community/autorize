@@ -60,6 +60,32 @@ export function deleteTemplate(
   return { kind: "Ok", value: undefined };
 }
 
+export function deleteTemplates(
+  _sdk: BackendSDK,
+  templateIds: number[],
+): APIResult<number> {
+  debugLog(`deleteTemplates API called for ${templateIds.length} templates`);
+
+  if (templateIds.length === 0) {
+    return { kind: "Ok", value: 0 };
+  }
+
+  jobsQueue.clear();
+
+  let deletedCount = 0;
+  for (const id of templateIds) {
+    const templates = templatesStore.getTemplates();
+    const template = templates.find((t: Template) => t.id === id);
+    if (template) {
+      templatesStore.deleteTemplate(id);
+      deletedCount++;
+    }
+  }
+
+  debugLog(`Deleted ${deletedCount} templates`);
+  return { kind: "Ok", value: deletedCount };
+}
+
 export function rerunTemplate(
   _sdk: BackendSDK,
   templateId: number,
