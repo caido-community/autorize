@@ -4,36 +4,36 @@ import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
 
 export async function filterTemplates(
-    sdk: BackendSDK,
-    httpqlQuery: string,
+  sdk: BackendSDK,
+  httpqlQuery: string,
 ): Promise<APIResult<number[]>> {
-    if (httpqlQuery === "") {
-        const templates = templatesStore.getTemplates();
-        return { kind: "Ok", value: templates.map((t) => t.id) };
-    }
-
+  if (httpqlQuery === "") {
     const templates = templatesStore.getTemplates();
-    const matchingTemplateIds: number[] = [];
+    return { kind: "Ok", value: templates.map((t) => t.id) };
+  }
 
-    for (const template of templates) {
-        try {
-            const result = await sdk.requests.get(template.request.id);
+  const templates = templatesStore.getTemplates();
+  const matchingTemplateIds: number[] = [];
 
-            if (!result) continue;
+  for (const template of templates) {
+    try {
+      const result = await sdk.requests.get(template.request.id);
 
-            const matches = sdk.requests.matches(
-                httpqlQuery,
-                result.request,
-                result.response,
-            );
+      if (!result) continue;
 
-            if (matches) {
-                matchingTemplateIds.push(template.id);
-            }
-        } catch {
-            continue;
-        }
+      const matches = sdk.requests.matches(
+        httpqlQuery,
+        result.request,
+        result.response,
+      );
+
+      if (matches) {
+        matchingTemplateIds.push(template.id);
+      }
+    } catch {
+      continue;
     }
+  }
 
-    return { kind: "Ok", value: matchingTemplateIds };
+  return { kind: "Ok", value: matchingTemplateIds };
 }

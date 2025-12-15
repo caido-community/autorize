@@ -9,7 +9,7 @@ import { debugLog, generateId } from "../utils";
 
 import { executeJob } from "./executor";
 
-export type AddRequestResult =
+type AddRequestResult =
   | {
       kind: "Ok";
       template: Template;

@@ -244,14 +244,20 @@ export const useTemplatesStore = defineStore("templates", () => {
     if (filteredTemplateIds.value === undefined) {
       return data;
     }
-    return data.filter((t) => filteredTemplateIds.value?.includes(t.id));
+    return data.filter(
+      (t) =>
+        filteredTemplateIds.value !== undefined &&
+        filteredTemplateIds.value.includes(t.id),
+    );
   });
 
   const hasSelection = computed(() => selectedIds.value.size > 0);
 
   const allSelected = computed(() => {
     const visibleData = filteredData.value;
-    return visibleData.length > 0 && selectedIds.value.size === visibleData.length;
+    return (
+      visibleData.length > 0 && selectedIds.value.size === visibleData.length
+    );
   });
 
   const toggleSelection = (id: number) => {
