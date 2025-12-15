@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Checkbox from "primevue/checkbox";
 import type { Template } from "shared";
 import { computed, ref } from "vue";
 import { DynamicScroller } from "vue-virtual-scroller";
@@ -63,11 +64,25 @@ const isTemplateScanning = (templateId: number) => {
   return store.activeTemplateIds.includes(templateId);
 };
 
+const isPassiveEnabled = computed(() => configStore.data?.enabled ?? false);
+const showCheckboxes = computed(() => !isPassiveEnabled.value);
+
+const onCheckboxClick = (event: Event, templateId: number) => {
+  event.stopPropagation();
+  store.toggleSelection(templateId);
+};
+
+const onSelectAllClick = (event: Event) => {
+  event.stopPropagation();
+  store.toggleSelectAll();
+};
+
 const columnWidths = {
+  checkbox: "3%",
   id: "3%",
   method: "5%",
   host: "8%",
-  path: "29%",
+  path: "26%",
   code: "8%",
   length: "7%",
   dynamic: "8%",
@@ -80,6 +95,18 @@ const columnWidths = {
       <table class="w-full border-spacing-0 border-separate table-fixed">
         <thead class="bg-surface-900">
           <tr class="bg-surface-800/50 text-surface-0/50">
+            <th
+              v-if="showCheckboxes"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-center border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              :style="{ width: columnWidths.checkbox }"
+            >
+              <Checkbox
+                :model-value="store.allSelected"
+                :indeterminate="store.hasSelection && !store.allSelected"
+                binary
+                @click="onSelectAllClick"
+              />
+            </th>
             <th
               class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2 cursor-pointer hover:bg-surface-700/50"
               :style="{ width: columnWidths.id }"
@@ -194,6 +221,17 @@ const columnWidths = {
               @mousedown="onRowClick($event, item)"
               @contextmenu="onRowContextMenu($event, item)"
             >
+              <td
+                v-if="showCheckboxes"
+                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-center border-0 py-[0.375rem] px-2"
+                :style="{ width: columnWidths.checkbox }"
+              >
+                <Checkbox
+                  :model-value="store.selectedIds.has(item.id)"
+                  binary
+                  @click="onCheckboxClick($event, item.id)"
+                />
+              </td>
               <td
                 class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-left border-0 py-[0.375rem] px-2"
                 :style="{ width: columnWidths.id }"

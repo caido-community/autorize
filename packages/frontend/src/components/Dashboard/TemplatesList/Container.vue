@@ -2,18 +2,48 @@
 import Button from "primevue/button";
 import Card from "primevue/card";
 import InputText from "primevue/inputtext";
+import Menu from "primevue/menu";
 import { computed, ref } from "vue";
 
 import { TemplatesTable } from "./Table";
+import { useExport } from "./useExport";
 
+import { useConfigStore } from "@/stores/config";
 import { useTemplatesStore } from "@/stores/templates";
 
 const store = useTemplatesStore();
+const configStore = useConfigStore();
+const { exportSelectedAsCSV, exportSelectedAsMarkdown } = useExport();
+
 const hasTemplates = computed(() => store.data.length > 0);
+const isPassiveEnabled = computed(() => configStore.data?.enabled ?? false);
+const canShowBulkActions = computed(
+  () => !isPassiveEnabled.value && store.hasSelection,
+);
 
 const isRescanningAll = ref(false);
 const isStoppingQueue = ref(false);
+const isDeletingSelected = ref(false);
 const httpqlInput = ref("");
+
+const exportMenu = ref();
+
+const exportMenuItems = [
+  {
+    label: "As CSV",
+    icon: "fas fa-file-csv",
+    command: () => exportSelectedAsCSV(),
+  },
+  {
+    label: "As Markdown",
+    icon: "fa-brands fa-markdown",
+    command: () => exportSelectedAsMarkdown(),
+  },
+];
+
+const toggleExportMenu = (event: Event) => {
+  exportMenu.value?.toggle(event);
+};
 
 const handleSearch = () => {
   store.filterByHttpql(httpqlInput.value);
@@ -38,6 +68,12 @@ const handleStopQueue = async () => {
   isStoppingQueue.value = true;
   await store.stopQueue();
   isStoppingQueue.value = false;
+};
+
+const handleDeleteSelected = async () => {
+  isDeletingSelected.value = true;
+  await store.deleteSelected();
+  isDeletingSelected.value = false;
 };
 </script>
 
@@ -80,7 +116,39 @@ const handleStopQueue = async () => {
               class="fas fa-times absolute right-3 top-1/2 -translate-y-1/2 text-surface-400 text-sm cursor-pointer hover:text-surface-200"
               @click="handleClearSearch"
             />
-          </div>          
+          </div>
+
+          <span
+            v-if="canShowBulkActions"
+            class="text-sm text-surface-400 whitespace-nowrap"
+          >
+            {{ store.selectedIds.size }} selected
+          </span>
+          <Button
+            v-if="canShowBulkActions"
+            v-tooltip.left="'Delete selected templates'"
+            label="Delete"
+            severity="danger"
+            size="small"
+            icon="fas fa-trash"
+            outlined
+            :loading="isDeletingSelected"
+            @click="handleDeleteSelected"
+          />
+          <Button
+            v-if="canShowBulkActions"
+            v-tooltip.left="'Export to file'"
+            label="Export"
+            severity="secondary"
+            size="small"
+            icon="fas fa-download"
+            outlined
+            @click="toggleExportMenu"
+          />
+          <Menu ref="exportMenu" :model="exportMenuItems" popup />
+
+
+
           <Button
             v-if="store.hasActiveJobs"
             v-tooltip.left="
