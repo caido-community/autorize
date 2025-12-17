@@ -207,10 +207,17 @@ function applyMutation(
       const resolvedMatch = resolveEnvVariables(mutation.match);
       const resolvedValue = resolveEnvVariables(mutation.value);
       const raw = forge.build();
-      const newRaw =
-        mutation.regex === true
-          ? raw.replace(new RegExp(resolvedMatch, "g"), resolvedValue)
-          : raw.replaceAll(resolvedMatch, resolvedValue);
+      let newRaw: string;
+
+      if (mutation.regex === true) {
+        try {
+          newRaw = raw.replace(new RegExp(resolvedMatch, "g"), resolvedValue);
+        } catch {
+          newRaw = raw;
+        }
+      } else {
+        newRaw = raw.replaceAll(resolvedMatch, resolvedValue);
+      }
 
       const body = newRaw.slice(newRaw.indexOf("\r\n\r\n") + 4);
       return HttpForge.create(newRaw).setHeader(

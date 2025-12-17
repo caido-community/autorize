@@ -86,7 +86,6 @@ class JobsQueue {
     const bodyHash = md5Hash(request.getBody()?.toText() ?? "");
     const templateKey = `${request.getMethod()}:${request.getHost()}:${request.getPort()}${request.getPath()}${request.getQuery()}:${bodyHash}`;
     const existingTemplate = templates.find((tmpl) => tmpl.key === templateKey);
-
     if (existingTemplate) {
       debugLog("addRequest rejected: template already exists");
       return { kind: "Error", reason: "Template already exists" };
@@ -193,6 +192,12 @@ class JobsQueue {
         templatesStore.addTemplateResult(job.templateId, result);
       }
       debugLog(`Worker finished for job ${job.id}`);
+    } catch (error) {
+      debugLog(`Worker failed for job ${job.id}:`, error);
+      templatesStore.addTemplateResult(job.templateId, {
+        kind: "Error",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     } finally {
       sdk.api.send("cursor:mark", job.templateId, false);
     }

@@ -1,4 +1,5 @@
 import type { Request } from "caido:utils";
+import { debugLog } from "packages/backend/src/utils";
 
 import { configStore } from "../stores/config";
 import { type BackendSDK } from "../types";
@@ -44,10 +45,14 @@ import { jobsQueue } from "./queue";
 
 export const initPassiveListener = (sdk: BackendSDK) => {
   sdk.events.onInterceptResponse((_, request, response) => {
-    const shouldProcess = shouldProcessRequest(request, sdk);
-    if (!shouldProcess) return;
+    try {
+      const shouldProcess = shouldProcessRequest(request, sdk);
+      if (!shouldProcess) return;
 
-    jobsQueue.addRequest(request, response);
+      jobsQueue.addRequest(request, response);
+    } catch (error) {
+      debugLog("Error processing intercepted response", error);
+    }
   });
 };
 

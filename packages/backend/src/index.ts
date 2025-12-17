@@ -66,13 +66,17 @@ export function init(sdk: BackendSDK) {
   initPassiveListener(sdk);
 
   sdk.events.onProjectChange(async (sdk, project) => {
-    const projectID = project?.getId();
+    try {
+      const projectID = project?.getId();
 
-    clearQueue(sdk);
-    sdk.api.send("cursor:clear");
-    await configStore.switchProject(projectID);
-    await templatesStore.switchProject(projectID);
+      clearQueue(sdk);
+      sdk.api.send("cursor:clear");
+      await configStore.switchProject(projectID);
+      await templatesStore.switchProject(projectID);
 
-    sdk.api.send("project:changed", projectID);
+      sdk.api.send("project:changed", projectID);
+    } catch (error) {
+      console.error("[Autorize] Project change failed:", error);
+    }
   });
 }
