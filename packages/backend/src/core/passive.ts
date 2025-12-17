@@ -1,8 +1,8 @@
 import type { Request } from "caido:utils";
-import { debugLog } from "packages/backend/src/utils";
 
 import { configStore } from "../stores/config";
 import { type BackendSDK } from "../types";
+import { debugLog } from "../utils";
 
 import { jobsQueue } from "./queue";
 
