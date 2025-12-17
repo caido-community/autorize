@@ -5,7 +5,7 @@ import { type Job, type Template } from "shared";
 import { requireSDK } from "../sdk";
 import { configStore } from "../stores/config";
 import { templatesStore } from "../stores/templates";
-import { debugLog, generateId, md5Hash } from "../utils";
+import { debugLog, generateId, hashString } from "../utils";
 
 import { executeJob } from "./executor";
 
@@ -83,7 +83,8 @@ class JobsQueue {
       };
     }
 
-    const bodyHash = md5Hash(request.getBody()?.toText() ?? "");
+    const body = request.getBody()?.toText() ?? "";
+    const bodyHash = hashString(body);
     const templateKey = `${request.getMethod()}:${request.getHost()}:${request.getPort()}${request.getPath()}${request.getQuery()}:${bodyHash}`;
     const existingTemplate = templates.find((tmpl) => tmpl.key === templateKey);
     if (existingTemplate) {

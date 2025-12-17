@@ -2,8 +2,8 @@ import { createHash } from "crypto";
 
 import { configStore } from "./stores/config";
 
-export function md5Hash(str: string): string {
-  return createHash("md5").update(str).digest("hex");
+export function hashString(str: string): string {
+  return createHash("sha256").update(str).digest("hex");
 }
 
 export function generateId(): string {
