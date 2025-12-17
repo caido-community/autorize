@@ -97,7 +97,7 @@ const columnWidths = {
           <tr class="bg-surface-800/50 text-surface-0/50">
             <th
               v-if="showCheckboxes"
-              class="font-semibold dark:font-normal leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-center border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
+              class="font-semibold dark:font-normal leading-[normal] overflow-hidden whitespace-nowrap text-center border-y-2 border-x-0 border-solid border-surface-900 py-[0.375rem] px-2"
               :style="{ width: columnWidths.checkbox }"
             >
               <Checkbox
@@ -223,7 +223,7 @@ const columnWidths = {
             >
               <td
                 v-if="showCheckboxes"
-                class="leading-[normal] overflow-hidden text-ellipsis whitespace-nowrap text-center border-0 py-[0.375rem] px-2"
+                class="leading-[normal] overflow-hidden whitespace-nowrap text-center border-0 py-[0.375rem] px-2"
                 :style="{ width: columnWidths.checkbox }"
               >
                 <Checkbox
