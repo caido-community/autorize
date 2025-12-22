@@ -50,12 +50,12 @@ const component = computed(() => {
 </script>
 
 <template>
-  <div class="h-full flex flex-col gap-1">
+  <div class="h-full flex flex-col gap-1 min-h-0">
     <Card
-      class="h-fit"
+      class="shrink-0"
       :pt="{
-        body: { class: 'h-fit p-0 flex flex-col' },
-        content: { class: 'h-fit flex flex-col' },
+        body: { class: 'p-0' },
+        content: { class: 'p-0' },
       }"
     >
       <template #content>
@@ -73,10 +73,11 @@ const component = computed(() => {
     </Card>
 
     <Card
-      class="h-full"
+      class="flex-1 min-h-0"
       :pt="{
-        body: { class: 'h-full p-0 flex flex-col' },
-        content: { class: 'h-full flex flex-col' },
+        root: { style: 'display: flex; flex-direction: column; height: 100%;' },
+        body: { class: 'flex-1 p-0 flex flex-col min-h-0' },
+        content: { class: 'flex-1 flex flex-col overflow-hidden min-h-0' },
       }"
     >
       <template #content>

@@ -14,6 +14,7 @@ class ConfigStore extends ProjectScopedStore<Config> {
       testNoAuth: true,
       debug: false,
       mutations: [],
+      userProfiles: [],
       queue: {
         maxConcurrentRequests: 5,
         requestsPerSecond: 30,

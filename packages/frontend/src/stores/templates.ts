@@ -10,6 +10,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const lastSelectedResultType = ref<MutationType>("baseline");
+  const lastSelectedUserProfileId = ref<string | undefined>(undefined);
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
   const activeTemplateIds = ref<number[]>([]);
@@ -127,6 +128,12 @@ export const useTemplatesStore = defineStore("templates", () => {
 
   const selectResult = (result: JobResult & { kind: "Ok" }) => {
     lastSelectedResultType.value = result.type;
+    // Track userProfileId for mutated results to enable multi-user selection
+    if (result.type === "mutated") {
+      lastSelectedUserProfileId.value = result.userProfileId;
+    } else {
+      lastSelectedUserProfileId.value = undefined;
+    }
   };
 
   const rerun = async (id: number) => {
@@ -226,9 +233,19 @@ export const useTemplatesStore = defineStore("templates", () => {
     const template = selectedTemplate.value;
     if (template === undefined) return undefined;
 
-    const preferredResult = template.results.find(
-      (r) => r.kind === "Ok" && r.type === lastSelectedResultType.value,
-    );
+    const preferredResult = template.results.find((r) => {
+      if (r.kind !== "Ok") return false;
+      if (r.type !== lastSelectedResultType.value) return false;
+
+      if (
+        r.type === "mutated" &&
+        lastSelectedUserProfileId.value !== undefined
+      ) {
+        return r.userProfileId === lastSelectedUserProfileId.value;
+      }
+
+      return true;
+    });
 
     if (preferredResult !== undefined && preferredResult.kind === "Ok") {
       return preferredResult.request.id;

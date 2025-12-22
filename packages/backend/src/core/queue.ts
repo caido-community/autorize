@@ -75,11 +75,17 @@ class JobsQueue {
     const anyMutatedMutations = config.mutations.some(
       (m) => m.type === "mutated",
     );
-    if (!anyMutatedMutations) {
-      debugLog("addRequest rejected: no mutated mutations configured");
+    const anyEnabledProfiles =
+      config.userProfiles?.some((p) => p.enabled && p.mutations.length > 0) ??
+      false;
+
+    if (!anyMutatedMutations && !anyEnabledProfiles) {
+      debugLog(
+        "addRequest rejected: no mutated mutations or user profiles configured",
+      );
       return {
         kind: "Error",
-        reason: "Please configure authorization for the second user first",
+        reason: "Please configure authorization for a user first",
       };
     }
 

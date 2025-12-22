@@ -94,12 +94,18 @@ export function rerunTemplate(
   const anyMutatedMutations = config.mutations.some(
     (m) => m.type === "mutated",
   );
-  if (!anyMutatedMutations) {
-    debugLog("rerunTemplate rejected: no mutated mutations configured");
+  const anyEnabledProfiles =
+    config.userProfiles?.some((p) => p.enabled && p.mutations.length > 0) ??
+    false;
+
+  if (!anyMutatedMutations && !anyEnabledProfiles) {
+    debugLog(
+      "rerunTemplate rejected: no mutated mutations or user profiles configured",
+    );
     return {
       kind: "Error",
       error:
-        "Please configure authorization for the second user first to rerun templates",
+        "Please configure authorization for a user first to rerun templates",
     };
   }
 
