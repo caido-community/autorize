@@ -1,7 +1,9 @@
 import { z } from "zod";
 
-const MutationTypeSchema = z.enum(["mutated", "no-auth", "baseline"]);
+const MutationTypeSchema = z.enum(["no-auth", "baseline"]);
 export type MutationType = z.infer<typeof MutationTypeSchema>;
+
+export type ResultType = "baseline" | "mutated" | "no-auth";
 
 export const ProfileMutationSchema = z.discriminatedUnion("kind", [
   z.object({
@@ -100,7 +102,8 @@ export type UserProfile = z.infer<typeof UserProfileSchema>;
 export const ConfigSchema = z.object({
   enabled: z.boolean(),
   mutations: z.array(MutationSchema),
-  userProfiles: z.array(UserProfileSchema).optional(),
+  userProfiles: z.array(UserProfileSchema),
+  multiUserMode: z.boolean(),
   testNoAuth: z.boolean(),
   debug: z.boolean(),
   queue: z.object({

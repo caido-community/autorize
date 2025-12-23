@@ -1,6 +1,6 @@
 import { create } from "mutative";
 import { defineStore } from "pinia";
-import type { JobResult, MutationType, Template } from "shared";
+import type { JobResult, ResultType, Template } from "shared";
 import { computed, reactive, ref } from "vue";
 
 import { useSDK } from "../plugins/sdk";
@@ -9,7 +9,7 @@ export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
-  const lastSelectedResultType = ref<MutationType>("baseline");
+  const lastSelectedResultType = ref<ResultType>("baseline");
   const lastSelectedUserProfileId = ref<string | undefined>(undefined);
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
@@ -332,7 +332,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     if (template === undefined) return [];
 
     const okResults = template.results.filter((r) => r.kind === "Ok");
-    const order: MutationType[] = ["baseline", "mutated", "no-auth"];
+    const order: ResultType[] = ["baseline", "mutated", "no-auth"];
 
     return okResults.sort((a, b) => {
       if (a.kind !== "Ok" || b.kind !== "Ok") return 0;

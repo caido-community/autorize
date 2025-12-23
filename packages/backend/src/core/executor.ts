@@ -73,28 +73,15 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
 
   const enabledProfiles = config.userProfiles?.filter((p) => p.enabled) ?? [];
 
-  if (enabledProfiles.length > 0) {
-    for (const profile of enabledProfiles) {
-      testRequests.push({
-        type: "mutated",
-        userProfileId: profile.id,
-        userProfileName: profile.name,
-        raw: applyProfileMutations(baselineRaw, profile.mutations),
-      });
-    }
-  } else {
-    const mutatedMutations = config.mutations.filter(
-      (m) => m.type === "mutated",
-    );
-    if (mutatedMutations.length > 0) {
-      testRequests.push({
-        type: "mutated",
-        raw: applyMutations(baselineRaw, mutatedMutations),
-      });
-    }
+  for (const profile of enabledProfiles) {
+    testRequests.push({
+      type: "mutated",
+      userProfileId: profile.id,
+      userProfileName: profile.name,
+      raw: applyProfileMutations(baselineRaw, profile.mutations),
+    });
   }
 
-  // Apply mutations for "no-auth" type or use default auth removal
   const noauthMutations = config.mutations.filter((m) => m.type === "no-auth");
   if (config.testNoAuth) {
     if (noauthMutations.length > 0) {

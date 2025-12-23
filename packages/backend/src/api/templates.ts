@@ -91,21 +91,14 @@ export function rerunTemplate(
   templateId: number,
 ): APIResult<void> {
   const config = configStore.getConfig();
-  const anyMutatedMutations = config.mutations.some(
-    (m) => m.type === "mutated",
-  );
   const anyEnabledProfiles =
-    config.userProfiles?.some((p) => p.enabled && p.mutations.length > 0) ??
-    false;
+    config.userProfiles?.some((p) => p.enabled) ?? false;
 
-  if (!anyMutatedMutations && !anyEnabledProfiles) {
-    debugLog(
-      "rerunTemplate rejected: no mutated mutations or user profiles configured",
-    );
+  if (!anyEnabledProfiles) {
+    debugLog("rerunTemplate rejected: no user profiles configured");
     return {
       kind: "Error",
-      error:
-        "Please configure authorization for a user first to rerun templates",
+      error: "Please configure a user profile in the Mutations tab first",
     };
   }
 
@@ -149,11 +142,14 @@ export function rescanAllTemplates(_sdk: BackendSDK): APIResult<void> {
   const config = configStore.getConfig();
   debugLog("rescanAllTemplates API called");
 
-  if (config.mutations.length === 0) {
-    debugLog("rescanAllTemplates rejected: no mutations configured");
+  const anyEnabledProfiles =
+    config.userProfiles?.some((p) => p.enabled) ?? false;
+
+  if (!anyEnabledProfiles) {
+    debugLog("rescanAllTemplates rejected: no user profiles configured");
     return {
       kind: "Error",
-      error: "Please configure authorization for the second user first",
+      error: "Please configure a user profile in the Mutations tab first",
     };
   }
 
