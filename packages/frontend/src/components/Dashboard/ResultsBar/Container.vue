@@ -3,20 +3,33 @@ import Card from "primevue/card";
 import SelectButton from "primevue/selectbutton";
 import { computed } from "vue";
 
-import { useSDK } from "@/plugins/sdk";
 import { useTemplatesStore } from "@/stores/templates";
 
-const sdk = useSDK();
 const store = useTemplatesStore();
 const selectedTemplate = computed(() => store.selectedTemplate);
 
 const options = computed(() => {
   return store.orderedResults
     .map((result) => {
-      if (result.kind !== "Ok") return "";
-      return result.type;
+      if (result.kind !== "Ok") return null;
+
+      if (result.type === "mutated") {
+        return {
+          key: result.userProfileId ?? "mutated",
+          label: result.userProfileName ?? "mutated",
+          type: "mutated",
+          userProfileId: result.userProfileId,
+        };
+      }
+
+      return {
+        key: result.type,
+        label: result.type,
+        type: result.type,
+        userProfileId: undefined,
+      };
     })
-    .filter((type) => type !== "");
+    .filter((opt): opt is NonNullable<typeof opt> => opt !== null);
 });
 
 const selection = computed({
@@ -25,36 +38,42 @@ const selection = computed({
       store.selectedRequestID === undefined ||
       selectedTemplate.value === undefined
     )
-      return options.value[0] ?? "";
+      return options.value[0]?.key ?? "";
 
-    const selectedIndex = selectedTemplate.value.results.findIndex((result) => {
+    const selectedResult = selectedTemplate.value.results.find((result) => {
       return (
         result.kind === "Ok" && result.request.id === store.selectedRequestID
       );
     });
 
-    if (selectedIndex >= 0) {
-      const result = selectedTemplate.value.results[selectedIndex];
-      return result?.kind === "Ok" ? result.type : "";
+    if (selectedResult?.kind === "Ok") {
+      if (selectedResult.type === "mutated") {
+        return selectedResult.userProfileId ?? "mutated";
+      }
+      return selectedResult.type;
     }
 
-    return options.value[0] ?? "";
+    return options.value[0]?.key ?? "";
   },
-  set: (option) => {
+  set: (optionKey) => {
     if (selectedTemplate.value === undefined) return;
 
-    const result = selectedTemplate.value.results.find(
-      (r) => r.kind === "Ok" && r.type === option,
-    );
-    if (result === undefined) return;
+    const option = options.value.find((o) => o.key === optionKey);
+    if (!option) return;
 
-    switch (result.kind) {
-      case "Ok":
-        store.selectResult(result);
-        break;
-      case "Error":
-        sdk.window.showToast(result.error, { variant: "error" });
-        break;
+    const result = selectedTemplate.value.results.find((r) => {
+      if (r.kind !== "Ok") return false;
+      if (r.type !== option.type) return false;
+
+      if (r.type === "mutated" && option.type === "mutated") {
+        return r.userProfileId === option.userProfileId;
+      }
+
+      return true;
+    });
+
+    if (result?.kind === "Ok") {
+      store.selectResult(result);
     }
   },
 });
@@ -76,13 +95,11 @@ const onSelectButtonMouseDown = (event: MouseEvent) => {
           <SelectButton
             v-model="selection"
             :options="options"
+            option-label="label"
+            option-value="key"
             :allow-empty="false"
             @mousedown="onSelectButtonMouseDown"
-          >
-            <template #option="{ option }">
-              <span>{{ option }}</span>
-            </template>
-          </SelectButton>
+          />
         </div>
       </div>
     </template>

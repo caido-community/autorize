@@ -58,7 +58,7 @@ const isEnabled = computed({
 });
 
 const anyMutations = computed(
-  () => configStore.data?.mutations.some((m) => m.type === "mutated") ?? false,
+  () => configStore.data?.userProfiles?.some((p) => p.enabled) ?? false,
 );
 </script>
 

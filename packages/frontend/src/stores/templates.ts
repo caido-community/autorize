@@ -1,6 +1,6 @@
 import { create } from "mutative";
 import { defineStore } from "pinia";
-import type { JobResult, MutationType, Template } from "shared";
+import type { JobResult, ResultType, Template } from "shared";
 import { computed, reactive, ref } from "vue";
 
 import { useSDK } from "../plugins/sdk";
@@ -9,7 +9,8 @@ export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
-  const lastSelectedResultType = ref<MutationType>("baseline");
+  const lastSelectedResultType = ref<ResultType>("baseline");
+  const lastSelectedUserProfileId = ref<string | undefined>(undefined);
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
   const activeTemplateIds = ref<number[]>([]);
@@ -127,6 +128,12 @@ export const useTemplatesStore = defineStore("templates", () => {
 
   const selectResult = (result: JobResult & { kind: "Ok" }) => {
     lastSelectedResultType.value = result.type;
+    // Track userProfileId for mutated results to enable multi-user selection
+    if (result.type === "mutated") {
+      lastSelectedUserProfileId.value = result.userProfileId;
+    } else {
+      lastSelectedUserProfileId.value = undefined;
+    }
   };
 
   const rerun = async (id: number) => {
@@ -226,9 +233,19 @@ export const useTemplatesStore = defineStore("templates", () => {
     const template = selectedTemplate.value;
     if (template === undefined) return undefined;
 
-    const preferredResult = template.results.find(
-      (r) => r.kind === "Ok" && r.type === lastSelectedResultType.value,
-    );
+    const preferredResult = template.results.find((r) => {
+      if (r.kind !== "Ok") return false;
+      if (r.type !== lastSelectedResultType.value) return false;
+
+      if (
+        r.type === "mutated" &&
+        lastSelectedUserProfileId.value !== undefined
+      ) {
+        return r.userProfileId === lastSelectedUserProfileId.value;
+      }
+
+      return true;
+    });
 
     if (preferredResult !== undefined && preferredResult.kind === "Ok") {
       return preferredResult.request.id;
@@ -315,7 +332,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     if (template === undefined) return [];
 
     const okResults = template.results.filter((r) => r.kind === "Ok");
-    const order: MutationType[] = ["baseline", "mutated", "no-auth"];
+    const order: ResultType[] = ["baseline", "mutated", "no-auth"];
 
     return okResults.sort((a, b) => {
       if (a.kind !== "Ok" || b.kind !== "Ok") return 0;

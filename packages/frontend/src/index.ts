@@ -11,6 +11,7 @@ import type { FrontendSDK } from "./types";
 import App from "./views/App.vue";
 
 import { useConfigStore } from "@/stores/config";
+import { createDefaultProfile } from "@/utils";
 
 export const init = (sdk: FrontendSDK) => {
   const app = createApp(App);
@@ -191,7 +192,6 @@ export const init = (sdk: FrontendSDK) => {
           const key = header.substring(0, colonIndex).trim();
           const value = header.substring(colonIndex + 1).trim();
           return {
-            type: "mutated" as const,
             kind: "HeaderReplace" as const,
             header: key,
             value,
@@ -205,7 +205,20 @@ export const init = (sdk: FrontendSDK) => {
         return;
       }
 
-      await configStore.update({ mutations });
+      const existingProfiles = configStore.data.userProfiles ?? [];
+      if (existingProfiles.length === 0) {
+        await configStore.update({
+          userProfiles: [createDefaultProfile(mutations)],
+        });
+      } else {
+        const firstProfile = existingProfiles[0];
+        if (firstProfile) {
+          const updatedProfiles = existingProfiles.map((p, i) =>
+            i === 0 ? { ...p, mutations: [...p.mutations, ...mutations] } : p,
+          );
+          await configStore.update({ userProfiles: updatedProfiles });
+        }
+      }
 
       sdk.window.showToast(
         `Added ${mutations.length} header${

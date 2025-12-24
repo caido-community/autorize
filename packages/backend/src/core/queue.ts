@@ -72,14 +72,14 @@ class JobsQueue {
       return { kind: "Error", reason: "Queue is paused" };
     }
 
-    const anyMutatedMutations = config.mutations.some(
-      (m) => m.type === "mutated",
-    );
-    if (!anyMutatedMutations) {
-      debugLog("addRequest rejected: no mutated mutations configured");
+    const anyEnabledProfiles =
+      config.userProfiles?.some((p) => p.enabled) ?? false;
+
+    if (!anyEnabledProfiles) {
+      debugLog("addRequest rejected: no user profiles configured");
       return {
         kind: "Error",
-        reason: "Please configure authorization for the second user first",
+        reason: "Please configure a user profile in the Mutations tab first",
       };
     }
 

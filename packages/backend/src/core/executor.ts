@@ -1,5 +1,10 @@
 import { type Request, RequestSpecRaw } from "caido:utils";
-import { type Job, type JobResult, type Mutation } from "shared";
+import {
+  type Job,
+  type JobResult,
+  type Mutation,
+  type ProfileMutation,
+} from "shared";
 import { HttpForge } from "ts-http-forge";
 
 import { requireSDK } from "../sdk";
@@ -9,7 +14,12 @@ import { determineAccessState } from "./comparasion";
 import { requestGate } from "./requests-gate";
 
 type TestRequest =
-  | { type: "mutated"; raw: string }
+  | {
+      type: "mutated";
+      userProfileId?: string;
+      userProfileName?: string;
+      raw: string;
+    }
   | { type: "no-auth"; raw: string };
 
 export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
@@ -61,16 +71,17 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
 
   const testRequests: TestRequest[] = [];
 
-  // Apply mutations for "mutated" type
-  const mutatedMutations = config.mutations.filter((m) => m.type === "mutated");
-  if (mutatedMutations.length > 0) {
+  const enabledProfiles = config.userProfiles?.filter((p) => p.enabled) ?? [];
+
+  for (const profile of enabledProfiles) {
     testRequests.push({
       type: "mutated",
-      raw: applyMutations(baselineRaw, mutatedMutations),
+      userProfileId: profile.id,
+      userProfileName: profile.name,
+      raw: applyProfileMutations(baselineRaw, profile.mutations),
     });
   }
 
-  // Apply mutations for "no-auth" type or use default auth removal
   const noauthMutations = config.mutations.filter((m) => m.type === "no-auth");
   if (config.testNoAuth) {
     if (noauthMutations.length > 0) {
@@ -86,14 +97,14 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     }
   }
 
-  const testPromises = testRequests.map(async ({ type, raw }) => {
-    const spec = buildRequestSpec(raw, originalRequest.request);
+  const testPromises = testRequests.map(async (testReq) => {
+    const spec = buildRequestSpec(testReq.raw, originalRequest.request);
     const result = await requestGate.wrapSend(spec);
-    return { type, result };
+    return { testReq, result };
   });
 
   for (const promise of testPromises) {
-    const { type, result } = await promise;
+    const { testReq, result } = await promise;
 
     if (result.kind === "Error") {
       yield { kind: "Error", error: result.error };
@@ -101,7 +112,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
     }
 
     if (result.value.response === undefined) {
-      yield { kind: "Error", error: `${type} response not found` };
+      yield { kind: "Error", error: `${testReq.type} response not found` };
       continue;
     }
 
@@ -136,21 +147,41 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       }
     }
 
-    yield {
-      kind: "Ok",
-      type,
-      request: {
-        id: result.value.request.getId(),
-        method: result.value.request.getMethod(),
-        url: result.value.request.getUrl(),
-      },
-      response: {
-        id: result.value.response.getId(),
-        code: result.value.response.getCode(),
-        length: result.value.response.getRaw().toText().length,
-      },
-      accessState,
-    };
+    if (testReq.type === "mutated") {
+      yield {
+        kind: "Ok",
+        type: "mutated",
+        userProfileId: testReq.userProfileId,
+        userProfileName: testReq.userProfileName,
+        request: {
+          id: result.value.request.getId(),
+          method: result.value.request.getMethod(),
+          url: result.value.request.getUrl(),
+        },
+        response: {
+          id: result.value.response.getId(),
+          code: result.value.response.getCode(),
+          length: result.value.response.getRaw().toText().length,
+        },
+        accessState,
+      };
+    } else {
+      yield {
+        kind: "Ok",
+        type: "no-auth",
+        request: {
+          id: result.value.request.getId(),
+          method: result.value.request.getMethod(),
+          url: result.value.request.getUrl(),
+        },
+        response: {
+          id: result.value.response.getId(),
+          code: result.value.response.getCode(),
+          length: result.value.response.getRaw().toText().length,
+        },
+        accessState,
+      };
+    }
   }
 }
 
@@ -172,6 +203,76 @@ function applyMutations(raw: string, mutations: Mutation[]): string {
   }
 
   return forge.build();
+}
+
+function applyProfileMutations(
+  raw: string,
+  mutations: ProfileMutation[],
+): string {
+  let forge = HttpForge.create(raw);
+
+  for (const mutation of mutations) {
+    forge = applyProfileMutation(forge, mutation);
+  }
+
+  return forge.build();
+}
+
+function applyProfileMutation(
+  forge: ReturnType<typeof HttpForge.create>,
+  mutation: ProfileMutation,
+) {
+  switch (mutation.kind) {
+    case "HeaderAdd":
+      return forge.addHeader(
+        mutation.header,
+        resolveEnvVariables(mutation.value),
+      );
+    case "HeaderRemove":
+      return forge.removeHeader(mutation.header);
+    case "HeaderReplace":
+      return forge.setHeader(
+        mutation.header,
+        resolveEnvVariables(mutation.value),
+      );
+    case "CookieAdd":
+      return forge.addCookie(
+        mutation.cookie,
+        resolveEnvVariables(mutation.value),
+      );
+    case "CookieRemove":
+      return forge.removeCookie(mutation.cookie);
+    case "CookieReplace":
+      return forge.setCookie(
+        mutation.cookie,
+        resolveEnvVariables(mutation.value),
+      );
+    case "RawMatchAndReplace": {
+      const resolvedMatch = resolveEnvVariables(mutation.match);
+      const resolvedValue = resolveEnvVariables(mutation.value);
+      const rawStr = forge.build();
+      let newRaw: string;
+
+      if (mutation.regex === true) {
+        try {
+          newRaw = rawStr.replace(
+            new RegExp(resolvedMatch, "g"),
+            resolvedValue,
+          );
+        } catch {
+          newRaw = rawStr;
+        }
+      } else {
+        newRaw = rawStr.replaceAll(resolvedMatch, resolvedValue);
+      }
+
+      const body = newRaw.slice(newRaw.indexOf("\r\n\r\n") + 4);
+      return HttpForge.create(newRaw).setHeader(
+        "Content-Length",
+        body.length.toString(),
+      );
+    }
+  }
 }
 
 function applyMutation(

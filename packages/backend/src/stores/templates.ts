@@ -60,9 +60,17 @@ class TemplatesStore extends ProjectScopedStore<Template[]> {
       const template = draft.find((t) => t.id === templateId);
       if (template) {
         if (result.kind === "Ok") {
-          const existingIndex = template.results.findIndex(
-            (r) => r.kind === "Ok" && r.type === result.type,
-          );
+          const existingIndex = template.results.findIndex((r) => {
+            if (r.kind !== "Ok") return false;
+            if (r.type !== result.type) return false;
+
+            if (result.type === "mutated" && r.type === "mutated") {
+              return r.userProfileId === result.userProfileId;
+            }
+
+            return true;
+          });
+
           if (existingIndex >= 0) {
             template.results[existingIndex] = result;
           } else {

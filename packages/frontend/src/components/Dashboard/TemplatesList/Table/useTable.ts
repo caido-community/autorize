@@ -29,6 +29,27 @@ export const useTable = () => {
     );
   };
 
+  const getMutatedResultByProfile = (
+    template: Template,
+    userProfileId: string | undefined,
+  ): (JobResult & { kind: "Ok"; type: "mutated" }) | undefined => {
+    return template.results.find(
+      (r): r is JobResult & { kind: "Ok"; type: "mutated" } =>
+        r.kind === "Ok" &&
+        r.type === "mutated" &&
+        r.userProfileId === userProfileId,
+    );
+  };
+
+  const getFirstMutatedResult = (
+    template: Template,
+  ): (JobResult & { kind: "Ok"; type: "mutated" }) | undefined => {
+    return template.results.find(
+      (r): r is JobResult & { kind: "Ok"; type: "mutated" } =>
+        r.kind === "Ok" && r.type === "mutated",
+    );
+  };
+
   const getBaselineCode = (template: Template) => {
     const result = getResultByType(template, "baseline");
     return result?.response.code;
@@ -49,13 +70,19 @@ export const useTable = () => {
     return result?.response.length;
   };
 
-  const getMutatedCode = (template: Template) => {
-    const result = getResultByType(template, "mutated");
+  const getMutatedCode = (template: Template, userProfileId?: string) => {
+    const result =
+      userProfileId !== undefined
+        ? getMutatedResultByProfile(template, userProfileId)
+        : getFirstMutatedResult(template);
     return result?.response.code;
   };
 
-  const getMutatedRespLen = (template: Template) => {
-    const result = getResultByType(template, "mutated");
+  const getMutatedRespLen = (template: Template, userProfileId?: string) => {
+    const result =
+      userProfileId !== undefined
+        ? getMutatedResultByProfile(template, userProfileId)
+        : getFirstMutatedResult(template);
     return result?.response.length;
   };
 
@@ -71,8 +98,14 @@ export const useTable = () => {
     return undefined;
   };
 
-  const getMutatedAccessState = (template: Template) => {
-    const result = getResultByType(template, "mutated");
+  const getMutatedAccessState = (
+    template: Template,
+    userProfileId?: string,
+  ) => {
+    const result =
+      userProfileId !== undefined
+        ? getMutatedResultByProfile(template, userProfileId)
+        : getFirstMutatedResult(template);
     if (result === undefined) return undefined;
 
     const labels = configStore.data?.ui.accessStateLabels;
@@ -109,67 +142,85 @@ export const useTable = () => {
   const codeAndLengthColumns = computed(() => {
     const showOnlyLengths = configStore.data?.ui?.showOnlyLengths ?? false;
     const testNoAuth = configStore.data?.testNoAuth ?? true;
+    const userProfiles = configStore.data?.userProfiles ?? [];
+    const enabledProfiles = userProfiles.filter((p) => p.enabled);
 
-    if (showOnlyLengths) {
-      const columns = [];
-
-      if (testNoAuth) {
-        columns.push({
-          field: "noAuthRespLen",
-          header: "Unauth. Len",
-          getter: getNoAuthRespLen,
-        });
-      }
-
-      columns.push({
-        field: "mutatedRespLen",
-        header: "Mutated Len",
-        getter: getMutatedRespLen,
-      });
-
-      return columns;
-    }
-
-    const columns = [];
+    const columns: {
+      field: string;
+      header: string;
+      getter: (template: Template) => number | undefined;
+      colorGetter?: (template: Template) => string | undefined;
+    }[] = [];
 
     if (testNoAuth) {
-      columns.push(
-        {
+      if (!showOnlyLengths) {
+        columns.push({
           field: "noAuthCode",
           header: "Unauth. Code",
           getter: getNoAuthCode,
           colorGetter: (template: Template) =>
             getStatusCodeColor(getNoAuthCode(template)),
-        },
-        {
-          field: "noAuthRespLen",
-          header: "Unauth. Len",
-          getter: getNoAuthRespLen,
-        },
-      );
+        });
+      }
+      columns.push({
+        field: "noAuthRespLen",
+        header: "Unauth. Len",
+        getter: getNoAuthRespLen,
+      });
     }
 
-    columns.push(
-      {
-        field: "mutatedCode",
-        header: "Mutated Code",
-        getter: getMutatedCode,
-        colorGetter: (template: Template) =>
-          getStatusCodeColor(getMutatedCode(template)),
-      },
-      {
+    // Dynamic columns for each user profile
+    if (enabledProfiles.length > 0) {
+      for (const profile of enabledProfiles) {
+        if (!showOnlyLengths) {
+          columns.push({
+            field: `mutatedCode_${profile.id}`,
+            header: `${profile.name} Code`,
+            getter: (template: Template) =>
+              getMutatedCode(template, profile.id),
+            colorGetter: (template: Template) =>
+              getStatusCodeColor(getMutatedCode(template, profile.id)),
+          });
+        }
+        columns.push({
+          field: `mutatedRespLen_${profile.id}`,
+          header: `${profile.name} Len`,
+          getter: (template: Template) =>
+            getMutatedRespLen(template, profile.id),
+        });
+      }
+    } else {
+      // Legacy: single mutated column
+      if (!showOnlyLengths) {
+        columns.push({
+          field: "mutatedCode",
+          header: "Mutated Code",
+          getter: (template: Template) => getMutatedCode(template),
+          colorGetter: (template: Template) =>
+            getStatusCodeColor(getMutatedCode(template)),
+        });
+      }
+      columns.push({
         field: "mutatedRespLen",
         header: "Mutated Len",
-        getter: getMutatedRespLen,
-      },
-    );
+        getter: (template: Template) => getMutatedRespLen(template),
+      });
+    }
 
     return columns;
   });
 
   const accessColumns = computed(() => {
     const testNoAuth = configStore.data?.testNoAuth ?? true;
-    const columns = [];
+    const userProfiles = configStore.data?.userProfiles ?? [];
+    const enabledProfiles = userProfiles.filter((p) => p.enabled);
+
+    const columns: {
+      field: string;
+      header: string;
+      getter: (template: Template) => string | undefined;
+      colorGetter: (template: Template) => string | undefined;
+    }[] = [];
 
     if (testNoAuth) {
       columns.push({
@@ -181,13 +232,28 @@ export const useTable = () => {
       });
     }
 
-    columns.push({
-      field: "mutatedAccessState",
-      header: "Mutated Access",
-      getter: getMutatedAccessState,
-      colorGetter: (template: Template) =>
-        getAccessStateColor(getMutatedAccessState(template)),
-    });
+    // Dynamic access columns for each user profile
+    if (enabledProfiles.length > 0) {
+      for (const profile of enabledProfiles) {
+        columns.push({
+          field: `mutatedAccessState_${profile.id}`,
+          header: `${profile.name}`,
+          getter: (template: Template) =>
+            getMutatedAccessState(template, profile.id),
+          colorGetter: (template: Template) =>
+            getAccessStateColor(getMutatedAccessState(template, profile.id)),
+        });
+      }
+    } else {
+      // Legacy: single mutated access column
+      columns.push({
+        field: "mutatedAccessState",
+        header: "Mutated Access",
+        getter: (template: Template) => getMutatedAccessState(template),
+        colorGetter: (template: Template) =>
+          getAccessStateColor(getMutatedAccessState(template)),
+      });
+    }
 
     return columns;
   });

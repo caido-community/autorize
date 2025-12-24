@@ -1,7 +1,49 @@
 import { z } from "zod";
 
-const MutationTypeSchema = z.enum(["mutated", "no-auth", "baseline"]);
+const MutationTypeSchema = z.enum(["no-auth", "baseline"]);
 export type MutationType = z.infer<typeof MutationTypeSchema>;
+
+export type ResultType = "baseline" | "mutated" | "no-auth";
+
+export const ProfileMutationSchema = z.discriminatedUnion("kind", [
+  z.object({
+    kind: z.literal("HeaderAdd"),
+    header: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    kind: z.literal("HeaderRemove"),
+    header: z.string().min(1),
+  }),
+  z.object({
+    kind: z.literal("HeaderReplace"),
+    header: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    kind: z.literal("CookieAdd"),
+    cookie: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    kind: z.literal("CookieRemove"),
+    cookie: z.string().min(1),
+  }),
+  z.object({
+    kind: z.literal("CookieReplace"),
+    cookie: z.string().min(1),
+    value: z.string(),
+  }),
+  z.object({
+    kind: z.literal("RawMatchAndReplace"),
+    match: z.string().min(1),
+    value: z.string(),
+    regex: z.boolean(),
+  }),
+]);
+
+export type ProfileMutation = z.infer<typeof ProfileMutationSchema>;
+
 export const MutationSchema = z.discriminatedUnion("kind", [
   z.object({
     type: MutationTypeSchema,
@@ -48,9 +90,20 @@ export const MutationSchema = z.discriminatedUnion("kind", [
 
 export type Mutation = z.infer<typeof MutationSchema>;
 
+export const UserProfileSchema = z.object({
+  id: z.string(),
+  name: z.string().min(1).max(50),
+  enabled: z.boolean(),
+  mutations: z.array(ProfileMutationSchema),
+});
+
+export type UserProfile = z.infer<typeof UserProfileSchema>;
+
 export const ConfigSchema = z.object({
   enabled: z.boolean(),
   mutations: z.array(MutationSchema),
+  userProfiles: z.array(UserProfileSchema),
+  multiUserMode: z.boolean(),
   testNoAuth: z.boolean(),
   debug: z.boolean(),
   queue: z.object({
@@ -97,49 +150,39 @@ export const AccessStateSchema = z.object({
 
 export type AccessState = z.infer<typeof AccessStateSchema>;
 
+const RequestInfoSchema = z.object({
+  id: z.string(),
+  method: z.string(),
+  url: z.url(),
+});
+
+const ResponseInfoSchema = z.object({
+  id: z.string(),
+  code: z.number().int().min(100).max(599),
+  length: z.number().int().min(0),
+});
+
 export const JobResultSchema = z.discriminatedUnion("kind", [
   z.object({
     kind: z.literal("Ok"),
     type: z.literal("baseline"),
-    request: z.object({
-      id: z.string(),
-      method: z.string(),
-      url: z.url(),
-    }),
-    response: z.object({
-      id: z.string(),
-      code: z.number().int().min(100).max(599),
-      length: z.number().int().min(0),
-    }),
+    request: RequestInfoSchema,
+    response: ResponseInfoSchema,
   }),
   z.object({
     kind: z.literal("Ok"),
     type: z.literal("mutated"),
-    request: z.object({
-      id: z.string(),
-      method: z.string(),
-      url: z.url(),
-    }),
-    response: z.object({
-      id: z.string(),
-      code: z.number().int().min(100).max(599),
-      length: z.number().int().min(0),
-    }),
+    userProfileId: z.string().optional(),
+    userProfileName: z.string().optional(),
+    request: RequestInfoSchema,
+    response: ResponseInfoSchema,
     accessState: AccessStateSchema,
   }),
   z.object({
     kind: z.literal("Ok"),
     type: z.literal("no-auth"),
-    request: z.object({
-      id: z.string(),
-      method: z.string(),
-      url: z.url(),
-    }),
-    response: z.object({
-      id: z.string(),
-      code: z.number().int().min(100).max(599),
-      length: z.number().int().min(0),
-    }),
+    request: RequestInfoSchema,
+    response: ResponseInfoSchema,
     accessState: AccessStateSchema,
   }),
   z.object({
