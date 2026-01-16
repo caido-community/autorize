@@ -35,15 +35,14 @@ export function updateConfig(
     };
   }
 
-  const anyMutatedMutations = config.mutations.some(
-    (m) => m.type === "mutated",
-  );
-  if (_config.enabled === true && !anyMutatedMutations) {
-    debugLog("updateConfig rejected: no mutated mutations configured");
+  const anyEnabledProfiles =
+    config.userProfiles?.some((p) => p.enabled) ?? false;
+  if (_config.enabled === true && !anyEnabledProfiles) {
+    debugLog("updateConfig rejected: no user profiles configured");
     return {
       kind: "Error",
       error:
-        "Cannot enable plugin without second-user authorization mutations configured.",
+        "Cannot enable plugin without a user profile. Add one in the Mutations tab.",
     };
   }
 

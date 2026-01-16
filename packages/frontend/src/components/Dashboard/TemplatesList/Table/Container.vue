@@ -78,21 +78,32 @@ const onSelectAllClick = (event: Event) => {
 };
 
 const columnWidths = {
-  checkbox: "1.5%",
-  id: "3%",
-  method: "5%",
-  host: "8%",
-  path: "26%",
-  code: "8%",
-  length: "7%",
-  dynamic: "8%",
+  checkbox: "40px",
+  id: "50px",
+  method: "60px",
+  host: "120px",
+  path: "300px",
+  code: "100px",
+  length: "90px",
+  dynamic: "100px",
 } as const;
+
+const tableMinWidth = computed(() => {
+  const baseWidth = 40 + 50 + 60 + 120 + 300 + 100 + 90;
+  const dynamicColumnCount =
+    codeAndLengthColumns.value.length + accessColumns.value.length;
+  const dynamicWidth = dynamicColumnCount * 100;
+  return Math.max(800, baseWidth + dynamicWidth);
+});
 </script>
 
 <template>
-  <div class="flex flex-col grow min-h-0 min-w-[800px]">
+  <div class="flex flex-col grow min-h-0 overflow-x-auto">
     <div>
-      <table class="w-full border-spacing-0 border-separate table-fixed">
+      <table
+        class="w-full border-spacing-0 border-separate table-fixed"
+        :style="{ minWidth: `${tableMinWidth}px` }"
+      >
         <thead class="bg-surface-900">
           <tr class="bg-surface-800/50 text-surface-0/50">
             <th
@@ -195,7 +206,12 @@ const columnWidths = {
     </div>
     <DynamicScroller
       :key="store.projectID"
-      class="flex-1 overflow-auto bg-surface-800"
+      class="flex-1 bg-surface-800"
+      :style="{
+        minWidth: `${tableMinWidth}px`,
+        overflowX: 'visible',
+        overflowY: 'auto',
+      }"
       :items="sortedData"
       :min-item-size="30"
       key-field="id"
@@ -203,6 +219,7 @@ const columnWidths = {
       <template #default="{ item, index }">
         <table
           class="w-full border-spacing-0 border-separate table-fixed h-[30px]"
+          :style="{ minWidth: `${tableMinWidth}px` }"
         >
           <tbody class="bg-surface-800">
             <tr
@@ -326,6 +343,7 @@ const columnWidths = {
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.8;
   }

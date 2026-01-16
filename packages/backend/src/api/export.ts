@@ -12,15 +12,19 @@ type RequestResponseData = {
   length: number;
 };
 
+type MutatedResultData = {
+  userProfileId: string | undefined;
+  userProfileName: string | undefined;
+  data: RequestResponseData | undefined;
+  access: string | undefined;
+};
+
 export type TemplateExportData = {
   id: number;
   method: string;
   url: string;
   baseline: RequestResponseData | undefined;
-  mutated: {
-    data: RequestResponseData | undefined;
-    access: string | undefined;
-  };
+  mutatedResults: MutatedResultData[];
   noAuth: {
     data: RequestResponseData | undefined;
     access: string | undefined;
@@ -68,11 +72,12 @@ export async function getTemplatesExportData(
     const baselineResult = template.results.find(
       (r) => r.kind === "Ok" && r.type === "baseline",
     );
-    const mutatedResult = template.results.find(
-      (r) => r.kind === "Ok" && r.type === "mutated",
-    );
     const noAuthResult = template.results.find(
       (r) => r.kind === "Ok" && r.type === "no-auth",
+    );
+
+    const mutatedResults = template.results.filter(
+      (r) => r.kind === "Ok" && r.type === "mutated",
     );
 
     const baselineData =
@@ -80,28 +85,36 @@ export async function getTemplatesExportData(
         ? await fetchSanitizedDataWithCode(sdk, baselineResult.request.id)
         : undefined;
 
-    const mutatedData =
-      mutatedResult?.kind === "Ok"
-        ? await fetchSanitizedDataWithCode(sdk, mutatedResult.request.id)
-        : undefined;
-
     const noAuthData =
       noAuthResult?.kind === "Ok"
         ? await fetchSanitizedDataWithCode(sdk, noAuthResult.request.id)
         : undefined;
+
+    // Process all mutated results
+    const mutatedResultsData: MutatedResultData[] = [];
+    for (const mutatedResult of mutatedResults) {
+      if (mutatedResult.kind !== "Ok" || mutatedResult.type !== "mutated")
+        continue;
+
+      const mutatedData = await fetchSanitizedDataWithCode(
+        sdk,
+        mutatedResult.request.id,
+      );
+
+      mutatedResultsData.push({
+        userProfileId: mutatedResult.userProfileId,
+        userProfileName: mutatedResult.userProfileName,
+        data: mutatedData,
+        access: mutatedResult.accessState.kind,
+      });
+    }
 
     exportData.push({
       id: template.id,
       method: template.request.method,
       url: template.request.url,
       baseline: baselineData,
-      mutated: {
-        data: mutatedData,
-        access:
-          mutatedResult?.kind === "Ok" && mutatedResult.type === "mutated"
-            ? mutatedResult.accessState.kind
-            : undefined,
-      },
+      mutatedResults: mutatedResultsData,
       noAuth: {
         data: noAuthData,
         access:
