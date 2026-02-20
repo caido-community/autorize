@@ -115,6 +115,20 @@ const handleAddProfile = async () => {
   selectedType.value = `user-${newProfile.id}`;
 };
 
+const handleCloneProfile = async () => {
+  if (!selectedProfile.value) return;
+
+  const newProfile = createDefaultProfile();
+  newProfile.name = `${selectedProfile.value.name} CLONE`;
+  newProfile.mutations = selectedProfile.value.mutations.map(m => ({ ...m }));
+
+  await configStore.update({
+    userProfiles: [...userProfiles.value, newProfile],
+  });
+
+  selectedType.value = `user-${newProfile.id}`;
+};
+
 const handleDeleteProfile = async () => {
   if (selectedProfileId.value === null) return;
 
@@ -175,6 +189,14 @@ const handleToggleProfile = async (enabled: boolean) => {
           </p>
         </div>
         <div class="flex items-center gap-3">
+          <Button
+            v-if="isUserSelected"
+            label="Clone User"
+            icon="fas fa-copy"
+            size="small"
+            :disabled="isPluginEnabled"
+            @click="handleCloneProfile"
+          />
           <Button
             v-if="isUserSelected"
             label="Add User"
