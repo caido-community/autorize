@@ -25,32 +25,60 @@ type TestRequest =
 export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   const sdk = requireSDK();
   const config = configStore.getConfig();
-
+  
   const originalRequest = await sdk.requests.get(job.baselineRequestId);
   if (!originalRequest) {
     yield { kind: "Error", error: "Baseline request not found" };
     return;
   }
-
-  let baselineRaw = originalRequest.request.getRaw().toText();
-
+  let baselineRequest = originalRequest.request;
+  let baselineRaw = baselineRequest.getRaw().toText();
+  
   if (originalRequest.response === undefined) {
+    yield { kind: "Error", error: "Baseline response not found" };
+    return;
+  }
+  let baselineResponse = originalRequest.response;
+  
+  if (config.queue.resendOriginalRequest) {
+    const baselineMutations = config.mutations.filter(
+      (m) => m.type === "baseline",
+    );
+    if (baselineMutations.length > 0) {
+      baselineRaw = applyMutations(baselineRaw, baselineMutations);
+    }
+
+    const baselineSpec = buildRequestSpec(baselineRaw, originalRequest.request);
+
+    const baselineResult = await requestGate.wrapSend(baselineSpec);
+    if (baselineResult.kind === "Error") {
+      yield { kind: "Error", error: baselineResult.error };
+      return;
+    }
+
+    if (baselineResult.value.response === undefined) {
       yield { kind: "Error", error: "Baseline response not found" };
       return;
+    }
+    
+    baselineRequest = baselineResult.value.request;
+    baselineResponse = baselineResult.value.response;
   }
+  
+  
 
   yield {
     kind: "Ok",
     type: "baseline",
     request: {
-      id: originalRequest.request.getId(),
-      method: originalRequest.request.getMethod(),
-      url: originalRequest.request.getUrl(),
+      id: baselineRequest.getId(),
+      method: baselineRequest.getMethod(),
+      url: baselineRequest.getUrl(),
     },
     response: {
-      id: originalRequest.response.getId(),
-      code: originalRequest.response.getCode(),
-      length: originalRequest.response.getRaw().toText().length,
+      id: baselineResponse.getId(),
+      code: baselineResponse.getCode(),
+      length: baselineResponse.getRaw().toText().length,
     },
   };
 
@@ -101,7 +129,6 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       continue;
     }
 
-    const baselineResponse = originalRequest.response;
     const mutatedResponse = result.value.response;
 
     let accessState = determineAccessState(baselineResponse, mutatedResponse);

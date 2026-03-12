@@ -501,6 +501,17 @@
             <strong>Default:</strong> 30 seconds
           </p>
         </div>
+
+        <div class="border border-surface-700 rounded p-4">
+          <h4 class="font-semibold mb-2">Resend Original Request</h4>
+          <p class="text-surface-300 text-sm">
+            When enabled, Autorize will add the defined mutations to the original request and send it again. 
+            Disable this if you run into issues related to duplication of data.
+          </p>
+          <p class="text-surface-300 text-sm mt-2">
+            <strong>Default:</strong> Disabled
+          </p>
+        </div>
       </div>
 
       <div class="mt-6 bg-amber-900/20 border border-amber-800 rounded p-4">
