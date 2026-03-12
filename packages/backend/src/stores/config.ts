@@ -20,6 +20,7 @@ class ConfigStore extends ProjectScopedStore<Config> {
         maxConcurrentRequests: 5,
         requestsPerSecond: 30,
         requestTimeoutSeconds: 15,
+        resendOriginalRequest: false,
       },
       ui: {
         showOnlyLengths: true,
