@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import Card from "primevue/card";
 import InputNumber from "primevue/inputnumber";
+import ToggleSwitch from "primevue/toggleswitch";
 import { computed } from "vue";
 
 import { useConfigStore } from "@/stores/config";
@@ -41,6 +42,17 @@ const requestTimeoutSeconds = computed({
 });
 
 const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
+
+const resendOriginalRequest = computed({
+  get: () => configStore.data?.queue.resendOriginalRequest ?? false,
+  set: (value) => {
+    if (configStore.data !== undefined) {
+      configStore.update({
+        queue: { ...configStore.data.queue, resendOriginalRequest: value },
+      });
+    }
+  },
+});
 </script>
 
 <template>
@@ -114,6 +126,18 @@ const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
               :disabled="isPluginEnabled"
               :pt="{ root: { style: 'width: 100%;' } }"
             />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between gap-4">
+          <div class="flex-1">
+            <label class="text-sm font-medium">Resend Original Request</label>
+            <p class="text-sm text-surface-400">
+              Resend the original request
+            </p>
+          </div>
+          <div class="flex-shrink-0">
+           <ToggleSwitch v-model="resendOriginalRequest" :disabled="isPluginEnabled" />
           </div>
         </div>
       </div>
