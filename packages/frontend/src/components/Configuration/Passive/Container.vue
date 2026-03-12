@@ -43,7 +43,7 @@ const requestTimeoutSeconds = computed({
 
 const isPluginEnabled = computed(() => configStore.data?.enabled ?? false);
 
-const resendyOriginalRequest = computed({
+const resendOriginalRequest = computed({
   get: () => configStore.data?.queue.resendOriginalRequest ?? false,
   set: (value) => {
     if (configStore.data !== undefined) {
@@ -137,7 +137,7 @@ const resendyOriginalRequest = computed({
             </p>
           </div>
           <div class="flex-shrink-0">
-           <ToggleSwitch v-model="resendyOriginalRequest" :disabled="isPluginEnabled" />
+           <ToggleSwitch v-model="resendOriginalRequest" :disabled="isPluginEnabled" />
           </div>
         </div>
       </div>
