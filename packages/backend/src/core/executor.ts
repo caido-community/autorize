@@ -25,7 +25,7 @@ type TestRequest =
 export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   const sdk = requireSDK();
   const config = configStore.getConfig();
-  
+
   const originalRequest = await sdk.requests.get(job.baselineRequestId);
   if (!originalRequest) {
     yield { kind: "Error", error: "Baseline request not found" };
@@ -33,13 +33,13 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
   }
   let baselineRequest = originalRequest.request;
   let baselineRaw = baselineRequest.getRaw().toText();
-  
+
   if (originalRequest.response === undefined) {
     yield { kind: "Error", error: "Baseline response not found" };
     return;
   }
   let baselineResponse = originalRequest.response;
-  
+
   if (config.queue.resendOriginalRequest) {
     const baselineMutations = config.mutations.filter(
       (m) => m.type === "baseline",
@@ -60,12 +60,10 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       yield { kind: "Error", error: "Baseline response not found" };
       return;
     }
-    
+
     baselineRequest = baselineResult.value.request;
     baselineResponse = baselineResult.value.response;
   }
-  
-  
 
   yield {
     kind: "Ok",

@@ -132,12 +132,13 @@ const resendOriginalRequest = computed({
         <div class="flex items-center justify-between gap-4">
           <div class="flex-1">
             <label class="text-sm font-medium">Resend Original Request</label>
-            <p class="text-sm text-surface-400">
-              Resend the original request
-            </p>
+            <p class="text-sm text-surface-400">Resend the original request</p>
           </div>
           <div class="flex-shrink-0">
-           <ToggleSwitch v-model="resendOriginalRequest" :disabled="isPluginEnabled" />
+            <ToggleSwitch
+              v-model="resendOriginalRequest"
+              :disabled="isPluginEnabled"
+            />
           </div>
         </div>
       </div>

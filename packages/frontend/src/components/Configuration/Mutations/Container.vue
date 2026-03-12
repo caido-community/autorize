@@ -120,7 +120,7 @@ const handleCloneProfile = async () => {
 
   const newProfile = createDefaultProfile();
   newProfile.name = `${selectedProfile.value.name} CLONE`;
-  newProfile.mutations = selectedProfile.value.mutations.map(m => ({ ...m }));
+  newProfile.mutations = selectedProfile.value.mutations.map((m) => ({ ...m }));
 
   await configStore.update({
     userProfiles: [...userProfiles.value, newProfile],
