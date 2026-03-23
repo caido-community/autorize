@@ -4,20 +4,24 @@ import {
   type JobResult,
   type Mutation,
   type ProfileMutation,
+  type UserProfile,
 } from "shared";
 import { HttpForge } from "ts-http-forge";
 
 import { requireSDK } from "../sdk";
 import { configStore } from "../stores/config";
+import { resolveEnvVariables } from "../utils";
 
 import { determineAccessState } from "./comparasion";
 import { requestGate } from "./requests-gate";
+import { isSessionInvalid, retryWithSession } from "./session";
 
 type TestRequest =
   | {
       type: "mutated";
       userProfileId?: string;
       userProfileName?: string;
+      profile?: UserProfile;
       raw: string;
     }
   | { type: "no-auth"; raw: string };
@@ -89,6 +93,7 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       type: "mutated",
       userProfileId: profile.id,
       userProfileName: profile.name,
+      profile,
       raw: applyProfileMutations(baselineRaw, profile.mutations),
     });
   }
@@ -127,9 +132,79 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
       continue;
     }
 
-    const mutatedResponse = result.value.response;
+    let finalResult = result.value;
+    let sessionExpired = false;
+    let sessionRetryReason: string | undefined;
 
-    let accessState = determineAccessState(baselineResponse, mutatedResponse);
+    if (
+      testReq.type === "mutated" &&
+      testReq.profile?.sessionManagement?.enabled === true
+    ) {
+      const sessionConfig = testReq.profile.sessionManagement;
+      const sessionInvalid = isSessionInvalid(
+        sessionConfig.invalidSessionHttpql,
+        originalRequest.request,
+        finalResult.response,
+      );
+
+      if (sessionInvalid) {
+        yield {
+          kind: "Ok",
+          type: "mutated",
+          userProfileId: testReq.userProfileId,
+          userProfileName: testReq.userProfileName,
+          request: {
+            id: finalResult.request.getId(),
+            method: finalResult.request.getMethod(),
+            url: finalResult.request.getUrl(),
+          },
+          response: {
+            id: finalResult.response.getId(),
+            code: finalResult.response.getCode(),
+            length: finalResult.response.getRaw().toText().length,
+          },
+          accessState: { kind: "re-authing" as const, confidence: 1 },
+        };
+
+        const retryResult = await retryWithSession(
+          {
+            profileId: testReq.profile.id,
+            sessionConfig,
+            baselineRaw,
+            mutations: testReq.profile.mutations,
+            originalRequest: originalRequest.request,
+            applyMutations: applyProfileMutations,
+            buildSpec: buildRequestSpec,
+          },
+          finalResult,
+        );
+
+        finalResult = retryResult.value;
+
+        if (retryResult.retryReason !== undefined) {
+          sessionExpired = true;
+          sessionRetryReason = retryResult.retryReason;
+        } else {
+          const stillInvalid = isSessionInvalid(
+            sessionConfig.invalidSessionHttpql,
+            originalRequest.request,
+            finalResult.response,
+          );
+
+          if (stillInvalid) {
+            sessionExpired = true;
+            sessionRetryReason =
+              "Session still invalid after successful re-auth";
+          }
+        }
+      }
+    }
+
+    const mutatedResponse = finalResult.response;
+
+    let accessState = sessionExpired
+      ? { kind: "expired" as const, confidence: 1 }
+      : determineAccessState(baselineResponse, mutatedResponse);
 
     const authorizedHttpql = config.statusDetection.authorizedHttpql;
     const unauthorizedHttpql = config.statusDetection.unauthorizedHttpql;
@@ -164,45 +239,36 @@ export async function* executeJob(job: Job): AsyncGenerator<JobResult> {
         userProfileId: testReq.userProfileId,
         userProfileName: testReq.userProfileName,
         request: {
-          id: result.value.request.getId(),
-          method: result.value.request.getMethod(),
-          url: result.value.request.getUrl(),
+          id: finalResult.request.getId(),
+          method: finalResult.request.getMethod(),
+          url: finalResult.request.getUrl(),
         },
         response: {
-          id: result.value.response.getId(),
-          code: result.value.response.getCode(),
-          length: result.value.response.getRaw().toText().length,
+          id: mutatedResponse.getId(),
+          code: mutatedResponse.getCode(),
+          length: mutatedResponse.getRaw().toText().length,
         },
         accessState,
+        sessionRetryReason,
       };
     } else {
       yield {
         kind: "Ok",
         type: "no-auth",
         request: {
-          id: result.value.request.getId(),
-          method: result.value.request.getMethod(),
-          url: result.value.request.getUrl(),
+          id: finalResult.request.getId(),
+          method: finalResult.request.getMethod(),
+          url: finalResult.request.getUrl(),
         },
         response: {
-          id: result.value.response.getId(),
-          code: result.value.response.getCode(),
-          length: result.value.response.getRaw().toText().length,
+          id: mutatedResponse.getId(),
+          code: mutatedResponse.getCode(),
+          length: mutatedResponse.getRaw().toText().length,
         },
         accessState,
       };
     }
   }
-}
-
-function resolveEnvVariables(value: string): string {
-  const sdk = requireSDK();
-  const envVarPattern = /{{\s*([A-Za-z0-9_]+)\s*}}/g;
-
-  return value.replace(envVarPattern, (match, varName) => {
-    const envValue = sdk.env.getVar(varName);
-    return envValue ?? match;
-  });
 }
 
 function applyMutations(raw: string, mutations: Mutation[]): string {

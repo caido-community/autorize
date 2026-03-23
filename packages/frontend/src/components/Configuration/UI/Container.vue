@@ -109,6 +109,48 @@ const uncertainLabel = computed({
     }
   },
 });
+
+const expiredLabel = computed({
+  get: () => configStore.data?.ui.accessStateLabels.expired ?? "RE-AUTH FAILED",
+  set: (value) => {
+    if (
+      configStore.data !== undefined &&
+      value.length >= 1 &&
+      value.length <= 14
+    ) {
+      configStore.update({
+        ui: {
+          ...configStore.data.ui,
+          accessStateLabels: {
+            ...configStore.data.ui.accessStateLabels,
+            expired: value,
+          },
+        },
+      });
+    }
+  },
+});
+
+const reAuthingLabel = computed({
+  get: () => configStore.data?.ui.accessStateLabels.reAuthing ?? "RE-AUTHING",
+  set: (value) => {
+    if (
+      configStore.data !== undefined &&
+      value.length >= 1 &&
+      value.length <= 14
+    ) {
+      configStore.update({
+        ui: {
+          ...configStore.data.ui,
+          accessStateLabels: {
+            ...configStore.data.ui.accessStateLabels,
+            reAuthing: value,
+          },
+        },
+      });
+    }
+  },
+});
 </script>
 
 <template>
@@ -208,6 +250,36 @@ const uncertainLabel = computed({
                 class="w-32"
                 :maxlength="14"
                 placeholder="UNCERTAIN"
+              />
+            </div>
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <label class="text-sm font-medium block mb-1"
+                  >Re-auth Failed</label
+                >
+                <p class="text-xs text-surface-400">
+                  Status shown when session expired and re-auth failed
+                </p>
+              </div>
+              <InputText
+                v-model="expiredLabel"
+                class="w-32"
+                :maxlength="14"
+                placeholder="RE-AUTH FAILED"
+              />
+            </div>
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex-1">
+                <label class="text-sm font-medium block mb-1">Re-authing</label>
+                <p class="text-xs text-surface-400">
+                  Status shown while re-authentication is in progress
+                </p>
+              </div>
+              <InputText
+                v-model="reAuthingLabel"
+                class="w-32"
+                :maxlength="14"
+                placeholder="RE-AUTHING"
               />
             </div>
           </div>

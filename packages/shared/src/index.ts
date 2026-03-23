@@ -1,5 +1,16 @@
 import { z } from "zod";
 
+import { SessionManagementSchema } from "./session";
+
+export {
+  SessionManagementSchema,
+  TokenExtractionSchema,
+  ReauthRequestSchema,
+  type SessionManagement,
+  type TokenExtraction,
+  type ReauthRequest,
+} from "./session";
+
 const MutationTypeSchema = z.enum(["no-auth", "baseline"]);
 export type MutationType = z.infer<typeof MutationTypeSchema>;
 
@@ -95,6 +106,7 @@ export const UserProfileSchema = z.object({
   name: z.string().min(1).max(50),
   enabled: z.boolean(),
   mutations: z.array(ProfileMutationSchema),
+  sessionManagement: SessionManagementSchema.optional(),
 });
 
 export type UserProfile = z.infer<typeof UserProfileSchema>;
@@ -120,6 +132,8 @@ export const ConfigSchema = z.object({
       authorized: z.string().min(1).max(14),
       unauthorized: z.string().min(1).max(14),
       uncertain: z.string().min(1).max(14),
+      expired: z.string().min(1).max(14),
+      reAuthing: z.string().min(1).max(14),
     }),
   }),
   passiveFiltering: z.object({
@@ -145,7 +159,13 @@ export const JobSchema = z.object({
 export type Job = z.infer<typeof JobSchema>;
 
 export const AccessStateSchema = z.object({
-  kind: z.enum(["authorized", "unauthorized", "uncertain"]),
+  kind: z.enum([
+    "authorized",
+    "unauthorized",
+    "uncertain",
+    "expired",
+    "re-authing",
+  ]),
   confidence: z.number().min(0).max(1),
 });
 
@@ -178,6 +198,7 @@ export const JobResultSchema = z.discriminatedUnion("kind", [
     request: RequestInfoSchema,
     response: ResponseInfoSchema,
     accessState: AccessStateSchema,
+    sessionRetryReason: z.string().optional(),
   }),
   z.object({
     kind: z.literal("Ok"),

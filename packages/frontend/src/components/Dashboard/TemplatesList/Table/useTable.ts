@@ -86,16 +86,20 @@ export const useTable = () => {
     return result?.response.length;
   };
 
+  const getAccessStateLabel = (kind: string): string | undefined => {
+    const labels = configStore.data?.ui.accessStateLabels;
+    if (kind === "unauthorized") return labels?.unauthorized ?? "DENY";
+    if (kind === "authorized") return labels?.authorized ?? "ALLOW";
+    if (kind === "uncertain") return labels?.uncertain ?? "UNCERTAIN";
+    if (kind === "expired") return labels?.expired ?? "RE-AUTH FAILED";
+    if (kind === "re-authing") return labels?.reAuthing ?? "RE-AUTHING";
+    return undefined;
+  };
+
   const getNoAuthAccessState = (template: Template) => {
     const result = getResultByType(template, "no-auth");
     if (result === undefined) return undefined;
-
-    const labels = configStore.data?.ui.accessStateLabels;
-    const state = result.accessState.kind;
-    if (state === "unauthorized") return labels?.unauthorized ?? "DENY";
-    if (state === "authorized") return labels?.authorized ?? "ALLOW";
-    if (state === "uncertain") return labels?.uncertain ?? "UNCERTAIN";
-    return undefined;
+    return getAccessStateLabel(result.accessState.kind);
   };
 
   const getMutatedAccessState = (
@@ -107,13 +111,18 @@ export const useTable = () => {
         ? getMutatedResultByProfile(template, userProfileId)
         : getFirstMutatedResult(template);
     if (result === undefined) return undefined;
+    return getAccessStateLabel(result.accessState.kind);
+  };
 
-    const labels = configStore.data?.ui.accessStateLabels;
-    const state = result.accessState.kind;
-    if (state === "unauthorized") return labels?.unauthorized ?? "DENY";
-    if (state === "authorized") return labels?.authorized ?? "ALLOW";
-    if (state === "uncertain") return labels?.uncertain ?? "UNCERTAIN";
-    return undefined;
+  const getMutatedSessionRetryReason = (
+    template: Template,
+    userProfileId?: string,
+  ): string | undefined => {
+    const result =
+      userProfileId !== undefined
+        ? getMutatedResultByProfile(template, userProfileId)
+        : getFirstMutatedResult(template);
+    return result?.sessionRetryReason;
   };
 
   const getAccessStateColor = (state: string | undefined) => {
@@ -126,6 +135,10 @@ export const useTable = () => {
       return "rgba(15, 110, 50, 0.6)";
     if (state === (labels?.uncertain ?? "UNCERTAIN"))
       return "rgba(217, 119, 6, 0.6)";
+    if (state === (labels?.expired ?? "RE-AUTH FAILED"))
+      return "rgba(147, 51, 234, 0.6)";
+    if (state === (labels?.reAuthing ?? "RE-AUTHING"))
+      return "rgba(59, 130, 246, 0.6)";
     return undefined;
   };
 
@@ -220,6 +233,7 @@ export const useTable = () => {
       header: string;
       getter: (template: Template) => string | undefined;
       colorGetter: (template: Template) => string | undefined;
+      tooltipGetter?: (template: Template) => string | undefined;
     }[] = [];
 
     if (testNoAuth) {
@@ -242,6 +256,8 @@ export const useTable = () => {
             getMutatedAccessState(template, profile.id),
           colorGetter: (template: Template) =>
             getAccessStateColor(getMutatedAccessState(template, profile.id)),
+          tooltipGetter: (template: Template) =>
+            getMutatedSessionRetryReason(template, profile.id),
         });
       }
     } else {
@@ -252,6 +268,8 @@ export const useTable = () => {
         getter: (template: Template) => getMutatedAccessState(template),
         colorGetter: (template: Template) =>
           getAccessStateColor(getMutatedAccessState(template)),
+        tooltipGetter: (template: Template) =>
+          getMutatedSessionRetryReason(template),
       });
     }
 

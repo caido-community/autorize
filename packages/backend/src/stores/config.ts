@@ -30,6 +30,8 @@ class ConfigStore extends ProjectScopedStore<Config> {
           authorized: "ALLOW",
           unauthorized: "DENY",
           uncertain: "UNCERTAIN",
+          expired: "RE-AUTH FAILED",
+          reAuthing: "RE-AUTHING",
         },
       },
       passiveFiltering: {
