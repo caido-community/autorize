@@ -11,7 +11,7 @@ import { requestGate } from "../requests-gate";
 import { isSessionInvalid } from "./detect";
 import { handleInvalidSession } from "./handler";
 
-export type RetryParams = {
+type RetryParams = {
   profileId: string;
   sessionConfig: SessionManagement;
   baselineRaw: string;
@@ -21,7 +21,7 @@ export type RetryParams = {
   buildSpec: (raw: string, request: Request) => RequestSpecRaw;
 };
 
-export type SessionRetryResult = {
+type SessionRetryResult = {
   value: RequestResponse;
   retryReason?: string;
 };

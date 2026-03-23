@@ -56,30 +56,29 @@ const theme = EditorView.theme({
   },
 });
 
-const createState = (content: string) =>
-  EditorState.create({
-    doc: content,
-    extensions: [
-      lineNumbers(),
-      history(),
-      keymap.of([...defaultKeymap, ...historyKeymap]),
-      theme,
-      EditorView.lineWrapping,
-      EditorView.editable.of(!disabled),
-      EditorView.domEventHandlers({
-        blur() {
-          if (view === undefined) return;
-          emit("update:modelValue", view.state.doc.toString());
-        },
-      }),
-    ],
-  });
+const buildExtensions = (editable: boolean) => [
+  lineNumbers(),
+  history(),
+  keymap.of([...defaultKeymap, ...historyKeymap]),
+  theme,
+  EditorView.lineWrapping,
+  EditorView.editable.of(editable),
+  EditorView.domEventHandlers({
+    blur() {
+      if (view === undefined) return;
+      emit("update:modelValue", view.state.doc.toString());
+    },
+  }),
+];
 
 onMounted(() => {
   if (container.value === undefined) return;
 
   view = new EditorView({
-    state: createState(modelValue),
+    state: EditorState.create({
+      doc: modelValue,
+      extensions: buildExtensions(!disabled),
+    }),
     parent: container.value,
   });
 });
@@ -93,9 +92,13 @@ watch(
   () => disabled,
   () => {
     if (view === undefined) return;
-    view.dispatch({
-      effects: EditorView.editable.reconfigure(!disabled),
-    });
+    const content = view.state.doc.toString();
+    view.setState(
+      EditorState.create({
+        doc: content,
+        extensions: buildExtensions(!disabled),
+      }),
+    );
   },
 );
 

@@ -95,11 +95,11 @@ importers:
         specifier: ^0.54.1
         version: 0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))
       '@codemirror/commands':
-        specifier: ^6.10.3
+        specifier: 6.10.3
         version: 6.10.3
-      '@codemirror/language':
-        specifier: ^6.12.2
-        version: 6.12.2
+      '@codemirror/state':
+        specifier: 6.6.0
+        version: 6.6.0
       '@codemirror/view':
         specifier: 6.39.4
         version: 6.39.4
@@ -197,9 +197,6 @@ packages:
 
   '@codemirror/language@6.12.2':
     resolution: {integrity: sha512-jEPmz2nGGDxhRTg3lTpzmIyGKxz3Gp3SJES4b0nAuE5SWQoKdT5GoQ69cwMmFd+wvFUhYirtDTr0/DRHpQAyWg==}
-
-  '@codemirror/state@6.5.2':
-    resolution: {integrity: sha512-FVqsPqtPWKVVL3dPSxy8wEF/ymIEuVzF1PK3VbUgrxXpJUSHQWWZz4JMToquRxnkw+36LTamCZG2iua2Ptq0fA==}
 
   '@codemirror/state@6.6.0':
     resolution: {integrity: sha512-4nbvra5R5EtiCzr9BTHiTLc+MLXK2QGiAVYMyi8PkQd3SR+6ixar/Q/01Fa21TBIDOZXgeWV4WppsQolSreAPQ==}
@@ -2878,16 +2875,12 @@ snapshots:
 
   '@codemirror/language@6.12.2':
     dependencies:
-      '@codemirror/state': 6.5.2
+      '@codemirror/state': 6.6.0
       '@codemirror/view': 6.39.4
       '@lezer/common': 1.5.1
       '@lezer/highlight': 1.2.3
       '@lezer/lr': 1.4.8
       style-mod: 4.1.3
-
-  '@codemirror/state@6.5.2':
-    dependencies:
-      '@marijn/find-cluster-break': 1.0.2
 
   '@codemirror/state@6.6.0':
     dependencies:
@@ -2895,7 +2888,7 @@ snapshots:
 
   '@codemirror/view@6.39.4':
     dependencies:
-      '@codemirror/state': 6.5.2
+      '@codemirror/state': 6.6.0
       crelt: 1.0.6
       style-mod: 4.1.3
       w3c-keyname: 2.2.8
