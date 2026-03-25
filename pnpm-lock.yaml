@@ -9,10 +9,10 @@ importers:
   .:
     devDependencies:
       '@caido-community/dev':
-        specifier: ^0.1.3
+        specifier: 0.1.6
         version: 0.1.6(@types/node@25.0.2)(postcss@8.5.6)(typescript@5.5.4)(yaml@2.8.1)
       '@caido/eslint-config':
-        specifier: ^0.8.0
+        specifier: 0.8.0
         version: 0.8.0(@typescript-eslint/parser@8.26.1(eslint@9.39.2(jiti@2.4.2))(typescript@5.5.4))(eslint@9.39.2(jiti@2.4.2))(prettier@3.6.2)(typescript@5.5.4)
       '@caido/tailwindcss':
         specifier: 0.0.1
@@ -21,13 +21,13 @@ importers:
         specifier: 5.2.1
         version: 5.2.1(vite@6.0.7(@types/node@25.0.2)(jiti@2.4.2)(yaml@2.8.1))(vue@3.5.25(typescript@5.5.4))
       eslint:
-        specifier: ^9.36.0
+        specifier: 9.39.2
         version: 9.39.2(jiti@2.4.2)
       globals:
-        specifier: ^16.5.0
+        specifier: 16.5.0
         version: 16.5.0
       knip:
-        specifier: ^5.73.4
+        specifier: 5.73.4
         version: 5.73.4(@types/node@25.0.2)(typescript@5.5.4)
       postcss-prefixwrap:
         specifier: 1.57.2
@@ -45,23 +45,23 @@ importers:
   packages/backend:
     dependencies:
       mutative:
-        specifier: ^1.3.0
+        specifier: 1.3.0
         version: 1.3.0
       p-queue:
-        specifier: ^9.0.0
+        specifier: 9.0.1
         version: 9.0.1
       shared:
         specifier: workspace:*
         version: link:../shared
       ts-http-forge:
-        specifier: ^0.1.3
+        specifier: 0.1.4
         version: 0.1.4
     devDependencies:
       '@caido/sdk-backend':
-        specifier: ^0.52.0
-        version: 0.52.0
+        specifier: 0.54.1
+        version: 0.54.1
       vitest:
-        specifier: ^4.1.1
+        specifier: 4.1.1
         version: 4.1.1(@types/node@25.0.2)(vite@6.0.7(@types/node@25.0.2)(jiti@2.6.1)(yaml@2.8.1))
 
   packages/frontend:
@@ -70,13 +70,13 @@ importers:
         specifier: 0.3.3
         version: 0.3.3(primevue@4.1.0(vue@3.5.25(typescript@5.5.4)))
       '@vueuse/core':
-        specifier: ^14.1.0
+        specifier: 14.1.0
         version: 14.1.0(vue@3.5.25(typescript@5.5.4))
       mutative:
-        specifier: ^1.3.0
+        specifier: 1.3.0
         version: 1.3.0
       pinia:
-        specifier: ^3.0.4
+        specifier: 3.0.4
         version: 3.0.4(typescript@5.5.4)(vue@3.5.25(typescript@5.5.4))
       primevue:
         specifier: 4.1.0
@@ -92,10 +92,10 @@ importers:
         version: 2.0.0-beta.8(vue@3.5.25(typescript@5.5.4))
     devDependencies:
       '@caido/sdk-backend':
-        specifier: ^0.54.1
+        specifier: 0.54.1
         version: 0.54.1
       '@caido/sdk-frontend':
-        specifier: ^0.54.1
+        specifier: 0.54.1
         version: 0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))
       '@codemirror/commands':
         specifier: 6.10.3
@@ -116,12 +116,12 @@ importers:
   packages/shared:
     dependencies:
       zod:
-        specifier: ^4.1.12
+        specifier: 4.1.12
         version: 4.1.12
     devDependencies:
       '@caido/sdk-backend':
-        specifier: ^0.52.0
-        version: 0.52.0
+        specifier: 0.54.1
+        version: 0.54.1
 
 packages:
 
@@ -169,14 +169,8 @@ packages:
     peerDependencies:
       primevue: 4.1.0
 
-  '@caido/quickjs-types@0.21.1':
-    resolution: {integrity: sha512-efLd1W92xun+E8/hdLBJD+pdDdf7TQ85zI28ZyYP3EfiQljq5zOyt9Sco45oWHyDGxvezUXeyee/NJ0NWxv3hg==}
-
   '@caido/quickjs-types@0.24.0':
     resolution: {integrity: sha512-BKkvkVbaZtm9b3qp2R0T4gp0dExstuExIlRaKQSnC5RgATsR+mEQUU0TK8oFjJwCCQsdVoSkQGnDnK8XeaCfHA==}
-
-  '@caido/sdk-backend@0.52.0':
-    resolution: {integrity: sha512-LRVM5RbkWbNhTSpNuqE8ALjZmPmZLo7JyalCTp6tHcMDwVOw1C2Weg8kKG48CltmEkoVqPoNpf+2qtX1JdNjLQ==}
 
   '@caido/sdk-backend@0.54.1':
     resolution: {integrity: sha512-YNIKIYYINMl5e6fdcITB+50LPjLw+m1B6PAKDOTcdNo+KIbYliQqzJptsQiz/vggcnuWmirablWwR+vRB4ohqA==}
@@ -1593,6 +1587,7 @@ packages:
   glob@11.0.1:
     resolution: {integrity: sha512-zrQDm8XPnYEKawJScsnM0QzobJxlT/kHOOlRTio8IH/GrmxRE5fjllkzdaHclIuNjUQTJYH2xHNIGfdpJkDJUw==}
     engines: {node: 20 || >=22}
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
     hasBin: true
 
   globals@14.0.0:
@@ -2965,14 +2960,7 @@ snapshots:
     dependencies:
       primevue: 4.1.0(vue@3.5.25(typescript@5.5.4))
 
-  '@caido/quickjs-types@0.21.1': {}
-
   '@caido/quickjs-types@0.24.0': {}
-
-  '@caido/sdk-backend@0.52.0':
-    dependencies:
-      '@caido/quickjs-types': 0.21.1
-      '@caido/sdk-shared': 0.1.1
 
   '@caido/sdk-backend@0.54.1':
     dependencies:
@@ -5239,7 +5227,7 @@ snapshots:
 
   send@1.2.0:
     dependencies:
-      debug: 4.3.6
+      debug: 4.4.3
       encodeurl: 2.0.0
       escape-html: 1.0.3
       etag: 1.8.1
