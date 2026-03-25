@@ -315,6 +315,7 @@ const tableMinWidth = computed(() => {
                   textAlign: 'center',
                   width: columnWidths.dynamic,
                 }"
+                :title="column.tooltipGetter?.(item)"
               >
                 {{ column.getter(item) ?? "" }}
               </td>

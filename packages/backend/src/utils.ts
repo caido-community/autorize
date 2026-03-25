@@ -1,5 +1,6 @@
 import { createHash } from "crypto";
 
+import { requireSDK } from "./sdk";
 import { configStore } from "./stores/config";
 
 export function hashString(str: string): string {
@@ -15,6 +16,16 @@ export function debugLog(message: string, ...args: unknown[]): void {
   if (config.debug) {
     console.log(`[Autorize Debug] ${message}`, ...args);
   }
+}
+
+export function resolveEnvVariables(value: string): string {
+  const sdk = requireSDK();
+  const envVarPattern = /{{\s*([A-Za-z0-9_]+)\s*}}/g;
+
+  return value.replace(envVarPattern, (match, varName) => {
+    const envValue = sdk.env.getVar(varName);
+    return envValue ?? match;
+  });
 }
 
 export function Uint8ArrayToString(data: Uint8Array): string {

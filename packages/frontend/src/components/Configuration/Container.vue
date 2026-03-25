@@ -7,11 +7,13 @@ import { Filtering } from "./Filtering";
 import { GeneralSettings } from "./General";
 import { Mutations } from "./Mutations";
 import { PassiveScanning } from "./Passive";
+import { SessionManagement } from "./Session";
 import { StatusDetection } from "./StatusDetection";
 import { UISettings } from "./UI";
 
 type Tab =
   | "Mutations"
+  | "Session"
   | "Filtering"
   | "PassiveScanning"
   | "StatusDetection"
@@ -22,6 +24,7 @@ const activeTab = ref<Tab>("Mutations");
 
 const tabs = [
   { label: "Mutations", value: "Mutations" },
+  { label: "Session", value: "Session" },
   { label: "Filtering", value: "Filtering" },
   { label: "Detection", value: "StatusDetection" },
   { label: "Queue", value: "PassiveScanning" },
@@ -33,6 +36,8 @@ const component = computed(() => {
   switch (activeTab.value) {
     case "Mutations":
       return Mutations;
+    case "Session":
+      return SessionManagement;
     case "Filtering":
       return Filtering;
     case "PassiveScanning":
