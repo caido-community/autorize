@@ -6,6 +6,7 @@
     "typecheck": "pnpm -r typecheck",
     "lint": "eslint --fix packages/*/src",
     "knip": "knip",
+    "test": "pnpm --filter backend test",
     "build": "caido-dev build",
     "watch": "caido-dev watch"
   },

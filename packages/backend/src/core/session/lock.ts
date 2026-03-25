@@ -4,6 +4,16 @@ type Release = () => void;
 
 class SessionLockManager {
   private locks = new Map<string, Promise<void>>();
+  private refreshVersions = new Map<string, number>();
+
+  getRefreshVersion(profileId: string): number {
+    return this.refreshVersions.get(profileId) ?? 0;
+  }
+
+  incrementRefreshVersion(profileId: string): void {
+    const current = this.getRefreshVersion(profileId);
+    this.refreshVersions.set(profileId, current + 1);
+  }
 
   async acquire(profileId: string): Promise<Release> {
     while (this.locks.has(profileId)) {

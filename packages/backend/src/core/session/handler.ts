@@ -7,13 +7,29 @@ import { sessionLockManager } from "./lock";
 import { sendReauthRequest } from "./reauth";
 import { storeTokens } from "./store-tokens";
 
+type HandleOptions = {
+  force?: boolean;
+};
+
 export async function handleInvalidSession(
   profileId: string,
   sessionConfig: SessionManagement,
+  options: HandleOptions = {},
 ): Promise<APIResult<void>> {
+  const versionBefore = sessionLockManager.getRefreshVersion(profileId);
   const release = await sessionLockManager.acquire(profileId);
 
   try {
+    if (options.force !== true) {
+      const versionAfter = sessionLockManager.getRefreshVersion(profileId);
+      if (versionAfter > versionBefore) {
+        debugLog(
+          `Session already refreshed for profile ${profileId}, skipping re-auth`,
+        );
+        return { kind: "Ok", value: undefined };
+      }
+    }
+
     const reauthResult = await sendReauthRequest(sessionConfig.reauthRequest);
     if (reauthResult.kind === "Error") {
       debugLog(
@@ -39,6 +55,7 @@ export async function handleInvalidSession(
     }
 
     await storeTokens(extractResult.value, sessionConfig.tokenExtractions);
+    sessionLockManager.incrementRefreshVersion(profileId);
 
     debugLog(`Session refreshed successfully for profile ${profileId}`);
     return { kind: "Ok", value: undefined };

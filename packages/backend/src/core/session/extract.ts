@@ -57,17 +57,7 @@ function extractFromJsonBody(
     if (!body) return undefined;
 
     const json = body.toJson();
-    const segments = jsonPath.split(".");
-    let current: unknown = json;
-
-    for (const segment of segments) {
-      if (current === null || current === undefined) return undefined;
-      current = (current as Record<string, unknown>)[segment];
-    }
-
-    if (current === null || current === undefined) return undefined;
-    if (typeof current === "object") return JSON.stringify(current);
-    return String(current as string | number | boolean);
+    return navigateJsonPath(json, jsonPath);
   } catch {
     debugLog(`Failed to parse JSON body for path "${jsonPath}"`);
     return undefined;
@@ -83,10 +73,34 @@ function extractFromRegex(
     if (!body) return undefined;
 
     const text = body.toText();
-    const match = new RegExp(pattern).exec(text);
-    return match?.[1] ?? undefined;
+    return extractRegexCapture(text, pattern);
   } catch {
     debugLog(`Failed to apply regex pattern "${pattern}"`);
     return undefined;
   }
+}
+
+export function navigateJsonPath(
+  json: unknown,
+  jsonPath: string,
+): string | undefined {
+  const segments = jsonPath.split(".");
+  let current: unknown = json;
+
+  for (const segment of segments) {
+    if (current === null || current === undefined) return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+
+  if (current === null || current === undefined) return undefined;
+  if (typeof current === "object") return JSON.stringify(current);
+  return String(current as string | number | boolean);
+}
+
+export function extractRegexCapture(
+  text: string,
+  pattern: string,
+): string | undefined {
+  const match = new RegExp(pattern).exec(text);
+  return match?.[1] ?? undefined;
 }

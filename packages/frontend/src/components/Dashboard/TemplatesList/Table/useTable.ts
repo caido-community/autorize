@@ -3,6 +3,14 @@ import { computed, ref } from "vue";
 
 import { useConfigStore } from "@/stores/config";
 
+const ACCESS_STATE_COLORS = {
+  unauthorized: "rgba(185, 28, 28, 0.6)",
+  authorized: "rgba(15, 110, 50, 0.6)",
+  uncertain: "rgba(217, 119, 6, 0.6)",
+  expired: "rgba(147, 51, 234, 0.6)",
+  reAuthing: "rgba(59, 130, 246, 0.6)",
+} as const;
+
 type SortDirection = "asc" | "desc" | undefined;
 
 export const useTable = () => {
@@ -130,15 +138,15 @@ export const useTable = () => {
 
     const labels = configStore.data?.ui.accessStateLabels;
     if (state === (labels?.unauthorized ?? "DENY"))
-      return "rgba(185, 28, 28, 0.6)";
+      return ACCESS_STATE_COLORS.unauthorized;
     if (state === (labels?.authorized ?? "ALLOW"))
-      return "rgba(15, 110, 50, 0.6)";
+      return ACCESS_STATE_COLORS.authorized;
     if (state === (labels?.uncertain ?? "UNCERTAIN"))
-      return "rgba(217, 119, 6, 0.6)";
+      return ACCESS_STATE_COLORS.uncertain;
     if (state === (labels?.expired ?? "RE-AUTH FAILED"))
-      return "rgba(147, 51, 234, 0.6)";
+      return ACCESS_STATE_COLORS.expired;
     if (state === (labels?.reAuthing ?? "RE-AUTHING"))
-      return "rgba(59, 130, 246, 0.6)";
+      return ACCESS_STATE_COLORS.reAuthing;
     return undefined;
   };
 
