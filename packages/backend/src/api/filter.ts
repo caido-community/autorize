@@ -1,7 +1,18 @@
-import { type APIResult } from "shared";
+import { type APIResult, type Template } from "shared";
 
 import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
+
+async function matchesQuery(
+  sdk: BackendSDK,
+  template: Template,
+  httpqlQuery: string,
+): Promise<boolean> {
+  const result = await sdk.requests.get(template.request.id);
+  if (!result) return false;
+
+  return sdk.requests.matches(httpqlQuery, result.request, result.response);
+}
 
 export async function filterTemplates(
   sdk: BackendSDK,
@@ -17,17 +28,7 @@ export async function filterTemplates(
 
   for (const template of templates) {
     try {
-      const result = await sdk.requests.get(template.request.id);
-
-      if (!result) continue;
-
-      const matches = sdk.requests.matches(
-        httpqlQuery,
-        result.request,
-        result.response,
-      );
-
-      if (matches) {
+      if (await matchesQuery(sdk, template, httpqlQuery)) {
         matchingTemplateIds.push(template.id);
       }
     } catch {
@@ -36,4 +37,31 @@ export async function filterTemplates(
   }
 
   return { kind: "Ok", value: matchingTemplateIds };
+}
+
+export async function filterTemplate(
+  sdk: BackendSDK,
+  httpqlQuery: string,
+  templateId: number,
+): Promise<APIResult<boolean>> {
+  if (httpqlQuery === "") {
+    return { kind: "Ok", value: true };
+  }
+
+  const template = templatesStore
+    .getTemplates()
+    .find((t) => t.id === templateId);
+
+  if (!template) {
+    return { kind: "Ok", value: false };
+  }
+
+  try {
+    return {
+      kind: "Ok",
+      value: await matchesQuery(sdk, template, httpqlQuery),
+    };
+  } catch {
+    return { kind: "Ok", value: false };
+  }
 }

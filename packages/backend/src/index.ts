@@ -6,6 +6,7 @@ import {
   createTemplate,
   deleteTemplate,
   deleteTemplates,
+  filterTemplate,
   filterTemplates,
   getConfig,
   getRequestResponse,
@@ -38,6 +39,7 @@ export type API = DefineAPI<{
   getRequestResponse: typeof getRequestResponse;
   clearAllTemplates: typeof clearAllTemplates;
   rescanAllTemplates: typeof rescanAllTemplates;
+  filterTemplate: typeof filterTemplate;
   filterTemplates: typeof filterTemplates;
   getTemplatesExportData: typeof getTemplatesExportData;
 }>;
@@ -59,6 +61,7 @@ export function init(sdk: BackendSDK) {
   sdk.api.register("getRequestResponse", getRequestResponse);
   sdk.api.register("clearAllTemplates", clearAllTemplates);
   sdk.api.register("rescanAllTemplates", rescanAllTemplates);
+  sdk.api.register("filterTemplate", filterTemplate);
   sdk.api.register("filterTemplates", filterTemplates);
   sdk.api.register("deleteTemplates", deleteTemplates);
   sdk.api.register("getTemplatesExportData", getTemplatesExportData);
