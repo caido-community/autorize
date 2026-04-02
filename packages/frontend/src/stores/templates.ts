@@ -22,12 +22,14 @@ export const useTemplatesStore = defineStore("templates", () => {
   const initialize = async () => {
     await fetch();
 
-    sdk.backend.onEvent("template:created", (template) => {
+    sdk.backend.onEvent("template:created", async (template) => {
       data.push(template);
+      await applyFilterToTemplate(template.id);
     });
 
-    sdk.backend.onEvent("template:updated", (templateID, template) => {
+    sdk.backend.onEvent("template:updated", async (templateID, template) => {
       update(templateID, template);
+      await applyFilterToTemplate(templateID);
     });
 
     sdk.backend.onEvent("template:deleted", (templateID) => {
@@ -218,6 +220,28 @@ export const useTemplatesStore = defineStore("templates", () => {
       filteredTemplateIds.value = undefined;
     }
     isFiltering.value = false;
+  };
+
+  const applyFilterToTemplate = async (templateId: number) => {
+    if (httpqlQuery.value === "" || filteredTemplateIds.value === undefined) {
+      return;
+    }
+
+    const result = await sdk.backend.filterTemplate(
+      httpqlQuery.value,
+      templateId,
+    );
+
+    if (result.kind !== "Ok") return;
+
+    const ids = filteredTemplateIds.value;
+    const included = ids.includes(templateId);
+
+    if (result.value && !included) {
+      filteredTemplateIds.value = [...ids, templateId];
+    } else if (!result.value && included) {
+      filteredTemplateIds.value = ids.filter((id) => id !== templateId);
+    }
   };
 
   const selectedTemplate = computed<Template | undefined>({
