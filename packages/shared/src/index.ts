@@ -1,6 +1,25 @@
+import type { DefinePluginPackageSpec } from "@caido/sdk-shared";
 import { z } from "zod";
 
+import type { API } from "./api";
+import type { Events } from "./events";
 import { SessionManagementSchema } from "./session";
+
+export type Spec = DefinePluginPackageSpec<{
+  manifestId: "autorize";
+  api: API;
+  events: Events;
+}>;
+
+export type { API } from "./api";
+export type { Events } from "./events";
+
+export {
+  type RequestResponseData,
+  type MutatedResultData,
+  type TemplateExportData,
+  type RequestResponseResult,
+} from "./export";
 
 export {
   SessionManagementSchema,

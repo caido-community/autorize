@@ -18,7 +18,6 @@ const config: RawConfigurationOrFn = {
     "packages/shared": {
       entry: ["src/index.ts"],
       project: ["src/**/*.ts"],
-      ignoreDependencies: ["@caido/sdk-shared"],
     },
   },
 };
