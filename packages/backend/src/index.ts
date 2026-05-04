@@ -21,9 +21,6 @@ import { configStore } from "./stores/config";
 import { templatesStore } from "./stores/templates";
 import { type BackendSDK } from "./types";
 
-export type { API, Events as BackendEvents } from "shared";
-export type { TemplateExportData } from "shared";
-
 export function init(sdk: BackendSDK) {
   setSDK(sdk);
 

@@ -94,12 +94,9 @@ importers:
         specifier: 2.0.0-beta.8
         version: 2.0.0-beta.8(vue@3.5.25(typescript@5.5.4))
     devDependencies:
-      '@caido/sdk-backend':
-        specifier: 0.56.0
-        version: 0.56.0
       '@caido/sdk-frontend':
-        specifier: 0.54.1
-        version: 0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))
+        specifier: 0.56.1-beta.1
+        version: 0.56.1-beta.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))
       '@codemirror/commands':
         specifier: 6.10.3
         version: 6.10.3
@@ -109,9 +106,6 @@ importers:
       '@codemirror/view':
         specifier: 6.39.4
         version: 6.39.4
-      backend:
-        specifier: workspace:*
-        version: link:../backend
       vue-tsc:
         specifier: 3.1.8
         version: 3.1.8(typescript@5.5.4)
@@ -202,10 +196,10 @@ packages:
   '@caido/sdk-backend@0.56.0':
     resolution: {integrity: sha512-OG0bx0fVkByRanUYokVyeMqzjq2zdXyuqsQ6NcnycI7N1wAEHCu4daoeesy4l+chuFNJxHIxJP8JwP68Rh4SbA==}
 
-  '@caido/sdk-frontend@0.54.1':
-    resolution: {integrity: sha512-juLWVTTAb8Klcyafs1t8M4hhD9gNNDsm9XnMMEW3GO96upW/JIZjRZH3IHbD5CL4ihvjL34BznHKHm2P3ZG3aw==}
+  '@caido/sdk-frontend@0.56.1-beta.1':
+    resolution: {integrity: sha512-9qCrbWJKsluGB6yZRkY0RVjCxp+XnP5/JetnxAltxyQXJg4XRv7Z0XQCge/d+DKU/mUJjcuRyq1ezkgs9yCGqA==}
     peerDependencies:
-      '@ai-sdk/provider': ^2.0.0
+      '@ai-sdk/provider': ^3.0.1
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
       vue: ^3.0.0
@@ -3269,7 +3263,7 @@ snapshots:
       '@caido/quickjs-types': 0.26.0
       '@caido/sdk-shared': 0.2.2
 
-  '@caido/sdk-frontend@0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))':
+  '@caido/sdk-frontend@0.56.1-beta.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))':
     dependencies:
       '@ai-sdk/provider': 2.0.0
       '@codemirror/state': 6.6.0

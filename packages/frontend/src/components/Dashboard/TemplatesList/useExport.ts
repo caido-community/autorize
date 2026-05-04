@@ -1,5 +1,4 @@
-import type { TemplateExportData } from "backend";
-import type { Template } from "shared";
+import type { Template, TemplateExportData } from "shared";
 
 import { useSDK } from "@/plugins/sdk";
 import { useTemplatesStore } from "@/stores/templates";
