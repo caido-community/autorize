@@ -1,35 +1,14 @@
-import { type APIResult } from "shared";
+import {
+  type APIResult,
+  type MutatedResultData,
+  type RequestResponseData,
+  type TemplateExportData,
+} from "shared";
 
 import { templatesStore } from "../stores/templates";
 import { type BackendSDK } from "../types";
 
 import { getRequestResponse } from "./utils";
-
-type RequestResponseData = {
-  requestRaw: string;
-  responseRaw: string;
-  code: number;
-  length: number;
-};
-
-type MutatedResultData = {
-  userProfileId: string | undefined;
-  userProfileName: string | undefined;
-  data: RequestResponseData | undefined;
-  access: string | undefined;
-};
-
-export type TemplateExportData = {
-  id: number;
-  method: string;
-  url: string;
-  baseline: RequestResponseData | undefined;
-  mutatedResults: MutatedResultData[];
-  noAuth: {
-    data: RequestResponseData | undefined;
-    access: string | undefined;
-  };
-};
 
 function sanitizeText(text: string): string {
   // eslint-disable-next-line no-control-regex

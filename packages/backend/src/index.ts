@@ -1,5 +1,3 @@
-import type { DefineAPI } from "caido:plugin";
-
 import {
   clearAllTemplates,
   clearQueue,
@@ -23,26 +21,8 @@ import { configStore } from "./stores/config";
 import { templatesStore } from "./stores/templates";
 import { type BackendSDK } from "./types";
 
-export { type BackendEvents } from "./types";
-export { type TemplateExportData } from "./api/export";
-
-export type API = DefineAPI<{
-  getTemplates: typeof getTemplates;
-  getTemplate: typeof getTemplate;
-  createTemplate: typeof createTemplate;
-  deleteTemplate: typeof deleteTemplate;
-  deleteTemplates: typeof deleteTemplates;
-  updateConfig: typeof updateConfig;
-  getConfig: typeof getConfig;
-  rerunTemplate: typeof rerunTemplate;
-  clearQueue: typeof clearQueue;
-  getRequestResponse: typeof getRequestResponse;
-  clearAllTemplates: typeof clearAllTemplates;
-  rescanAllTemplates: typeof rescanAllTemplates;
-  filterTemplate: typeof filterTemplate;
-  filterTemplates: typeof filterTemplates;
-  getTemplatesExportData: typeof getTemplatesExportData;
-}>;
+export type { API, Events as BackendEvents } from "shared";
+export type { TemplateExportData } from "shared";
 
 export function init(sdk: BackendSDK) {
   setSDK(sdk);

@@ -61,8 +61,8 @@ importers:
         version: 0.1.4
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.54.1
-        version: 0.54.1
+        specifier: 0.56.0
+        version: 0.56.0
       vitest:
         specifier: 4.1.1
         version: 4.1.1(@types/node@25.0.2)(vite@6.0.7(@types/node@25.0.2)(jiti@2.6.1)(yaml@2.8.1))
@@ -95,8 +95,8 @@ importers:
         version: 2.0.0-beta.8(vue@3.5.25(typescript@5.5.4))
     devDependencies:
       '@caido/sdk-backend':
-        specifier: 0.54.1
-        version: 0.54.1
+        specifier: 0.56.0
+        version: 0.56.0
       '@caido/sdk-frontend':
         specifier: 0.54.1
         version: 0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))
@@ -196,11 +196,11 @@ packages:
     peerDependencies:
       primevue: 4.1.0
 
-  '@caido/quickjs-types@0.24.0':
-    resolution: {integrity: sha512-BKkvkVbaZtm9b3qp2R0T4gp0dExstuExIlRaKQSnC5RgATsR+mEQUU0TK8oFjJwCCQsdVoSkQGnDnK8XeaCfHA==}
+  '@caido/quickjs-types@0.26.0':
+    resolution: {integrity: sha512-Nnpu87fnTvVxEdLUQXAc9d763vj13GPcQEhSWireuLlDPDgxM/7dK8kZdOhGX/BhWRRZ7nUzNc3IdN+OVdsoSA==}
 
-  '@caido/sdk-backend@0.54.1':
-    resolution: {integrity: sha512-YNIKIYYINMl5e6fdcITB+50LPjLw+m1B6PAKDOTcdNo+KIbYliQqzJptsQiz/vggcnuWmirablWwR+vRB4ohqA==}
+  '@caido/sdk-backend@0.56.0':
+    resolution: {integrity: sha512-OG0bx0fVkByRanUYokVyeMqzjq2zdXyuqsQ6NcnycI7N1wAEHCu4daoeesy4l+chuFNJxHIxJP8JwP68Rh4SbA==}
 
   '@caido/sdk-frontend@0.54.1':
     resolution: {integrity: sha512-juLWVTTAb8Klcyafs1t8M4hhD9gNNDsm9XnMMEW3GO96upW/JIZjRZH3IHbD5CL4ihvjL34BznHKHm2P3ZG3aw==}
@@ -3262,11 +3262,11 @@ snapshots:
     dependencies:
       primevue: 4.1.0(vue@3.5.25(typescript@5.5.4))
 
-  '@caido/quickjs-types@0.24.0': {}
+  '@caido/quickjs-types@0.26.0': {}
 
-  '@caido/sdk-backend@0.54.1':
+  '@caido/sdk-backend@0.56.0':
     dependencies:
-      '@caido/quickjs-types': 0.24.0
+      '@caido/quickjs-types': 0.26.0
       '@caido/sdk-shared': 0.2.2
 
   '@caido/sdk-frontend@0.54.1(@ai-sdk/provider@2.0.0)(@codemirror/state@6.6.0)(@codemirror/view@6.39.4)(vue@3.5.25(typescript@5.5.4))':

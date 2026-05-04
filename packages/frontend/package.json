@@ -16,7 +16,7 @@
     "vue-virtual-scroller": "2.0.0-beta.8"
   },
   "devDependencies": {
-    "@caido/sdk-backend": "0.54.1",
+    "@caido/sdk-backend": "0.56.0",
     "@caido/sdk-frontend": "0.54.1",
     "@codemirror/commands": "6.10.3",
     "@codemirror/state": "6.6.0",
