@@ -3,6 +3,7 @@ import type { Template } from ".";
 export type Events = {
   "template:created": (template: Template) => void;
   "template:updated": (templateId: number, template: Template) => void;
+  "template:completed": (templateId: number, template: Template) => void;
   "template:deleted": (templateId: number) => void;
   "templates:cleared": () => void;
   "project:changed": (projectID: string | undefined) => void;

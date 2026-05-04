@@ -200,6 +200,12 @@ class JobsQueue {
         error: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
+      const completed = templatesStore
+        .getTemplates()
+        .find((t) => t.id === job.templateId);
+      if (completed) {
+        sdk.api.send("template:completed", job.templateId, completed);
+      }
       sdk.api.send("cursor:mark", job.templateId, false);
     }
   }
