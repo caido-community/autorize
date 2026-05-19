@@ -8,11 +8,12 @@ const config: RawConfigurationOrFn = {
     "packages/backend": {
       entry: ["src/index.ts"],
       project: ["src/**/*.ts"],
-      ignoreDependencies: ["caido"],
+      ignoreDependencies: ["caido", "shared"],
     },
     "packages/frontend": {
       entry: ["src/index.ts"],
       project: ["src/**/*.{ts,tsx,vue}"],
+      ignoreDependencies: ["shared"],
     },
     "packages/shared": {
       entry: ["src/index.ts"],
