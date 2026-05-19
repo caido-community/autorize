@@ -24,10 +24,5 @@
     "tailwindcss": "3.4.13",
     "tailwindcss-primeui": "0.3.4",
     "typescript": "5.5.4"
-  },
-  "pnpm": {
-    "overrides": {
-      "@caido/sdk-shared": "0.2.2"
-    }
   }
 }
