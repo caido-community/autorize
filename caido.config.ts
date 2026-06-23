@@ -14,7 +14,7 @@ export default defineConfig({
   id,
   name: "Autorize",
   description: "Automated authorization testing",
-  version: "1.2.0",
+  version: "1.2.1",
   author: {
     name: "Caido Labs Inc.",
     email: "dev@caido.io",
