@@ -63,7 +63,11 @@ export async function handleInvalidSession(
       return extractResult;
     }
 
-    await storeTokens(extractResult.value, sessionConfig.tokenExtractions);
+    const storeResult = await storeTokens(extractResult.value);
+    if (storeResult.kind === "Error") {
+      return storeResult;
+    }
+
     sessionLockManager.incrementRefreshVersion(profileId);
 
     debugLog(`Session refreshed successfully for profile ${profileId}`);

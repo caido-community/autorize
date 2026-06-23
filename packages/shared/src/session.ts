@@ -5,19 +5,16 @@ export const TokenExtractionSchema = z.discriminatedUnion("kind", [
     kind: z.literal("Header"),
     headerName: z.string().min(1),
     envVar: z.string().min(1),
-    secret: z.boolean(),
   }),
   z.object({
     kind: z.literal("JsonBody"),
     jsonPath: z.string().min(1),
     envVar: z.string().min(1),
-    secret: z.boolean(),
   }),
   z.object({
     kind: z.literal("Regex"),
     pattern: z.string().min(1),
     envVar: z.string().min(1),
-    secret: z.boolean(),
   }),
 ]);
 

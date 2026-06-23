@@ -60,7 +60,6 @@ const handleAdd = async () => {
         kind: "Header",
         headerName: key,
         envVar: env,
-        secret: false,
       };
       break;
     case "JsonBody":
@@ -68,11 +67,10 @@ const handleAdd = async () => {
         kind: "JsonBody",
         jsonPath: key,
         envVar: env,
-        secret: false,
       };
       break;
     case "Regex":
-      extraction = { kind: "Regex", pattern: key, envVar: env, secret: false };
+      extraction = { kind: "Regex", pattern: key, envVar: env };
       break;
   }
 

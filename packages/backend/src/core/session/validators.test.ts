@@ -11,7 +11,6 @@ describe("TokenExtractionSchema", () => {
       kind: "Header",
       headerName: "Authorization",
       envVar: "TOKEN",
-      secret: false,
     });
     expect(result.success).toBe(true);
   });
@@ -21,7 +20,6 @@ describe("TokenExtractionSchema", () => {
       kind: "JsonBody",
       jsonPath: "data.token",
       envVar: "TOKEN",
-      secret: true,
     });
     expect(result.success).toBe(true);
   });
@@ -31,7 +29,6 @@ describe("TokenExtractionSchema", () => {
       kind: "Regex",
       pattern: "token=([a-f0-9]+)",
       envVar: "TOKEN",
-      secret: false,
     });
     expect(result.success).toBe(true);
   });
@@ -40,7 +37,6 @@ describe("TokenExtractionSchema", () => {
     const result = TokenExtractionSchema.safeParse({
       kind: "Unknown",
       envVar: "TOKEN",
-      secret: false,
     });
     expect(result.success).toBe(false);
   });
@@ -50,7 +46,6 @@ describe("TokenExtractionSchema", () => {
       kind: "Header",
       headerName: "",
       envVar: "TOKEN",
-      secret: false,
     });
     expect(result.success).toBe(false);
   });
@@ -60,16 +55,6 @@ describe("TokenExtractionSchema", () => {
       kind: "JsonBody",
       jsonPath: "token",
       envVar: "",
-      secret: false,
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("rejects missing secret field", () => {
-    const result = TokenExtractionSchema.safeParse({
-      kind: "Header",
-      headerName: "Authorization",
-      envVar: "TOKEN",
     });
     expect(result.success).toBe(false);
   });
@@ -110,7 +95,7 @@ describe("SessionManagementSchema", () => {
         tls: false,
       },
       tokenExtractions: [
-        { kind: "JsonBody", jsonPath: "token", envVar: "TOKEN", secret: false },
+        { kind: "JsonBody", jsonPath: "token", envVar: "TOKEN" },
       ],
       maxRetries: 2,
     });
