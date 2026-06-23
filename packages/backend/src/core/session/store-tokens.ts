@@ -17,7 +17,7 @@ export async function storeTokens(
       name: envVar,
       value,
       secret,
-      global: true,
+      global: false,
     });
 
     debugLog(`Stored token in env var "${envVar}" (secret=${secret})`);

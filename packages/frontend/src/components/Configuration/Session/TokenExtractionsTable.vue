@@ -6,6 +6,7 @@ import InputText from "primevue/inputtext";
 import type { SessionManagement, TokenExtraction } from "shared";
 import { computed, ref } from "vue";
 
+import HighlightedValue from "@/components/Configuration/Mutations/Table/HighlightedValue.vue";
 import { useConfigStore } from "@/stores/config";
 
 const { profileId, disabled } = defineProps<{
@@ -140,12 +141,7 @@ const handleRemove = (index: number) => {
           @blur="handleEnvVarUpdate(index, $event.target.value)"
           @keyup.enter="handleEnvVarUpdate(index, $event.target.value)"
         />
-        <span
-          v-else
-          class="block text-ellipsis whitespace-nowrap overflow-hidden"
-        >
-          {{ data.envVar }}
-        </span>
+        <HighlightedValue v-else :value="`{{ ${data.envVar} }}`" />
       </template>
     </Column>
     <Column header="Actions" style="width: 10%">

@@ -46,6 +46,15 @@ export async function handleInvalidSession(
       return { kind: "Error", error: "Re-auth request returned no response" };
     }
 
+    const code = response.getCode();
+    if (code >= 400) {
+      debugLog(`Re-auth response body: ${response.getBody()?.toText() ?? ""}`);
+      return {
+        kind: "Error",
+        error: `Re-auth request rejected with HTTP ${code}`,
+      };
+    }
+
     const extractResult = extractTokens(
       response,
       sessionConfig.tokenExtractions,
