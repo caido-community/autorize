@@ -42,10 +42,9 @@ function extractFromHeader(
   response: Response,
   headerName: string,
 ): string | undefined {
-  const headers = response.getHeaders();
-  const values = headers[headerName.toLowerCase()];
+  const values = response.getHeaders()[headerName.toLowerCase()];
   if (values === undefined || values.length === 0) return undefined;
-  return Array.isArray(values) ? values.join("; ") : values;
+  return values[0];
 }
 
 function extractFromJsonBody(

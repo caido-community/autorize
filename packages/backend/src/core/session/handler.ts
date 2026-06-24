@@ -46,6 +46,15 @@ export async function handleInvalidSession(
       return { kind: "Error", error: "Re-auth request returned no response" };
     }
 
+    const code = response.getCode();
+    if (code >= 400) {
+      debugLog(`Re-auth response body: ${response.getBody()?.toText() ?? ""}`);
+      return {
+        kind: "Error",
+        error: `Re-auth request rejected with HTTP ${code}`,
+      };
+    }
+
     const extractResult = extractTokens(
       response,
       sessionConfig.tokenExtractions,
@@ -54,7 +63,11 @@ export async function handleInvalidSession(
       return extractResult;
     }
 
-    await storeTokens(extractResult.value, sessionConfig.tokenExtractions);
+    const storeResult = await storeTokens(extractResult.value);
+    if (storeResult.kind === "Error") {
+      return storeResult;
+    }
+
     sessionLockManager.incrementRefreshVersion(profileId);
 
     debugLog(`Session refreshed successfully for profile ${profileId}`);

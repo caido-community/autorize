@@ -1,7 +1,16 @@
 <script setup lang="ts">
 import { defaultKeymap, history, historyKeymap } from "@codemirror/commands";
 import { EditorState } from "@codemirror/state";
-import { EditorView, keymap, lineNumbers } from "@codemirror/view";
+import {
+  Decoration,
+  type DecorationSet,
+  EditorView,
+  keymap,
+  lineNumbers,
+  MatchDecorator,
+  ViewPlugin,
+  type ViewUpdate,
+} from "@codemirror/view";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 
 const { modelValue, disabled } = defineProps<{
@@ -54,13 +63,43 @@ const theme = EditorView.theme({
   ".cm-selectionBackground": {
     backgroundColor: "rgba(100, 130, 255, 0.25) !important",
   },
+  ".cm-env-var": {
+    backgroundColor:
+      "color-mix(in srgb, var(--p-surface-500) 30%, transparent)",
+    color: "var(--p-surface-200)",
+    border:
+      "1px solid color-mix(in srgb, var(--p-surface-500) 30%, transparent)",
+    borderRadius: "3px",
+    padding: "0 3px",
+  },
 });
+
+const envVarMatcher = new MatchDecorator({
+  regexp: /\{\{\s*[A-Za-z0-9_]+\s*\}\}/g,
+  decoration: Decoration.mark({ class: "cm-env-var" }),
+});
+
+const envVarHighlighter = ViewPlugin.fromClass(
+  class {
+    decorations: DecorationSet;
+
+    constructor(view: EditorView) {
+      this.decorations = envVarMatcher.createDeco(view);
+    }
+
+    update(update: ViewUpdate) {
+      this.decorations = envVarMatcher.updateDeco(update, this.decorations);
+    }
+  },
+  { decorations: (plugin) => plugin.decorations },
+);
 
 const buildExtensions = (editable: boolean) => [
   lineNumbers(),
   history(),
   keymap.of([...defaultKeymap, ...historyKeymap]),
   theme,
+  envVarHighlighter,
   EditorView.lineWrapping,
   EditorView.editable.of(editable),
   EditorView.domEventHandlers({
