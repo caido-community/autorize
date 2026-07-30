@@ -13,11 +13,11 @@ const ACCESS_STATE_COLORS = {
 
 type SortDirection = "asc" | "desc" | undefined;
 
+const sortColumn = ref<string | undefined>(undefined);
+const sortDirection = ref<SortDirection>(undefined);
+
 export const useTable = () => {
   const configStore = useConfigStore();
-
-  const sortColumn = ref<string | undefined>(undefined);
-  const sortDirection = ref<SortDirection>(undefined);
 
   const parseURL = (url: string) => {
     const parsed = new URL(url);
