@@ -1,7 +1,7 @@
+import { storeToRefs } from "pinia";
 import type { JobResult, MutationType, Template } from "shared";
 import { computed } from "vue";
 
-import { storeToRefs } from "pinia";
 import { useConfigStore } from "@/stores/config";
 import { useTemplatesStore } from "@/stores/templates";
 
