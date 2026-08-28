@@ -5,7 +5,7 @@ import { computed, reactive, ref } from "vue";
 
 import { useSDK } from "../plugins/sdk";
 
-export type SortDirection = "asc" | "desc" | undefined;
+type SortDirection = "asc" | "desc" | undefined;
 
 export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
