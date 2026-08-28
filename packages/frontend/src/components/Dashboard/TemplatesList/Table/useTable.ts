@@ -1,7 +1,9 @@
 import type { JobResult, MutationType, Template } from "shared";
 import { computed, ref } from "vue";
 
+import { storeToRefs } from "pinia";
 import { useConfigStore } from "@/stores/config";
+import { useTemplatesStore } from "@/stores/templates";
 
 const ACCESS_STATE_COLORS = {
   unauthorized: "rgba(185, 28, 28, 0.6)",
@@ -11,13 +13,10 @@ const ACCESS_STATE_COLORS = {
   reAuthing: "rgba(59, 130, 246, 0.6)",
 } as const;
 
-type SortDirection = "asc" | "desc" | undefined;
-
-const sortColumn = ref<string | undefined>(undefined);
-const sortDirection = ref<SortDirection>(undefined);
-
 export const useTable = () => {
   const configStore = useConfigStore();
+  const templatesStore = useTemplatesStore();
+  const { sortColumn, sortDirection } = storeToRefs(templatesStore);
 
   const parseURL = (url: string) => {
     const parsed = new URL(url);
