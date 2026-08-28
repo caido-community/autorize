@@ -5,12 +5,16 @@ import { computed, reactive, ref } from "vue";
 
 import { useSDK } from "../plugins/sdk";
 
+type SortDirection = "asc" | "desc" | undefined;
+
 export const useTemplatesStore = defineStore("templates", () => {
   const sdk = useSDK();
   const data = reactive<Template[]>([]);
   const selectedID = ref<number | undefined>(undefined);
   const lastSelectedResultType = ref<ResultType>("baseline");
   const lastSelectedUserProfileId = ref<string | undefined>(undefined);
+  const sortColumn = ref<string | undefined>(undefined);
+  const sortDirection = ref<SortDirection>(undefined);
   const hasActiveJobs = ref(false);
   const projectID = ref<string | undefined>(undefined);
   const activeTemplateIds = ref<number[]>([]);
@@ -408,5 +412,7 @@ export const useTemplatesStore = defineStore("templates", () => {
     initialize,
     selectedTemplate,
     orderedResults,
+    sortColumn,
+    sortDirection,
   };
 });
