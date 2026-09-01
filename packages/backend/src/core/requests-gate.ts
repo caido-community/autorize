@@ -50,6 +50,8 @@ class RequestGate {
       forge = forge.removeHeader(header);
     }
 
+    forge = forge.addHeader("X-Autorize-Ignore", "true");
+
     const modifiedRaw = forge.build();
     request.setRaw(modifiedRaw);
 
