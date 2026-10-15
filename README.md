@@ -1,5 +1,5 @@
 <div align="center">
-  <img width="1000" alt="image" src="https://github.com/caido-community/.github/blob/main/content/banner.png?raw=true">
+  <img width="1000" alt="image" src="assets/banner.png">
 
   <br />
   <br />
@@ -16,7 +16,7 @@
 
 Automated authorization testing for web applications. Autorize helps you find authorization vulnerabilities by automatically testing if lower-privilege users can access resources they shouldn't.
 
-<img width="1902" height="1040" alt="dashboard" src="https://github.com/user-attachments/assets/d62d3ac5-56e8-45f6-b884-8992fd164e57" />
+<img width="1902" height="1040" alt="dashboard" src="assets/dashboard.png" />
 
 ## Installation
 
